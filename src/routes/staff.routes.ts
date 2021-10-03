@@ -11,7 +11,7 @@ const staffRoutes = express.Router();
 
 staffRoutes.get('/', async (req, res) => {
   const [staffs, count] = await Staff.findAll(JsonApi.parameters(req, Staff));
-  res.json(JsonApi.encode(req, staffs, count))
+  res.json(await JsonApi.encode(req, staffs, count))
 });
 
 staffRoutes.post('/', async (req, res) => {
@@ -22,13 +22,13 @@ staffRoutes.post('/', async (req, res) => {
 
   const staff: Staff = req.body;
   const newStaff = await staff.create();
-  res.json(JsonApi.encode(req, newStaff));
+  res.json(await JsonApi.encode(req, newStaff));
 });
 
 staffRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const staff = await Staff.findById(id, JsonApi.parameters(req, Staff))
-  res.json(JsonApi.encode(req, staff));
+  res.json(await JsonApi.encode(req, staff));
 });
 
 staffRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -39,7 +39,7 @@ staffRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const staff: Staff = req.body;
   const newStaff = await staff.update();
-  res.json(JsonApi.encode(req, newStaff));
+  res.json(await JsonApi.encode(req, newStaff));
 });
 
 staffRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -60,7 +60,7 @@ staffRoutes.get('/:id(\\d+)/people', async (req, res) => {
   const staff = await Staff.findById(id);
   const response = await staff?.getRelated("people", JsonApi.parameters(req, People));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -69,7 +69,7 @@ staffRoutes.get('/:id(\\d+)/manga', async (req, res) => {
   const staff = await Staff.findById(id);
   const response = await staff?.getRelated("manga", JsonApi.parameters(req, Manga));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -78,7 +78,7 @@ staffRoutes.get('/:id(\\d+)/anime', async (req, res) => {
   const staff = await Staff.findById(id);
   const response = await staff?.getRelated("anime", JsonApi.parameters(req, Anime));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 

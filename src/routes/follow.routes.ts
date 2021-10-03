@@ -8,7 +8,7 @@ const followRoutes = express.Router();
 
 followRoutes.get('/', async (req, res) => {
   const [follows, count] = await Follow.findAll(JsonApi.parameters(req, Follow));
-  res.json(JsonApi.encode(req, follows, count));
+  res.json(await JsonApi.encode(req, follows, count));
 });
 
 followRoutes.post('/', async (req, res) => {
@@ -19,13 +19,13 @@ followRoutes.post('/', async (req, res) => {
 
   const follow: Follow = req.body;
   const newFollow = await follow.create();
-  res.json(JsonApi.encode(req, newFollow));
+  res.json(await JsonApi.encode(req, newFollow));
 });
 
 followRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const follow = await Follow.findById(id, JsonApi.parameters(req, Follow));
-  res.json(JsonApi.encode(req, follow));
+  res.json(await JsonApi.encode(req, follow));
 });
 
 followRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -37,7 +37,7 @@ followRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const follow: Follow = req.body;
   const newFollow = await follow.update();
-  res.json(JsonApi.encode(req, newFollow));
+  res.json(await JsonApi.encode(req, newFollow));
 });
 
 followRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -57,7 +57,7 @@ followRoutes.get('/:id(\\d+)/follower', async (req, res) => {
   const follow = await Follow.findById(id);
   const response = await follow?.getRelated("follower", JsonApi.parameters(req, User));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -66,7 +66,7 @@ followRoutes.get('/:id(\\d+)/followed', async (req, res) => {
   const follow = await Follow.findById(id);
   const response = await follow?.getRelated("followed", JsonApi.parameters(req, User));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 

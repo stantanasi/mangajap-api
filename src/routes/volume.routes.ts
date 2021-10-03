@@ -9,7 +9,7 @@ const volumeRoutes = express.Router();
 
 volumeRoutes.get('/', async (req, res) => {
   const [volumes, count] = await Volume.findAll(JsonApi.parameters(req, Volume));
-  res.json(JsonApi.encode(req, volumes, count))
+  res.json(await JsonApi.encode(req, volumes, count))
 });
 
 volumeRoutes.post('/', async (req, res) => {
@@ -20,13 +20,13 @@ volumeRoutes.post('/', async (req, res) => {
 
   const volume: Volume = req.body;
   const newVolume = await volume.create();
-  res.json(JsonApi.encode(req, newVolume));
+  res.json(await JsonApi.encode(req, newVolume));
 });
 
 volumeRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const volume = await Volume.findById(id, JsonApi.parameters(req, Volume))
-  res.json(JsonApi.encode(req, volume));
+  res.json(await JsonApi.encode(req, volume));
 });
 
 volumeRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -37,7 +37,7 @@ volumeRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const volume: Volume = req.body;
   const newVolume = await volume.update();
-  res.json(JsonApi.encode(req, newVolume));
+  res.json(await JsonApi.encode(req, newVolume));
 });
 
 volumeRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -58,7 +58,7 @@ volumeRoutes.get('/:id(\\d+)/manga', async (req, res) => {
   const volume = await Volume.findById(id);
   const response = await volume?.getRelated("manga", JsonApi.parameters(req, Manga));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 

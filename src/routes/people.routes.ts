@@ -9,7 +9,7 @@ const peopleRoutes = express.Router();
 
 peopleRoutes.get('/', async (req, res) => {
   const [peoples, count] = await People.findAll(JsonApi.parameters(req, People));
-  res.json(JsonApi.encode(req, peoples, count))
+  res.json(await JsonApi.encode(req, peoples, count))
 });
 
 peopleRoutes.post('/', async (req, res) => {
@@ -20,13 +20,13 @@ peopleRoutes.post('/', async (req, res) => {
 
   const people: People = req.body;
   const newPeople = await people.create();
-  res.json(JsonApi.encode(req, newPeople));
+  res.json(await JsonApi.encode(req, newPeople));
 });
 
 peopleRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const people = await People.findById(id, JsonApi.parameters(req, People))
-  res.json(JsonApi.encode(req, people));
+  res.json(await JsonApi.encode(req, people));
 });
 
 peopleRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -37,7 +37,7 @@ peopleRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const people: People = req.body;
   const newPeople = await people.update();
-  res.json(JsonApi.encode(req, newPeople));
+  res.json(await JsonApi.encode(req, newPeople));
 });
 
 peopleRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -59,7 +59,7 @@ peopleRoutes.get('/:id(\\d+)/staff', async (req, res) => {
   const response = await people?.getRelated("staff", JsonApi.parameters(req, Staff));
   if (Array.isArray(response)) {
     const [staff, count] = response;
-    res.json(JsonApi.encode(req, staff, count));
+    res.json(await JsonApi.encode(req, staff, count));
   }
 });
 
@@ -69,7 +69,7 @@ peopleRoutes.get('/:id(\\d+)/manga-staff', async (req, res) => {
   const response = await people?.getRelated("manga-staff", JsonApi.parameters(req, Staff));
   if (Array.isArray(response)) {
     const [staff, count] = response;
-    res.json(JsonApi.encode(req, staff, count));
+    res.json(await JsonApi.encode(req, staff, count));
   }
 });
 
@@ -79,7 +79,7 @@ peopleRoutes.get('/:id(\\d+)/anime-staff', async (req, res) => {
   const response = await people?.getRelated("anime-staff", JsonApi.parameters(req, Staff));
   if (Array.isArray(response)) {
     const [staff, count] = response;
-    res.json(JsonApi.encode(req, staff, count));
+    res.json(await JsonApi.encode(req, staff, count));
   }
 });
 

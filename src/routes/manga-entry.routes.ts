@@ -9,7 +9,7 @@ const mangaEntryRoutes = express.Router();
 
 mangaEntryRoutes.get('/', async (req, res) => {
   const [mangaEntries, count] = await MangaEntry.findAll(JsonApi.parameters(req, MangaEntry));
-  res.json(JsonApi.encode(req, mangaEntries, count))
+  res.json(await JsonApi.encode(req, mangaEntries, count))
 });
 
 mangaEntryRoutes.post('/', async (req, res) => {
@@ -20,13 +20,13 @@ mangaEntryRoutes.post('/', async (req, res) => {
 
   const mangaEntry: MangaEntry = req.body;
   const newMangaEntry = await mangaEntry.create();
-  res.json(JsonApi.encode(req, newMangaEntry));
+  res.json(await JsonApi.encode(req, newMangaEntry));
 });
 
 mangaEntryRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const mangaEntry = await MangaEntry.findById(id, JsonApi.parameters(req, MangaEntry));
-  res.json(JsonApi.encode(req, mangaEntry));
+  res.json(await JsonApi.encode(req, mangaEntry));
 });
 
 mangaEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -38,7 +38,7 @@ mangaEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const mangaEntry: MangaEntry = req.body;
   const newMangaEntry = await mangaEntry.update();
-  res.json(JsonApi.encode(req, newMangaEntry));
+  res.json(await JsonApi.encode(req, newMangaEntry));
 });
 
 mangaEntryRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -58,7 +58,7 @@ mangaEntryRoutes.get('/:id(\\d+)/manga', async (req, res) => {
   const mangaEntry = await MangaEntry.findById(id);
   const response = await mangaEntry?.getRelated("manga", JsonApi.parameters(req, Manga));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -67,7 +67,7 @@ mangaEntryRoutes.get('/:id(\\d+)/user', async (req, res) => {
   const mangaEntry = await MangaEntry.findById(id);
   const response = await mangaEntry?.getRelated("user", JsonApi.parameters(req, User));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 

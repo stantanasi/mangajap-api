@@ -10,7 +10,7 @@ const seasonRoutes = express.Router();
 
 seasonRoutes.get('/', async (req, res) => {
   const [seasons, count] = await Season.findAll(JsonApi.parameters(req, Season));
-  res.json(JsonApi.encode(req, seasons, count))
+  res.json(await JsonApi.encode(req, seasons, count))
 });
 
 seasonRoutes.post('/', async (req, res) => {
@@ -21,13 +21,13 @@ seasonRoutes.post('/', async (req, res) => {
 
   const season: Season = req.body;
   const newSeason = await season.create();
-  res.json(JsonApi.encode(req, newSeason));
+  res.json(await JsonApi.encode(req, newSeason));
 });
 
 seasonRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const season = await Season.findById(id, JsonApi.parameters(req, Season))
-  res.json(JsonApi.encode(req, season));
+  res.json(await JsonApi.encode(req, season));
 });
 
 seasonRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -38,7 +38,7 @@ seasonRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const season: Season = req.body;
   const newSeason = await season.update();
-  res.json(JsonApi.encode(req, newSeason));
+  res.json(await JsonApi.encode(req, newSeason));
 });
 
 seasonRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -59,7 +59,7 @@ seasonRoutes.get('/:id(\\d+)/anime', async (req, res) => {
   const season = await Season.findById(id);
   const response = await season?.getRelated("anime", JsonApi.parameters(req, Anime));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -69,7 +69,7 @@ seasonRoutes.get('/:id(\\d+)/episodes', async (req, res) => {
   const response = await season?.getRelated("episodes", JsonApi.parameters(req, Episode));
   if (Array.isArray(response)) {
     const [episodes, count] = response;
-    res.json(JsonApi.encode(req, episodes, count));
+    res.json(await JsonApi.encode(req, episodes, count));
   }
 });
 

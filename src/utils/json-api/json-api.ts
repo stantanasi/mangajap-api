@@ -83,7 +83,7 @@ export default class JsonApi {
   }
 
 
-  public static encode<T extends MySqlModel>(req: Request, models: T | T[] | null, count: number = 0): JsonApiBody {
+  public static async encode<T extends MySqlModel>(req: Request, models: T | T[] | null, count: number = 0): Promise<JsonApiBody> {
     const body: JsonApiBody = {
       jsonapi: {
         version: "1.0",
@@ -94,12 +94,12 @@ export default class JsonApi {
       body.data = [];
       body.included = [];
 
-      models.map(model => {
-        const [data, included] = JsonApi.encodeModel(req, model);
+      for (const model of models) {
+        const [data, included] = await JsonApi.encodeModel(req, model);
 
         body.data = (body.data as JsonApiResource[]).concat(data);
         body.included = body.included!!.concat(included);
-      });
+      }
 
       const query: any = req.query || {};
       const url = `${JsonApi.apiUrl(req)}${req.originalUrl.split("?").shift()}`
@@ -137,7 +137,7 @@ export default class JsonApi {
         count: count,
       }
     } else if (models) {
-      const [data, included] = JsonApi.encodeModel(req, models);
+      const [data, included] = await JsonApi.encodeModel(req, models);
 
       body.data = data;
       body.included = included;
@@ -148,7 +148,7 @@ export default class JsonApi {
     return body
   }
 
-  private static encodeModel(req: Request, model: MySqlModel, include?: any): [JsonApiResource, JsonApiResource[]] {
+  private static async encodeModel(req: Request, model: MySqlModel, include?: any): Promise<[JsonApiResource, JsonApiResource[]]> {
     const jsonApiConfig: JsonApiConfig = model.constructor.prototype.jsonApi;
     const mysqlConfig: MySqlConfig = model.constructor.prototype.mysql;
 
@@ -171,7 +171,7 @@ export default class JsonApi {
         continue;
       }
 
-      let value = (model as any)[property];
+      let value = await (model as any)[property];
 
       switch (mysqlConfig.schema.properties[property]?.type) {
         case MySqlColumn.Date:
@@ -226,8 +226,8 @@ export default class JsonApi {
         for (const [name, includes] of Object.entries(include)) {
           if (name === relationship) {
 
-            const includeToDocument = (model: MySqlModel) => {
-              const [relationshipData, relationshipIncluded] = JsonApi.encodeModel(req, model, includes);
+            const includeToDocument = async (model: MySqlModel) => {
+              const [relationshipData, relationshipIncluded] = await JsonApi.encodeModel(req, model, includes);
               included = included.concat(relationshipData, relationshipIncluded);
               return {
                 type: relationshipData.type,
@@ -236,11 +236,11 @@ export default class JsonApi {
             }
 
             if (Array.isArray((model as any)[config.property])) {
-              data.relationships!![relationship].data = (model as any)[config.property].map((m: MySqlModel) => {
+              data.relationships!![relationship].data = await Promise.all((model as any)[config.property].map((m: MySqlModel) => {
                 return includeToDocument(m);
-              });
+              }));
             } else if ((model as any)[config.property]) {
-              data.relationships!![relationship].data = includeToDocument((model as any)[config.property])
+              data.relationships!![relationship].data = await includeToDocument((model as any)[config.property])
             }
           }
         }

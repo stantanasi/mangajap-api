@@ -11,19 +11,19 @@ const userRoutes = express.Router();
 
 userRoutes.get('/', async (req, res) => {
   const [users, count] = await User.findAll(JsonApi.parameters(req, User));
-  res.json(JsonApi.encode(req, users, count))
+  res.json(await JsonApi.encode(req, users, count))
 });
 
 userRoutes.post('/', async (req, res) => {
   const user: User = req.body;
   const newUser = await user.create();
-  res.json(JsonApi.encode(req, newUser));
+  res.json(await JsonApi.encode(req, newUser));
 });
 
 userRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const user = await User.findById(id, JsonApi.parameters(req, User));
-  res.json(JsonApi.encode(req, user));
+  res.json(await JsonApi.encode(req, user));
 });
 
 userRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -34,7 +34,7 @@ userRoutes.patch('/:id(\\d+)', async (req, res) => {
   }
 
   const newAnime = await (req.body as User).update();
-  res.json(JsonApi.encode(req, newAnime));
+  res.json(await JsonApi.encode(req, newAnime));
 });
 
 userRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -55,7 +55,7 @@ userRoutes.get('/:id(\\d+)/followers', async (req, res) => {
   const response = await user?.getRelated("followers", JsonApi.parameters(req, Follow));
   if (Array.isArray(response)) {
     const [followers, count] = response;
-    res.json(JsonApi.encode(req, followers, count));
+    res.json(await JsonApi.encode(req, followers, count));
   }
 });
 
@@ -65,7 +65,7 @@ userRoutes.get('/:id(\\d+)/following', async (req, res) => {
   const response = await user?.getRelated("following", JsonApi.parameters(req, Follow));
   if (Array.isArray(response)) {
     const [following, count] = response;
-    res.json(JsonApi.encode(req, following, count));
+    res.json(await JsonApi.encode(req, following, count));
   }
 });
 
@@ -75,7 +75,7 @@ userRoutes.get('/:id(\\d+)/manga-library', async (req, res) => {
   const response = await user?.getRelated("mangaLibrary", JsonApi.parameters(req, MangaEntry));
   if (Array.isArray(response)) {
     const [mangaLibrary, count] = response;
-    res.json(JsonApi.encode(req, mangaLibrary, count));
+    res.json(await JsonApi.encode(req, mangaLibrary, count));
   }
 });
 
@@ -85,7 +85,7 @@ userRoutes.get('/:id(\\d+)/anime-library', async (req, res) => {
   const response = await user?.getRelated("animeLibrary", JsonApi.parameters(req, AnimeEntry));
   if (Array.isArray(response)) {
     const [animeLibrary, count] = response;
-    res.json(JsonApi.encode(req, animeLibrary, count));
+    res.json(await JsonApi.encode(req, animeLibrary, count));
   }
 });
 
@@ -95,7 +95,7 @@ userRoutes.get('/:id(\\d+)/manga-favorites', async (req, res) => {
   const response = await user?.getRelated("mangaFavorites", JsonApi.parameters(req, MangaEntry));
   if (Array.isArray(response)) {
     const [mangaFavorites, count] = response;
-    res.json(JsonApi.encode(req, mangaFavorites, count));
+    res.json(await JsonApi.encode(req, mangaFavorites, count));
   }
 });
 
@@ -105,7 +105,7 @@ userRoutes.get('/:id(\\d+)/anime-favorites', async (req, res) => {
   const response = await user?.getRelated("animeFavorites", JsonApi.parameters(req, AnimeEntry));
   if (Array.isArray(response)) {
     const [animeFavorites, count] = response;
-    res.json(JsonApi.encode(req, animeFavorites, count));
+    res.json(await JsonApi.encode(req, animeFavorites, count));
   }
 });
 
@@ -115,7 +115,7 @@ userRoutes.get('/:id(\\d+)/reviews', async (req, res) => {
   const response = await user?.getRelated("reviews", JsonApi.parameters(req, Review));
   if (Array.isArray(response)) {
     const [reviews, count] = response;
-    res.json(JsonApi.encode(req, reviews, count));
+    res.json(await JsonApi.encode(req, reviews, count));
   }
 });
 

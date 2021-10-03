@@ -10,7 +10,7 @@ const themeRoutes = express.Router();
 
 themeRoutes.get('/', async (req, res) => {
   const [themes, count] = await Theme.findAll(JsonApi.parameters(req, Theme));
-  res.json(JsonApi.encode(req, themes, count))
+  res.json(await JsonApi.encode(req, themes, count))
 });
 
 themeRoutes.post('/', async (req, res) => {
@@ -21,13 +21,13 @@ themeRoutes.post('/', async (req, res) => {
 
   const theme: Theme = req.body;
   const newTheme = await theme.create();
-  res.json(JsonApi.encode(req, newTheme));
+  res.json(await JsonApi.encode(req, newTheme));
 });
 
 themeRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const theme = await Theme.findById(id, JsonApi.parameters(req, Theme))
-  res.json(JsonApi.encode(req, theme));
+  res.json(await JsonApi.encode(req, theme));
 });
 
 themeRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -38,7 +38,7 @@ themeRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const theme: Theme = req.body;
   const newTheme = await theme.update();
-  res.json(JsonApi.encode(req, newTheme));
+  res.json(await JsonApi.encode(req, newTheme));
 });
 
 themeRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -60,7 +60,7 @@ themeRoutes.get('/:id(\\d+)/manga', async (req, res) => {
   const response = await theme?.getRelated("manga", JsonApi.parameters(req, Manga));
   if (Array.isArray(response)) {
     const [mangas, count] = response;
-    res.json(JsonApi.encode(req, mangas, count));
+    res.json(await JsonApi.encode(req, mangas, count));
   }
 });
 
@@ -70,7 +70,7 @@ themeRoutes.get('/:id(\\d+)/anime', async (req, res) => {
   const response = await theme?.getRelated("anime", JsonApi.parameters(req, Anime));
   if (Array.isArray(response)) {
     const [animes, count] = response;
-    res.json(JsonApi.encode(req, animes, count));
+    res.json(await JsonApi.encode(req, animes, count));
   }
 });
 

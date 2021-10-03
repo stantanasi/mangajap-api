@@ -10,7 +10,7 @@ const episodeRoutes = express.Router();
 
 episodeRoutes.get('/', async (req, res) => {
   const [episodes, count] = await Episode.findAll(JsonApi.parameters(req, Episode));
-  res.json(JsonApi.encode(req, episodes, count))
+  res.json(await JsonApi.encode(req, episodes, count))
 });
 
 episodeRoutes.post('/', async (req, res) => {
@@ -21,13 +21,13 @@ episodeRoutes.post('/', async (req, res) => {
 
   const episode: Episode = req.body;
   const newEpisode = await episode.create();
-  res.json(JsonApi.encode(req, newEpisode));
+  res.json(await JsonApi.encode(req, newEpisode));
 });
 
 episodeRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const episode = await Episode.findById(id, JsonApi.parameters(req, Episode))
-  res.json(JsonApi.encode(req, episode));
+  res.json(await JsonApi.encode(req, episode));
 });
 
 episodeRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -38,7 +38,7 @@ episodeRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const episode: Episode = req.body;
   const newEpisode = await episode.update();
-  res.json(JsonApi.encode(req, newEpisode));
+  res.json(await JsonApi.encode(req, newEpisode));
 });
 
 episodeRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -59,7 +59,7 @@ episodeRoutes.get('/:id(\\d+)/anime', async (req, res) => {
   const episode = await Episode.findById(id);
   const response = await episode?.getRelated("anime", JsonApi.parameters(req, Anime));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -68,7 +68,7 @@ episodeRoutes.get('/:id(\\d+)/season', async (req, res) => {
   const episode = await Episode.findById(id);
   const response = await episode?.getRelated("season", JsonApi.parameters(req, Season));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 

@@ -10,7 +10,7 @@ const franchiseRoutes = express.Router();
 
 franchiseRoutes.get('/', async (req, res) => {
   const [franchises, count] = await Franchise.findAll(JsonApi.parameters(req, Franchise));
-  res.json(JsonApi.encode(req, franchises, count))
+  res.json(await JsonApi.encode(req, franchises, count))
 });
 
 franchiseRoutes.post('/', async (req, res) => {
@@ -21,13 +21,13 @@ franchiseRoutes.post('/', async (req, res) => {
 
   const franchise: Franchise = req.body;
   const newFranchise = await franchise.create();
-  res.json(JsonApi.encode(req, newFranchise));
+  res.json(await JsonApi.encode(req, newFranchise));
 });
 
 franchiseRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const franchise = await Franchise.findById(id, JsonApi.parameters(req, Franchise))
-  res.json(JsonApi.encode(req, franchise));
+  res.json(await JsonApi.encode(req, franchise));
 });
 
 franchiseRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -38,7 +38,7 @@ franchiseRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const franchise: Franchise = req.body;
   const newFranchise = await franchise.update();
-  res.json(JsonApi.encode(req, newFranchise));
+  res.json(await JsonApi.encode(req, newFranchise));
 });
 
 franchiseRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -59,7 +59,7 @@ franchiseRoutes.get('/:id(\\d+)/source', async (req, res) => {
   const franchise = await Franchise.findById(id);
   const response = await franchise?.getRelated("source", JsonApi.parameters(req, Manga)); // TODO: JsonApi.parameters(req, Anime | Manga)
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -68,7 +68,7 @@ franchiseRoutes.get('/:id(\\d+)/destination', async (req, res) => {
   const franchise = await Franchise.findById(id);
   const response = await franchise?.getRelated("destination", JsonApi.parameters(req, Anime)); // TODO: JsonApi.parameters(req, Anime | Manga)
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 

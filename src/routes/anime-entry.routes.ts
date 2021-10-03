@@ -9,7 +9,7 @@ const animeEntryRoutes = express.Router();
 
 animeEntryRoutes.get('/', async (req, res) => {
   const [animeEntries, count] = await AnimeEntry.findAll(JsonApi.parameters(req, AnimeEntry));
-  res.json(JsonApi.encode(req, animeEntries, count))
+  res.json(await JsonApi.encode(req, animeEntries, count))
 });
 
 animeEntryRoutes.post('/', async (req, res) => {
@@ -20,13 +20,13 @@ animeEntryRoutes.post('/', async (req, res) => {
 
   const animeEntry: AnimeEntry = req.body;
   const newAnimeEntry = await animeEntry.create();
-  res.json(JsonApi.encode(req, newAnimeEntry));
+  res.json(await JsonApi.encode(req, newAnimeEntry));
 });
 
 animeEntryRoutes.get('/:id(\\d+)', async (req, res) => {
   const id: string = (req.params as any).id
   const animeEntry = await AnimeEntry.findById(id, JsonApi.parameters(req, AnimeEntry));
-  res.json(JsonApi.encode(req, animeEntry));
+  res.json(await JsonApi.encode(req, animeEntry));
 });
 
 animeEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
@@ -38,7 +38,7 @@ animeEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
 
   const animeEntry: AnimeEntry = req.body;
   const newAnimeEntry = await animeEntry.update();
-  res.json(JsonApi.encode(req, newAnimeEntry));
+  res.json(await JsonApi.encode(req, newAnimeEntry));
 });
 
 animeEntryRoutes.delete('/:id(\\d+)', async (req, res) => {
@@ -58,7 +58,7 @@ animeEntryRoutes.get('/:id(\\d+)/anime', async (req, res) => {
   const animeEntry = await AnimeEntry.findById(id);
   const response = await animeEntry?.getRelated("anime", JsonApi.parameters(req, Anime));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 
@@ -67,7 +67,7 @@ animeEntryRoutes.get('/:id(\\d+)/user', async (req, res) => {
   const animeEntry = await AnimeEntry.findById(id);
   const response = await animeEntry?.getRelated("user", JsonApi.parameters(req, User));
   if (response && !Array.isArray(response)) {
-    res.json(JsonApi.encode(req, response));
+    res.json(await JsonApi.encode(req, response));
   }
 });
 

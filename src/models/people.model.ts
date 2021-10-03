@@ -1,10 +1,11 @@
-import fs from "fs";
 import db from "../db";
 import { JsonApiType, JsonApiFilter, JsonApiId, JsonApiAttribute, JsonApiRelationship } from "../utils/json-api/json-api-annotations";
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, OneToMany } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Staff from "./staff.model";
+import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
+import { storage } from '../firebase-app';
 
 @Entity({
   database: db,
@@ -89,27 +90,29 @@ export default class People extends MySqlModel {
   animeStaff?: Staff[];
 
 
-  @JsonApiAttribute() // TODO: Structuration des images (manga, anime, users, people, etc)
-  get image(): string | null {
-    if (fs.existsSync(`./peoples/${this.id}/image.jpg`)) {
-      return `http://mangajap.000webhostapp.com/images/peoples/${this.id}/image.jpg`
-    } else {
-      return null
-    }
+  @JsonApiAttribute()
+  get image(): string | null | Promise<string | null> {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`peoples/${this.id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return (async () => getDownloadURL(ref(storage, `peoples/${this.id}/images/profile.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(error => null)
+    )();
   }
-  set image(value: string | null) {
-    if (value === null) {
-      if (fs.existsSync(`./peoples/${this.id}/image.jpg`)) {
-        fs.unlinkSync(`./peoples/${this.id}/image.jpg`)
-      }
-    } else {
-      if (value.startsWith('data')) {
-        value = value.split(',')[1];
-      }
+  set image(value: string | null | Promise<string | null>) {
+    const storageRef = ref(storage, `peoples/${this.id}/images/profile.jpg`);
 
-      fs.writeFileSync(`./peoples/${this.id}/image.jpg`, value, {
-        encoding: 'base64'
-      })
+    if (value === null) {
+      deleteObject(storageRef)
+        .then()
+        .catch();
+    } else if (!(value instanceof Promise)) {
+      if (value.startsWith('data')) {
+        uploadString(storageRef, value, 'data_url')
+          .then();
+      } else {
+        uploadString(storageRef, value, 'base64')
+          .then();
+      }
     }
   }
 }

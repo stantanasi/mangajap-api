@@ -4,7 +4,8 @@ import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Manga from "./manga.model";
-import fs from "fs";
+import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
+import { storage } from '../firebase-app';
 
 @Entity({
   database: db,
@@ -21,7 +22,7 @@ export default class Volume extends MySqlModel {
   @Column("volume_mangaid")
   mangaId?: number;
 
-  
+
   @Column("volume_title_fr")
   @JsonApiAttribute("titles.fr")
   title_fr?: string;
@@ -78,27 +79,39 @@ export default class Volume extends MySqlModel {
   manga?: Manga;
 
 
-  @JsonApiAttribute() // TODO: Structuration des images (manga, anime, users, people, etc)
-  get coverImage(): string | null {
-    if (fs.existsSync(`./manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`)) {
-      return `http://mangajap.000webhostapp.com/manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`
-    } else {
-      return null
-    }
+  @JsonApiAttribute()
+  get coverImage(): string | null | Promise<string | null> {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return (async () => getDownloadURL(ref(storage, `manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(error => null)
+    )();
   }
-  set coverImage(value: string | null) {
-    if (value === null) {
-      if (fs.existsSync(`./manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`)) {
-        fs.unlinkSync(`./manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`)
-      }
-    } else {
-      if (value.startsWith('data')) {
-        value = value.split(',')[1];
-      }
+  set coverImage(value: string | null | Promise<string | null>) {
+    if (!this.mangaId) {
+      Volume.findById(`${this.id}`).then(volume => {
+        if (volume) {
+          this.mangaId = volume.mangaId;
+          this.coverImage = value;
+        }
+      });
 
-      fs.writeFileSync(`./manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`, value, {
-        encoding: 'base64'
-      })
+    } else {
+      const storageRef = ref(storage, `manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`);
+
+      if (value === null) {
+        deleteObject(storageRef)
+          .then()
+          .catch();
+      } else if (!(value instanceof Promise)) {
+        if (value.startsWith('data')) {
+          uploadString(storageRef, value, 'data_url')
+            .then();
+        } else {
+          uploadString(storageRef, value, 'base64')
+            .then();
+        }
+      }
     }
   }
 }

@@ -1,4 +1,3 @@
-import console from "console";
 import { Request, Response } from "express";
 import MySqlModel, { QueryOptions } from "../mysql/mysql-model";
 import { MySqlColumn } from "../mysql/mysql-column";
@@ -91,15 +90,17 @@ export default class JsonApi {
     }
 
     if (Array.isArray(models)) {
-      body.data = [];
-      body.included = [];
-
-      for (const model of models) {
-        const [data, included] = await JsonApi.encodeModel(req, model);
-
-        body.data = (body.data as JsonApiResource[]).concat(data);
-        body.included = body.included!!.concat(included);
-      }
+      const { data, included } = (await Promise.all(models.map((model) => JsonApi.encodeModel(req, model))))
+        .reduce((acc, cur) => {
+          acc.data = acc.data.concat(cur[0]);
+          acc.included = acc.included.concat(cur[1]);
+          return acc;
+        }, {
+          data: [] as JsonApiResource[],
+          included: [] as JsonApiResource[],
+        });
+      body.data = data;
+      body.included = included;
 
       const query: any = req.query || {};
       const url = `${JsonApi.apiUrl(req)}${req.originalUrl.split("?").shift()}`

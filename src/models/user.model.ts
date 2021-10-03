@@ -1,6 +1,5 @@
 import { Request } from "express";
 import db from "../db";
-import fs from "fs";
 import JsonApi from "../utils/json-api/json-api";
 import { JsonApiType, JsonApiFilter, JsonApiId, JsonApiAttribute, JsonApiRelationship } from "../utils/json-api/json-api-annotations";
 import MySqlModel from "../utils/mysql/mysql-model";
@@ -10,6 +9,8 @@ import AnimeEntry from "./anime-entry.model";
 import Follow from "./follow.model";
 import MangaEntry from "./manga-entry.model";
 import Review from "./review.model";
+import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
+import { storage } from '../firebase-app';
 
 @Entity({
   database: db,
@@ -209,135 +210,128 @@ export default class User extends MySqlModel {
   reviews?: Review[];
 
 
-  @JsonApiAttribute() // TODO: Structuration des images (manga, anime, users, people, etc)
-  get avatar(): any | null {
-    if (fs.existsSync(`./users/${this.id}/images/profile.jpg`)) {
-      return {
-        tiny: `https://mangajap.000webhostapp.com/media/users/avatars/${this.id}/tiny.jpeg`,
-        small: `https://mangajap.000webhostapp.com/media/users/avatars/${this.id}/small.jpeg`,
-        medium: `https://mangajap.000webhostapp.com/media/users/avatars/${this.id}/medium.jpeg`,
-        large: `https://mangajap.000webhostapp.com/media/users/avatars/${this.id}/large.jpeg`,
-        original: `https://mangajap.000webhostapp.com/media/users/avatars/${this.id}/original.jpeg`
-      };
-    } else {
-      return null;
-    }
+  @JsonApiAttribute()
+  get avatar(): any | null | Promise<string | null> {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`users/${this.id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return (async () => getDownloadURL(ref(storage, `users/${this.id}/images/profile.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(error => null)
+    )();
   }
-  set avatar(value: string | null) {
-    if (value === null) {
-      if (fs.existsSync(`./users/${this.id}/images/profile.jpg`)) {
-        fs.unlinkSync(`./users/${this.id}/images/profile.jpg`)
-      }
-    } else {
-      if (value.startsWith('data')) {
-        value = value.split(',')[1];
-      }
+  set avatar(value: string | null | Promise<string | null>) {
+    const storageRef = ref(storage, `users/${this.id}/images/profile.jpg`);
 
-      fs.writeFileSync(`./users/${this.id}/images/profile.jpg`, value, {
-        encoding: 'base64'
-      })
+    if (value === null) {
+      deleteObject(storageRef)
+        .then()
+        .catch();
+    } else if (!(value instanceof Promise)) {
+      if (value.startsWith('data')) {
+        uploadString(storageRef, value, 'data_url')
+          .then();
+      } else {
+        uploadString(storageRef, value, 'base64')
+          .then();
+      }
     }
   }
 
 
 
   async afterFind() {
-    //   $this->getWriteConnection()->execute(
-    //     "
-    //     UPDATE
-    //         user
-    //     SET
-    //         user_followerscount =(
-    //             SELECT
-    //                 COUNT(*)
-    //             FROM
-    //                 follow
-    //             WHERE
-    //                 follow_followedid = user_id
-    //         ),
-    //         user_followingcount =(
-    //             SELECT
-    //                 COUNT(*)
-    //             FROM
-    //                 follow
-    //             WHERE
-    //                 follow_followerid = user_id
-    //         ),
-    //         user_followedmangacount =(
-    //             SELECT
-    //                 COUNT(*)
-    //             FROM
-    //                 mangaentry
-    //             WHERE
-    //                 mangaentry_userid = user_id AND mangaentry_isadd = 1
-    //         ),
-    //         user_mangavolumesread =(
-    //             SELECT
-    //                 COALESCE(
-    //                     SUM(
-    //                         mangaentry_volumesread *(mangaentry_rereadcount +1)
-    //                     ),
-    //                     0
-    //                 )
-    //             FROM
-    //                 mangaentry
-    //             WHERE
-    //                 mangaentry_userid = user_id
-    //         ),
-    //         user_mangachaptersread =(
-    //             SELECT
-    //                 COALESCE(
-    //                     SUM(
-    //                         mangaentry_chaptersread *(mangaentry_rereadcount +1)
-    //                     ),
-    //                     0
-    //                 )
-    //             FROM
-    //                 mangaentry
-    //             WHERE
-    //                 mangaentry_userid = user_id
-    //         ),
-    //         user_followedanimecount =(
-    //             SELECT
-    //                 COUNT(*)
-    //             FROM
-    //                 animeentry
-    //             WHERE
-    //                 animeentry_userid = user_id AND animeentry_isadd = 1
-    //         ),
-    //         user_animeepisodeswatch =(
-    //             SELECT
-    //                 COALESCE(
-    //                     SUM(
-    //                         animeentry_episodeswatch *(animeentry_rewatchcount +1)
-    //                     ),
-    //                     0
-    //                 )
-    //             FROM
-    //                 animeentry
-    //             WHERE
-    //                 animeentry_userid = user_id
-    //         ),
-    //         user_animetimespent =(
-    //             SELECT
-    //                 COALESCE(
-    //                     SUM(
-    //                         animeentry_episodeswatch * TIME_TO_SEC(anime_episodelength)
-    //                     ),
-    //                     0
-    //                 )
-    //             FROM
-    //                 animeentry
-    //             RIGHT OUTER JOIN anime ON anime_id = animeentry_animeid
-    //             WHERE
-    //                 animeentry_userid = user_id
-    //         )
-    //     WHERE
-    //         user_id = :userId",
-    //     [
-    //         'userId' => $this->getId()
-    //     ]
-    // );
+    db.promise().query(`
+        UPDATE
+            user
+        SET
+            user_followerscount =(
+                SELECT
+                    COUNT(*)
+                FROM
+                    follow
+                WHERE
+                    follow_followedid = user_id
+            ),
+            user_followingcount =(
+                SELECT
+                    COUNT(*)
+                FROM
+                    follow
+                WHERE
+                    follow_followerid = user_id
+            ),
+            user_followedmangacount =(
+                SELECT
+                    COUNT(*)
+                FROM
+                    mangaentry
+                WHERE
+                    mangaentry_userid = user_id AND mangaentry_isadd = 1
+            ),
+            user_mangavolumesread =(
+                SELECT
+                    COALESCE(
+                        SUM(
+                            mangaentry_volumesread *(mangaentry_rereadcount +1)
+                        ),
+                        0
+                    )
+                FROM
+                    mangaentry
+                WHERE
+                    mangaentry_userid = user_id
+            ),
+            user_mangachaptersread =(
+                SELECT
+                    COALESCE(
+                        SUM(
+                            mangaentry_chaptersread *(mangaentry_rereadcount +1)
+                        ),
+                        0
+                    )
+                FROM
+                    mangaentry
+                WHERE
+                    mangaentry_userid = user_id
+            ),
+            user_followedanimecount =(
+                SELECT
+                    COUNT(*)
+                FROM
+                    animeentry
+                WHERE
+                    animeentry_userid = user_id AND animeentry_isadd = 1
+            ),
+            user_animeepisodeswatch =(
+                SELECT
+                    COALESCE(
+                        SUM(
+                            animeentry_episodeswatch *(animeentry_rewatchcount +1)
+                        ),
+                        0
+                    )
+                FROM
+                    animeentry
+                WHERE
+                    animeentry_userid = user_id
+            ),
+            user_animetimespent =(
+                SELECT
+                    COALESCE(
+                        SUM(
+                            animeentry_episodeswatch * TIME_TO_SEC(anime_episodelength)
+                        ),
+                        0
+                    )
+                FROM
+                    animeentry
+                RIGHT OUTER JOIN anime ON anime_id = animeentry_animeid
+                WHERE
+                    animeentry_userid = user_id
+            )
+        WHERE
+            user_id = ${this.id}`)
+      .then()
+      .catch();
   }
 
 

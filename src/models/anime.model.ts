@@ -1,5 +1,4 @@
 import db from "../db";
-import fs from "fs";
 import { JsonApiAttribute, JsonApiFilter, JsonApiId, JsonApiRelationship, JsonApiType } from "../utils/json-api/json-api-annotations";
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryKey } from "../utils/mysql/mysql-annotations";
@@ -16,6 +15,8 @@ import slugify from "slugify";
 import AnimeEntry from "./anime-entry.model";
 import User from "./user.model";
 import Season from "./season.model";
+import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
+import { storage } from '../firebase-app';
 
 @Entity({
   database: db,
@@ -205,29 +206,29 @@ export default class Anime extends MySqlModel {
   animeEntry?: AnimeEntry;
 
 
-  @JsonApiAttribute() // TODO: Structuration des images (manga, anime, users, people, etc)
-  get coverImage(): string | null {
-    if (true || fs.existsSync(`./images/anime/cover/${this.slug}.jpg`)) {
-      return `http://mangajap.000webhostapp.com/images/anime/cover/${this.slug}.jpg`;
-    } else {
-      return null;
-    }
+  @JsonApiAttribute()
+  get coverImage(): string | null | Promise<string | null> {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`anime/${this.id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return (async () => getDownloadURL(ref(storage, `anime/${this.id}/images/cover.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(error => null)
+    )();
   }
-  set coverImage(value: string | null) {
-    this.slug = this.slug || slugify(this.title || this.title_en || this.title_en_jp || this.title_fr || "").toLowerCase(); // TODO: lors de la modification le slug est undefined du coup l'image s'enregistre ".jpg"
+  set coverImage(value: string | null | Promise<string | null>) {
+    const storageRef = ref(storage, `anime/${this.id}/images/cover.jpg`);
 
     if (value === null) {
-      if (fs.existsSync(`./images/anime/cover/${this.slug}.jpg`)) {
-        fs.unlinkSync(`./images/anime/cover/${this.slug}.jpg`);
-      }
-    } else {
+      deleteObject(storageRef)
+        .then()
+        .catch();
+    } else if (!(value instanceof Promise)) {
       if (value.startsWith('data')) {
-        value = value.split(',')[1];
+        uploadString(storageRef, value, 'data_url')
+          .then();
+      } else {
+        uploadString(storageRef, value, 'base64')
+          .then();
       }
-
-      fs.writeFileSync(`./images/anime/cover/${this.slug}.jpg`, value, {
-        encoding: 'base64'
-      });
     }
   }
 
@@ -253,71 +254,68 @@ export default class Anime extends MySqlModel {
   }
 
   async afterFind() {
-    //   $this->getWriteConnection()->execute(
-    //     "
-    //     UPDATE
-    //         anime
-    //     SET
-    //         anime_seasoncount =(
-    //             SELECT
-    //                 COALESCE(MAX(episode_seasonnumber), 0)
-    //             FROM
-    //                 episode
-    //             WHERE
-    //                 episode_animeid = anime_id
-    //         ),
-    //         anime_episodecount =(
-    //             SELECT
-    //                 COUNT(*)
-    //             FROM
-    //                 episode
-    //             WHERE
-    //                 episode_animeid = anime_id
-    //         ),
-    //         anime_rating =(
-    //             SELECT
-    //                 AVG(animeentry_rating)
-    //             FROM
-    //                 animeentry
-    //             WHERE
-    //                 animeentry_animeid = anime_id AND animeentry_rating IS NOT NULL
-    //             GROUP BY
-    //                 animeentry_animeid
-    //         ),
-    //         anime_usercount =(
-    //             SELECT
-    //                 COUNT(*)
-    //             FROM
-    //                 animeentry
-    //             WHERE
-    //                 animeentry_animeid = anime_id AND animeentry_isadd = 1
-    //         ),
-    //         anime_favoritescount =(
-    //             SELECT
-    //                 COUNT(*)
-    //             FROM
-    //                 animeentry
-    //             WHERE
-    //                 animeentry_animeid = anime_id AND animeentry_isfavorites = 1
-    //         ),
-    //         anime_popularity =(
-    //             SELECT
-    //                 COALESCE(
-    //                     (anime_usercount + anime_favoritescount) +
-    //                     anime_usercount * COALESCE(anime_rating, 0) +
-    //                     2 * COUNT(animeentry_id) * COALESCE(anime_rating, 0) *(anime_usercount + anime_favoritescount),
-    //                     0
-    //                 )
-    //             FROM
-    //                 animeentry
-    //             WHERE
-    //                 animeentry_animeid = anime_id AND animeentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
-    //         )
-    //     WHERE
-    //         anime_id = :animeId",
-    //     [
-    //         'animeId' => $this->id
-    //     ]
-    // );
+    db.promise().query(`
+        UPDATE
+            anime
+        SET
+            anime_seasoncount =(
+                SELECT
+                    COALESCE(MAX(episode_seasonnumber), 0)
+                FROM
+                    episode
+                WHERE
+                    episode_animeid = anime_id
+            ),
+            anime_episodecount =(
+                SELECT
+                    COUNT(*)
+                FROM
+                    episode
+                WHERE
+                    episode_animeid = anime_id
+            ),
+            anime_rating =(
+                SELECT
+                    AVG(animeentry_rating)
+                FROM
+                    animeentry
+                WHERE
+                    animeentry_animeid = anime_id AND animeentry_rating IS NOT NULL
+                GROUP BY
+                    animeentry_animeid
+            ),
+            anime_usercount =(
+                SELECT
+                    COUNT(*)
+                FROM
+                    animeentry
+                WHERE
+                    animeentry_animeid = anime_id AND animeentry_isadd = 1
+            ),
+            anime_favoritescount =(
+                SELECT
+                    COUNT(*)
+                FROM
+                    animeentry
+                WHERE
+                    animeentry_animeid = anime_id AND animeentry_isfavorites = 1
+            ),
+            anime_popularity =(
+                SELECT
+                    COALESCE(
+                        (anime_usercount + anime_favoritescount) +
+                        anime_usercount * COALESCE(anime_rating, 0) +
+                        2 * COUNT(animeentry_id) * COALESCE(anime_rating, 0) *(anime_usercount + anime_favoritescount),
+                        0
+                    )
+                FROM
+                    animeentry
+                WHERE
+                    animeentry_animeid = anime_id AND animeentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
+            )
+        WHERE
+            anime_id = ${this.id}`)
+      .then()
+      .catch();
   }
 }

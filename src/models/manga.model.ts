@@ -1,5 +1,4 @@
 import slugify from "slugify";
-import fs from "fs";
 import db from "../db";
 import { JsonApiAttribute, JsonApiFilter, JsonApiId, JsonApiRelationship, JsonApiType } from "../utils/json-api/json-api-annotations";
 import MySqlModel from "../utils/mysql/mysql-model";
@@ -15,6 +14,8 @@ import Review from "./review.model";
 import ThemeRelationships from "./theme-relationships.model";
 import MangaEntry from "./manga-entry.model";
 import User from "./user.model";
+import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
+import { storage } from '../firebase-app';
 
 @Entity({
   database: db,
@@ -194,55 +195,55 @@ export default class Manga extends MySqlModel {
   mangaEntry?: MangaEntry;
 
 
-  @JsonApiAttribute() // TODO: Structuration des images (manga, anime, users, people, etc)
-  get coverImage(): string | null {
-    if (true || fs.existsSync(`./images/manga/cover/${this.slug}.jpg`)) {
-      return `http://mangajap.000webhostapp.com/images/manga/cover/${this.slug}.jpg`;
-    } else {
-      return null;
-    }
+  @JsonApiAttribute()
+  get coverImage(): string | null | Promise<string | null> {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return (async () => getDownloadURL(ref(storage, `manga/${this.id}/images/cover.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(error => null)
+    )();
   }
-  set coverImage(value: string | null) {
-    this.slug = this.slug || slugify(this.title || this.title_en || this.title_en_jp || this.title_fr || "").toLowerCase(); // TODO: lors de la modification le slug est undefined du coup l'image s'enregistre ".jpg"
+  set coverImage(value: string | null | Promise<string | null>) {
+    const storageRef = ref(storage, `manga/${this.id}/images/cover.jpg`);
 
     if (value === null) {
-      if (fs.existsSync(`./images/manga/cover/${this.slug}.jpg`)) {
-        fs.unlinkSync(`./images/manga/cover/${this.slug}.jpg`);
-      }
-    } else {
+      deleteObject(storageRef)
+        .then()
+        .catch();
+    } else if (!(value instanceof Promise)) {
       if (value.startsWith('data')) {
-        value = value.split(',')[1];
+        uploadString(storageRef, value, 'data_url')
+          .then();
+      } else {
+        uploadString(storageRef, value, 'base64')
+          .then();
       }
-
-      fs.writeFileSync(`./images/manga/cover/${this.slug}.jpg`, value, {
-        encoding: 'base64'
-      });
     }
   }
 
   @JsonApiAttribute()
-  get bannerImage(): string | null {
-    if (true || fs.existsSync(`./images/manga/banner/${this.slug}.jpg`)) {
-      return `http://mangajap.000webhostapp.com/images/manga/banner/${this.slug}.jpg`;
-    } else {
-      return null;
-    }
+  get bannerImage(): string | Promise<string | null> {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.id}/images/banner.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return (async () => getDownloadURL(ref(storage, `manga/${this.id}/images/banner.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(error => null)
+    )();
   }
-  set bannerImage(value: string | null) {
-    this.slug = this.slug || slugify(this.title || this.title_en || this.title_en_jp || this.title_fr || "").toLowerCase(); // TODO: lors de la modification le slug est undefined du coup l'image s'enregistre ".jpg"
+  set bannerImage(value: string | null | Promise<string | null>) {
+    const storageRef = ref(storage, `manga/${this.id}/images/banner.jpg`);
 
     if (value === null) {
-      if (fs.existsSync(`./images/manga/banner/${this.slug}.jpg`)) {
-        fs.unlinkSync(`./images/manga/banner/${this.slug}.jpg`);
-      }
-    } else {
+      deleteObject(storageRef)
+        .then()
+        .catch();
+    } else if (!(value instanceof Promise)) {
       if (value.startsWith('data')) {
-        value = value.split(',')[1];
+        uploadString(storageRef, value, 'data_url')
+          .then();
+      } else {
+        uploadString(storageRef, value, 'base64')
+          .then();
       }
-
-      fs.writeFileSync(`./images/manga/banner/${this.slug}.jpg`, value, {
-        encoding: 'base64'
-      });
     }
   }
 
@@ -266,63 +267,60 @@ export default class Manga extends MySqlModel {
   }
 
   async afterFind() {
-    // $this->getWriteConnection()->execute(
-    //   "
-    //         UPDATE
-    //             manga
-    //         SET
-    //             manga_rating = (
-    //                 SELECT
-    //                     AVG(mangaentry_rating)
-    //                 FROM
-    //                     mangaentry
-    //                 WHERE
-    //                     mangaentry_mangaid = manga_id AND mangaentry_rating IS NOT NULL
-    //                 GROUP BY
-    //                     mangaentry_mangaid
-    //             ),
-    //             manga_usercount = (
-    //                 SELECT
-    //                     COUNT(*)
-    //                 FROM
-    //                     mangaentry
-    //                 WHERE
-    //                     mangaentry_mangaid = manga_id AND mangaentry_isadd = 1
-    //             ),
-    //             manga_favoritescount = (
-    //                 SELECT
-    //                     COUNT(*)
-    //                 FROM
-    //                     mangaentry
-    //                 WHERE
-    //                     mangaentry_mangaid = manga_id AND mangaentry_isfavorites = 1
-    //             ),
-    //             manga_reviewcount = (
-    //                 SELECT
-    //                     COUNT(*)
-    //                 FROM
-    //                     review
-    //                 WHERE
-    //                     review_mangaid = manga_id
-    //             ),
-    //             manga_popularity = (
-    //                 SELECT
-    //                     COALESCE(
-    //                         (manga_usercount + manga_favoritescount) +
-    //                         manga_usercount * COALESCE(manga_rating, 0) +
-    //                         2 * COUNT(mangaentry_id) * COALESCE(manga_rating, 0) *(manga_usercount + manga_favoritescount),
-    //                         0
-    //                     )
-    //                 FROM
-    //                     mangaentry
-    //                 WHERE
-    //                     mangaentry_mangaid = manga_id AND mangaentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
-    //             )
-    //         WHERE
-    //             manga_id = :mangaId",
-    //   [
-    //     'mangaId' => $this->getId()
-    //   ]
-    // );
+    db.promise().query(`
+        UPDATE
+            manga
+        SET
+            manga_rating = (
+                SELECT
+                    AVG(mangaentry_rating)
+                FROM
+                    mangaentry
+                WHERE
+                    mangaentry_mangaid = manga_id AND mangaentry_rating IS NOT NULL
+                GROUP BY
+                    mangaentry_mangaid
+            ),
+            manga_usercount = (
+                SELECT
+                    COUNT(*)
+                FROM
+                    mangaentry
+                WHERE
+                    mangaentry_mangaid = manga_id AND mangaentry_isadd = 1
+            ),
+            manga_favoritescount = (
+                SELECT
+                    COUNT(*)
+                FROM
+                    mangaentry
+                WHERE
+                    mangaentry_mangaid = manga_id AND mangaentry_isfavorites = 1
+            ),
+            manga_reviewcount = (
+                SELECT
+                    COUNT(*)
+                FROM
+                    review
+                WHERE
+                    review_mangaid = manga_id
+            ),
+            manga_popularity = (
+                SELECT
+                    COALESCE(
+                        (manga_usercount + manga_favoritescount) +
+                        manga_usercount * COALESCE(manga_rating, 0) +
+                        2 * COUNT(mangaentry_id) * COALESCE(manga_rating, 0) *(manga_usercount + manga_favoritescount),
+                        0
+                    )
+                FROM
+                    mangaentry
+                WHERE
+                    mangaentry_mangaid = manga_id AND mangaentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
+            )
+        WHERE
+            manga_id = ${this.id}`)
+      .then()
+      .catch();
   }
 }

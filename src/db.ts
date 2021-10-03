@@ -1,11 +1,14 @@
 import mysql from 'mysql2';
-import { dbConfig } from "./db.config";
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 const db = mysql.createConnection({
-  host: dbConfig.host,
-  user: dbConfig.username,
-  password: dbConfig.password,
-  database: dbConfig.dbname,
+  host: process.env.DB_HOST,
+  port: +(process.env.DB_PORT || 3306),
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   timezone: 'UTC',
 });
 

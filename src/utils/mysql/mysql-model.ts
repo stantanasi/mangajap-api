@@ -1,4 +1,5 @@
 import console from "console";
+import { response } from 'express';
 import { FieldPacket, OkPacket, RowDataPacket } from "mysql2";
 import { MySqlColumn } from "./mysql-column";
 import MySqlConfig from "./mysql-config";
@@ -196,40 +197,9 @@ export default abstract class MySqlModel {
         //   }
         //   return cur;
         // }, {});
-        sql += " WHERE " + Object.entries(options.where).map(([key, conditions]) => {
-          if (key === 'or') {
-            return Object.entries(conditions).map(([key, conditions]) => {
-              if (Array.isArray(conditions)) {
-                return conditions
-                  .map(condition => {
-                    if (!key.trim()) {
-                      return condition;
-                    } else if (schema.primaryKey.property == key) {
-                      return `${schema.primaryKey.name} = ${condition}`
-                    } else if (condition === null || condition === 'NULL' || condition === 'NOT NULL') {
-                      return `${properties[key]?.name || key} IS ${condition}`
-                    } else if (typeof condition === 'string') {
-                      return `${properties[key]?.name || key} LIKE '${condition}'`
-                    } else {
-                      return `${properties[key]?.name || key} = ${condition}`
-                    }
-                  })
-                  .join(' OR ');
-              } else {
-                if (!key.trim()) {
-                  return conditions;
-                } else if (schema.primaryKey.property == key) {
-                  return `${schema.primaryKey.name} = ${conditions}`
-                } else if (conditions === null || conditions === 'NULL' || conditions === 'NOT NULL') {
-                  return `${properties[key]?.name || key} IS ${conditions}`
-                } else if (typeof conditions === 'string') {
-                  return `${properties[key]?.name || key} LIKE '${conditions}'`
-                } else {
-                  return `${properties[key]?.name || key} = ${conditions}`
-                }
-              }
-            }).join(' OR ');
-          } else if (Array.isArray(conditions)) {
+
+        const processFilter = (key: string, conditions: any): string => {
+          if (Array.isArray(conditions)) {
             return conditions
               .map(condition => {
                 if (!key.trim()) {
@@ -257,6 +227,24 @@ export default abstract class MySqlModel {
             } else {
               return `${properties[key]?.name || key} = ${conditions}`
             }
+          }
+        }
+
+        sql += " WHERE " + Object.entries(options.where).map(([key, conditions]) => {
+          if (key === 'or') {
+            if (Array.isArray(conditions)) {
+              return conditions.map(conditions => {
+                return Object.entries(conditions).map(([key, conditions]) => {
+                  return processFilter(key, conditions);
+                }).join(' OR ');
+              }).join(' OR ');
+            } else {
+              return Object.entries(conditions).map(([key, conditions]) => {
+                return processFilter(key, conditions);
+              }).join(' OR ');
+            }
+          } else {
+            return processFilter(key, conditions);
           }
         }).join(' AND ');
       }
@@ -347,6 +335,20 @@ export default abstract class MySqlModel {
       }));
     } else if (options?.include) {
       await hydrateRelations(model, options.include.relation, options.include.scope);
+    }
+
+    return model;
+  }
+
+  public static decodeBody<T extends MySqlModel>(
+    this: ModelType<T>,
+    body: any,
+  ): T {
+    const mysqlConfig: MySqlConfig = this.prototype.mysql;
+    const model = new this();
+
+    for (const [key, value] of Object.entries(body)) {
+      (model as any)[key] = value;
     }
 
     return model;

@@ -1,7 +1,8 @@
 import console from 'console';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import JsonApi from './utils/json-api/json-api';
+import JsonApiError, { NotFoundError } from './utils/json-api/json-api.error';
 import animeEntryRoutes from './routes/anime-entry.routes';
 import animeRoutes from './routes/anime.routes';
 import episodeRoutes from './routes/episode.routes';
@@ -46,9 +47,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-});
-
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);
 app.use('/episodes', episodeRoutes);
@@ -65,6 +63,19 @@ app.use('/staff', staffRoutes);
 app.use('/themes', themeRoutes);
 app.use('/users', userRoutes);
 app.use('/volumes', volumeRoutes);
+
+app.get('*', (req, res) => {
+  throw new NotFoundError();
+});
+
+// Error handling
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof JsonApiError) {
+    res.status(+(err.obj.status || 500)).json(JsonApi.encodeError(err));
+  } else {
+    res.status(500).json(JsonApi.encodeError(err));
+  }
+});
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

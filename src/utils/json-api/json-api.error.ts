@@ -1,27 +1,8 @@
-import JsonApi from "./json-api"
-
-export interface JsonApiErrorObject {
-  id?: string;
-  links?: {
-    about: string;
-  };
-  status?: string;
-  code?: string;
-  title?: string;
-  detail?: string;
-  source?: {
-    pointer?: string;
-    parameter?: string;
-  };
-  meta?: any;
-}
+import { JsonApiError as JsonApiErrorObject } from "./json-api-body"
 
 export default class JsonApiError extends Error {
-  constructor(error: JsonApiErrorObject) {
+  constructor(public obj: JsonApiErrorObject) {
     super();
-    JsonApi.res.status(error.status ? +error.status : 400).json({
-      errors: [error]
-    });
   }
 }
 
@@ -30,5 +11,14 @@ export class PermissionDenied extends JsonApiError {
     super({
       title: 'Permission denied',
     });
+  }
+}
+
+export class NotFoundError extends JsonApiError {
+  constructor() {
+    super({
+      status: '404',
+      title: 'Route Not Found',
+    })
   }
 }

@@ -5,6 +5,7 @@ import MySqlConfig from "../mysql/mysql-config";
 import UrlQuery from "../url-query/url-query";
 import JsonApiBody, { JsonApiResource } from "./json-api-body";
 import JsonApiConfig from "./json-api-config";
+import JsonApiError from './json-api.error';
 
 export interface ModelType<T> {
   new(): T;
@@ -17,7 +18,6 @@ export default class JsonApi {
   } = {};
 
   public static req: Request; // TODO: essayer de supprimer
-  public static res: Response;
 
   public static apiUrl(req: Request): string {
     return `${req.protocol}://${req.get('host')}`;
@@ -26,7 +26,6 @@ export default class JsonApi {
 
   public static initialize(req: Request, res: Response) {
     JsonApi.req = req;
-    JsonApi.res = res;
   }
 
 
@@ -356,5 +355,24 @@ export default class JsonApi {
     }
 
     return queryOptions;
+  }
+
+
+
+  public static encodeError(err: Error): JsonApiBody {
+    const body: JsonApiBody = {
+      errors: [],
+    };
+
+    if (err instanceof JsonApiError) {
+      body.errors?.push(err.obj);
+    } else {
+      body.errors?.push({
+        title: err.message,
+        meta: err.stack,
+      });
+    }
+
+    return body;
   }
 }

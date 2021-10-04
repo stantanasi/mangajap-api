@@ -365,7 +365,7 @@ export default class JsonApi {
     };
 
     if (err instanceof JsonApiError) {
-      body.errors?.push(err.obj);
+      body.errors?.push(err.data);
     } else {
       body.errors?.push({
         title: err.message,

@@ -71,7 +71,7 @@ app.get('*', (req, res) => {
 // Error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof JsonApiError) {
-    res.status(+(err.obj.status || 500)).json(JsonApi.encodeError(err));
+    res.status(+(err.data.status || 500)).json(JsonApi.encodeError(err));
   } else {
     res.status(500).json(JsonApi.encodeError(err));
   }

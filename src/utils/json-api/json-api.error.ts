@@ -1,7 +1,7 @@
 import { JsonApiError as JsonApiErrorObject } from "./json-api-body"
 
 export default class JsonApiError extends Error {
-  constructor(public obj: JsonApiErrorObject) {
+  constructor(public data: JsonApiErrorObject) {
     super();
   }
 }

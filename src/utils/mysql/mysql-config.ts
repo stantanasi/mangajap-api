@@ -3,7 +3,9 @@ import { ModelType, QueryOptions } from './mysql-model';
 import { MySqlColumn } from './mysql-column';
 
 export default interface MySqlConfig {
-  db: mysql.Connection;
+  db: {
+    connection: mysql.Connection;
+  };
   schema: {
     table: string;
     primaryKey: {

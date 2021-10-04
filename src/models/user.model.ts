@@ -239,7 +239,7 @@ export default class User extends MySqlModel {
 
 
   async afterFind() {
-    db.promise().query(`
+    db.connection.promise().query(`
         UPDATE
             user
         SET

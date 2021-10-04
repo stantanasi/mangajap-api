@@ -267,7 +267,7 @@ export default class Manga extends MySqlModel {
   }
 
   async afterFind() {
-    db.promise().query(`
+    db.connection.promise().query(`
         UPDATE
             manga
         SET

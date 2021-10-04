@@ -4,8 +4,10 @@ import { MySqlColumn } from './mysql-column';
 import MySqlConfig from './mysql-config';
 
 export function Entity(config: {
-  database: mysql.Connection,
-  table: string
+  database: {
+    connection: mysql.Connection;
+  };
+  table: string;
 }): any {
   return (constructor: Function): any => {
     MySqlModel.models[constructor.name] = constructor as any;

@@ -43,14 +43,14 @@ export default abstract class MySqlModel {
   ): Promise<[T[], number]> {
     const mysqlConfig: MySqlConfig = this.prototype.mysql;
 
-    const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.promise()
+    const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.connection.promise()
       .query(MySqlModel.getPreparedQuery(this, options));
 
     options = options || {};
     options.fields = "COUNT(*)";
     delete options.limit;
     delete options.offset;
-    const [rowsCount, fieldsCount]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.promise()
+    const [rowsCount, fieldsCount]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.connection.promise()
       .query(MySqlModel.getPreparedQuery(this, options));
 
     return [
@@ -71,7 +71,7 @@ export default abstract class MySqlModel {
     options = options || {};
     options.limit = 1;
 
-    const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.promise().query(MySqlModel.getPreparedQuery(this, options))
+    const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.connection.promise().query(MySqlModel.getPreparedQuery(this, options))
 
     if (rows[0]) {
       const model = await MySqlModel.hydrateModel(this, rows[0], options);
@@ -93,7 +93,7 @@ export default abstract class MySqlModel {
     options.where = options.where || {};
     options.where[mysqlConfig.schema.primaryKey.property] = id;
 
-    const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.promise().query(MySqlModel.getPreparedQuery(this, options))
+    const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.connection.promise().query(MySqlModel.getPreparedQuery(this, options))
 
     if (rows[0]) {
       const model = await MySqlModel.hydrateModel(this, rows[0], options);
@@ -462,16 +462,16 @@ export default abstract class MySqlModel {
 
       switch (config.type) {
         case MySqlColumn.Text:
-          data[config.name] = mysqlConfig.db.escape(value);
+          data[config.name] = mysqlConfig.db.connection.escape(value);
           break;
         case MySqlColumn.Date:
-          data[config.name] = mysqlConfig.db.escape((value as Date)?.toISOString().slice(0, 10));
+          data[config.name] = mysqlConfig.db.connection.escape((value as Date)?.toISOString().slice(0, 10));
           break;
         case MySqlColumn.DateTime:
           if (value) {
-            data[config.name] = mysqlConfig.db.escape(`${(value as Date)?.toISOString().slice(0, 10)} ${(value as Date)?.toISOString().slice(11, 19)}`);
+            data[config.name] = mysqlConfig.db.connection.escape(`${(value as Date)?.toISOString().slice(0, 10)} ${(value as Date)?.toISOString().slice(11, 19)}`);
           } else {
-            data[config.name] = mysqlConfig.db.escape(null);
+            data[config.name] = mysqlConfig.db.connection.escape(null);
           }
           break;
 
@@ -486,7 +486,7 @@ export default abstract class MySqlModel {
 
     console.log(sql + ';');
 
-    const [result, fields]: [OkPacket, FieldPacket[]] = await mysqlConfig.db.promise().query(sql);
+    const [result, fields]: [OkPacket, FieldPacket[]] = await mysqlConfig.db.connection.promise().query(sql);
 
     (this as any)[mysqlConfig.schema.primaryKey.property] = result.insertId;
 
@@ -528,16 +528,16 @@ export default abstract class MySqlModel {
 
       switch (config.type) {
         case MySqlColumn.Text:
-          data[config.name] = mysqlConfig.db.escape(value);
+          data[config.name] = mysqlConfig.db.connection.escape(value);
           break;
         case MySqlColumn.Date:
-          data[config.name] = mysqlConfig.db.escape((value as Date)?.toISOString().slice(0, 10));
+          data[config.name] = mysqlConfig.db.connection.escape((value as Date)?.toISOString().slice(0, 10));
           break;
         case MySqlColumn.DateTime:
           if (value) {
-            data[config.name] = mysqlConfig.db.escape(`${(value as Date)?.toISOString().slice(0, 10)} ${(value as Date)?.toISOString().slice(11, 19)}`);
+            data[config.name] = mysqlConfig.db.connection.escape(`${(value as Date)?.toISOString().slice(0, 10)} ${(value as Date)?.toISOString().slice(11, 19)}`);
           } else {
-            data[config.name] = mysqlConfig.db.escape(null);
+            data[config.name] = mysqlConfig.db.connection.escape(null);
           }
           break;
 
@@ -557,7 +557,7 @@ export default abstract class MySqlModel {
 
       console.log(sql + ';');
 
-      const [result, fields]: [OkPacket, FieldPacket[]] = await mysqlConfig.db.promise().query(sql);
+      const [result, fields]: [OkPacket, FieldPacket[]] = await mysqlConfig.db.connection.promise().query(sql);
     }
 
     await this.postSaveRelated();
@@ -586,7 +586,7 @@ export default abstract class MySqlModel {
 
     console.log(sql + ';');
 
-    const [result, fields]: [OkPacket, FieldPacket[]] = await mysqlConfig.db.promise().query(sql);
+    const [result, fields]: [OkPacket, FieldPacket[]] = await mysqlConfig.db.connection.promise().query(sql);
 
     await this.afterDelete();
 

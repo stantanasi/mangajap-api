@@ -254,7 +254,7 @@ export default class Anime extends MySqlModel {
   }
 
   async afterFind() {
-    db.promise().query(`
+    db.connection.promise().query(`
         UPDATE
             anime
         SET

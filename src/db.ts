@@ -17,4 +17,8 @@ db.connect(error => {
   console.log("Successfully connected to the database.");
 });
 
-export default db
+setInterval(() => {
+  db.query('SELECT 1');
+}, 5000);
+
+export default db;

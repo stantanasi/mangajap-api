@@ -1,6 +1,7 @@
 import console from 'console';
 import express from 'express';
 import cors from 'cors';
+import JsonApi from './utils/json-api/json-api';
 import animeEntryRoutes from './routes/anime-entry.routes';
 import animeRoutes from './routes/anime.routes';
 import episodeRoutes from './routes/episode.routes';
@@ -12,12 +13,11 @@ import mangaRoutes from './routes/manga.routes';
 import peopleRoutes from './routes/people.routes';
 import requestRoutes from './routes/request.routes';
 import reviewRoutes from './routes/review.routes';
+import seasonRoutes from './routes/season.routes';
 import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
-import JsonApi from './utils/json-api/json-api';
-import seasonRoutes from './routes/season.routes';
 
 const app = express();
 

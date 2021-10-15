@@ -175,7 +175,7 @@ export default class JsonApi {
 
       switch (mysqlConfig.schema.properties[property]?.type) {
         case MySqlColumn.Date:
-          value = (value as Date)?.toISOString().slice(0, 10)
+          value = (value as Date)?.toISOString().slice(0, 10);
           break;
       }
 

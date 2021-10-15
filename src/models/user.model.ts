@@ -212,9 +212,22 @@ export default class User extends MySqlModel {
 
   @JsonApiAttribute()
   get avatar(): any | null | Promise<string | null> {
-    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`users/${this.id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`
+    const downloadURL = `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`users/${this.id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`;
+    return {
+      tiny: downloadURL,
+      small: downloadURL,
+      medium: downloadURL,
+      large: downloadURL,
+      original: downloadURL,
+    }
     return (async () => getDownloadURL(ref(storage, `users/${this.id}/images/profile.jpg`))
-      .then(downloadURL => downloadURL)
+      .then(downloadURL => ({
+        tiny: downloadURL,
+        small: downloadURL,
+        medium: downloadURL,
+        large: downloadURL,
+        original: downloadURL,
+      }))
       .catch(error => null)
     )();
   }

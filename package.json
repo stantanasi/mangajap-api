@@ -8,7 +8,7 @@
     "start": "node dist/app.js",
     "start:dev": "npm run build && npm start"
   },
-  "author": "",
+  "author": "Lory-Stan TANASI",
   "license": "ISC",
   "dependencies": {
     "@types/cors": "^2.8.12",

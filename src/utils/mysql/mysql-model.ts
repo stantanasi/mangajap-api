@@ -1,5 +1,4 @@
 import console from "console";
-import { response } from 'express';
 import { FieldPacket, OkPacket, RowDataPacket } from "mysql2";
 import { MySqlColumn } from "./mysql-column";
 import MySqlConfig from "./mysql-config";
@@ -47,7 +46,7 @@ export default abstract class MySqlModel {
       .query(MySqlModel.getPreparedQuery(this, options));
 
     options = options || {};
-    options.fields = "COUNT(*)";
+    options.fields = 'COUNT(*)';
     delete options.limit;
     delete options.offset;
     const [rowsCount, fieldsCount]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.connection.promise()
@@ -92,6 +91,7 @@ export default abstract class MySqlModel {
     options = options || {};
     options.where = options.where || {};
     options.where[mysqlConfig.schema.primaryKey.property] = id;
+    options.limit = 1;
 
     const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await mysqlConfig.db.connection.promise().query(MySqlModel.getPreparedQuery(this, options))
 
@@ -114,7 +114,7 @@ export default abstract class MySqlModel {
     const mysqlConfig: MySqlConfig = this.constructor.prototype.mysql;
     const relation = mysqlConfig.schema.relations[name];
 
-    if (relation.type === "OneToOne") {
+    if (relation.type === 'OneToOne') {
       options = options || {};
       options = Object.assign({}, relation.options, options);
       options.where = options.where || {};
@@ -122,7 +122,7 @@ export default abstract class MySqlModel {
 
       return (MySqlModel.models[relation.referenceModel] as any).findOne(Object.assign({}, relation.options, options))
 
-    } else if (relation.type === "OneToMany") {
+    } else if (relation.type === 'OneToMany') {
       options = options || {};
       options = Object.assign({}, relation.options, options);
       options.where = options.where || {};
@@ -130,7 +130,7 @@ export default abstract class MySqlModel {
 
       return (MySqlModel.models[relation.referenceModel] as any).findAll(Object.assign({}, relation.options, options))
 
-    } else if (relation.type === "ManyToMany") {
+    } else if (relation.type === 'ManyToMany') {
       const intermediateOptions: QueryOptions = {};
       intermediateOptions.where = intermediateOptions.where || {};
       intermediateOptions.where[relation.intermediateFields!!] = (this as any)?.[relation.field]
@@ -149,7 +149,7 @@ export default abstract class MySqlModel {
         count
       ]
 
-    } else if (relation.type === "BelongsTo") {
+    } else if (relation.type === 'BelongsTo') {
       options = options || {};
       options = Object.assign({}, relation.options, options);
       options.where = options.where || {};
@@ -176,11 +176,11 @@ export default abstract class MySqlModel {
       const properties = schema.properties;
 
       if (Array.isArray(options.fields)) {
-        sql += " " + options.fields.map(field => properties[field]?.name || field).join(', ')
+        sql += ` ${options.fields.map(field => properties[field]?.name || field).join(', ')}`
       } else if (options.fields) {
-        sql += " " + (properties[options.fields]?.name || options.fields);
+        sql += ` ${properties[options.fields]?.name || options.fields}`;
       } else {
-        sql += " * "
+        sql += ` * `;
       }
 
       sql += ` FROM ${schema.table} `;
@@ -549,9 +549,9 @@ export default abstract class MySqlModel {
     }
 
     if (Object.keys(data).length) {
-      sql += " SET " + Object.entries(data)
+      sql += ` SET ${Object.entries(data)
         .map(([field, value]) => `${field} = ${value}`)
-        .join(', ');
+        .join(', ')}`;
 
       sql += ` WHERE ${mysqlConfig.schema.primaryKey.name} = ${(this as any)[mysqlConfig.schema.primaryKey.property]}`
 

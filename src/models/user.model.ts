@@ -65,13 +65,17 @@ export default class User extends MySqlModel {
   pseudo?: string;
 
   @Column("user_isadmin", {
-    type: MySqlColumn.Boolean
+    type: MySqlColumn.Boolean,
+    skipOnCreate: true,
+    skipOnUpdate: true,
   })
   @JsonApiAttribute()
   isAdmin?: boolean;
 
   @Column("user_ispremium", {
-    type: MySqlColumn.Boolean
+    type: MySqlColumn.Boolean,
+    skipOnCreate: true,
+    skipOnUpdate: true,
   })
   @JsonApiAttribute()
   isPremium?: boolean;

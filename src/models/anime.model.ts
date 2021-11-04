@@ -236,6 +236,7 @@ export default class Anime extends MySqlModel {
 
 
   async initialize() {
+    // TODO: 
     const selfUser = await User.fromAccessToken();
     if (selfUser) {
       OneToOne("id", AnimeEntry, "AnimeEntry", "animeId", {

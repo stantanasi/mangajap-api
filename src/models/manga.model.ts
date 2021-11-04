@@ -250,6 +250,7 @@ export default class Manga extends MySqlModel {
 
 
   async initialize() {
+    // TODO:
     const selfUser = await User.fromAccessToken();
     if (selfUser) {
       OneToOne("id", MangaEntry, "MangaEntry", "mangaId", {

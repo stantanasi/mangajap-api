@@ -588,6 +588,8 @@ export default abstract class MySqlModel {
 
     const [result, fields]: [OkPacket, FieldPacket[]] = await mysqlConfig.db.connection.promise().query(sql);
 
+    // TODO: delete relations
+
     await this.afterDelete();
 
     return result.affectedRows;

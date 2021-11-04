@@ -56,17 +56,13 @@ export default class User extends MySqlModel {
   id?: number;
 
 
-  @Column("user_accesstoken")
+  @Column("user_uid")
   @JsonApiAttribute()
   uid?: string;
 
   @Column("user_pseudo")
   @JsonApiAttribute()
   pseudo?: string;
-
-  @Column("user_slug")
-  @JsonApiAttribute()
-  slug?: string;
 
   @Column("user_isadmin", {
     type: MySqlColumn.Boolean
@@ -351,7 +347,7 @@ export default class User extends MySqlModel {
 
   private static selfUser: User | null;
 
-  // TODO:
+  // TODO: (req: Request)
   public static async fromAccessToken(req?: Request): Promise<User | null> {
     let bearerToken = req ? req.headers.authorization : JsonApi.req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {

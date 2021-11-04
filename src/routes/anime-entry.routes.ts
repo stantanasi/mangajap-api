@@ -31,7 +31,7 @@ animeEntryRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 animeEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const oldAnimeEntry = await AnimeEntry.findById((req.params as any).id)
   if (user === null || oldAnimeEntry === null || user.id !== oldAnimeEntry.userId) {
     throw new PermissionDenied();
@@ -43,7 +43,7 @@ animeEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 animeEntryRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const animeEntry = await AnimeEntry.findById((req.params as any).id);
   if (user === null || animeEntry === null || user.id !== animeEntry.userId) {
     throw new PermissionDenied();

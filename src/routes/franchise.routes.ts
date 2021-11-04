@@ -14,7 +14,7 @@ franchiseRoutes.get('/', async (req, res) => {
 });
 
 franchiseRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -31,7 +31,7 @@ franchiseRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 franchiseRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -42,7 +42,7 @@ franchiseRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 franchiseRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

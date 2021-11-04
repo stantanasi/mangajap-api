@@ -30,7 +30,7 @@ followRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 followRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const oldFollow = await Follow.findById((req.params as any).id)
   if (user === null || oldFollow === null || (user.id !== oldFollow.followerId && user.id !== oldFollow.followedId)) {
     throw new PermissionDenied();
@@ -42,7 +42,7 @@ followRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 followRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const follow = await Follow.findById((req.params as any).id);
   if (user === null || follow === null || (user.id !== follow.followerId && user.id !== follow.followedId)) {
     throw new PermissionDenied();

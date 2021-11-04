@@ -14,7 +14,7 @@ seasonRoutes.get('/', async (req, res) => {
 });
 
 seasonRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -31,7 +31,7 @@ seasonRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 seasonRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -42,7 +42,7 @@ seasonRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 seasonRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

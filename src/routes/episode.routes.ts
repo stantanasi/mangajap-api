@@ -14,7 +14,7 @@ episodeRoutes.get('/', async (req, res) => {
 });
 
 episodeRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -31,7 +31,7 @@ episodeRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 episodeRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -42,7 +42,7 @@ episodeRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 episodeRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

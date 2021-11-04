@@ -20,7 +20,7 @@ animeRoutes.get('/', async (req, res) => {
 });
 
 animeRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -37,7 +37,7 @@ animeRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 animeRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -48,7 +48,7 @@ animeRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 animeRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

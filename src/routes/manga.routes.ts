@@ -19,7 +19,7 @@ mangaRoutes.get('/', async (req, res) => {
 });
 
 mangaRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -36,7 +36,7 @@ mangaRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 mangaRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -47,7 +47,7 @@ mangaRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 mangaRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

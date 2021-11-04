@@ -14,7 +14,7 @@ themeRoutes.get('/', async (req, res) => {
 });
 
 themeRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -31,7 +31,7 @@ themeRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 themeRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -42,7 +42,7 @@ themeRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 themeRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

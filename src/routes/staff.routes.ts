@@ -15,7 +15,7 @@ staffRoutes.get('/', async (req, res) => {
 });
 
 staffRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -32,7 +32,7 @@ staffRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 staffRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -43,7 +43,7 @@ staffRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 staffRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

@@ -13,7 +13,7 @@ volumeRoutes.get('/', async (req, res) => {
 });
 
 volumeRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -30,7 +30,7 @@ volumeRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 volumeRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -41,7 +41,7 @@ volumeRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 volumeRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

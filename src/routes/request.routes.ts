@@ -30,7 +30,7 @@ requestRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 requestRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const oldRequest = await Request.findById((req.params as any).id);
   if (user === null || oldRequest === null || user.id !== oldRequest.userId) {
     throw new PermissionDenied();
@@ -42,7 +42,7 @@ requestRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 requestRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const request = await Request.findById((req.params as any).id);
   if (user === null || request === null || user.id !== request.userId) {
     throw new PermissionDenied();

@@ -32,7 +32,7 @@ reviewRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 reviewRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const oldReview = await Review.findById((req.params as any).id)
   if (user === null || oldReview === null || user.id !== oldReview.userId) {
     throw new PermissionDenied();
@@ -44,7 +44,7 @@ reviewRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 reviewRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const review = await Review.findById((req.params as any).id);
   if (user === null || review === null || user.id !== review.userId) {
     throw new PermissionDenied();

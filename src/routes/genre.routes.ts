@@ -14,7 +14,7 @@ genreRoutes.get('/', async (req, res) => {
 });
 
 genreRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -31,7 +31,7 @@ genreRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 genreRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }
@@ -42,7 +42,7 @@ genreRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 genreRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || !user?.isAdmin) {
     throw new PermissionDenied();
   }

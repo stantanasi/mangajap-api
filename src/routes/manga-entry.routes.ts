@@ -32,7 +32,7 @@ mangaEntryRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 mangaEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const oldMangaEntry = await MangaEntry.findById((req.params as any).id);
   if (user === null || oldMangaEntry === null || user.id !== oldMangaEntry.userId) {
     throw new PermissionDenied();
@@ -79,7 +79,7 @@ mangaEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 mangaEntryRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const mangaEntry = await MangaEntry.findById((req.params as any).id);
   if (user === null || mangaEntry === null || user.id !== mangaEntry.userId) {
     throw new PermissionDenied();

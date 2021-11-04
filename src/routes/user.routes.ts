@@ -27,7 +27,7 @@ userRoutes.get('/:id(\\d+)', async (req, res) => {
 });
 
 userRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null || user.id !== (req.body as User).id) {
     throw new PermissionDenied();
   }
@@ -37,7 +37,7 @@ userRoutes.patch('/:id(\\d+)', async (req, res) => {
 });
 
 userRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   const userToDelete = await User.findById((req.params as any).id);
   if (user === null || userToDelete === null || user.id !== userToDelete.id) {
     throw new PermissionDenied();

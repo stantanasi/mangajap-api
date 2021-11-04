@@ -36,13 +36,11 @@ import { storage } from '../firebase-app';
       where: {
         or: {
           pseudo: `%${query.replace("'", "''")}%`,
-          slug: `%${query.replace("'", "''")}%`,
         },
       },
       order: [
         `CASE
           WHEN user_pseudo LIKE '${query.replace("'", "''")}%' THEN 0
-          WHEN user_slug LIKE '${query.replace("'", "''")}%' THEN 1
           ELSE 2
         END`
       ],

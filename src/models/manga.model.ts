@@ -104,11 +104,11 @@ export default class Manga extends MySqlModel {
 
   @Column("manga_volumecount")
   @JsonApiAttribute()
-  volumeCount?: string;
+  volumeCount?: number;
 
   @Column("manga_chaptercount")
   @JsonApiAttribute()
-  chapterCount?: string;
+  chapterCount?: number;
 
   @Column("manga_type")
   @JsonApiAttribute()

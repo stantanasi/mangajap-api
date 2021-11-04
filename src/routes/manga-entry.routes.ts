@@ -2,6 +2,7 @@ import express from "express";
 import MangaEntry from "../models/manga-entry.model";
 import Manga from "../models/manga.model";
 import User from "../models/user.model";
+import Volume from '../models/volume.model';
 import JsonApi from "../utils/json-api/json-api";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 
@@ -39,6 +40,41 @@ mangaEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
   const mangaEntry: MangaEntry = req.body;
   const newMangaEntry = await mangaEntry.update();
   res.json(await JsonApi.encode(req, newMangaEntry));
+
+  if (user.isAdmin) {
+    newMangaEntry.getRelated('manga')
+      .then(response => {
+        if (response && !Array.isArray(response)) {
+          const manga = response as Manga;
+
+          if (
+            (newMangaEntry.volumesRead || 0) > (manga.volumeCount || 0) ||
+            (newMangaEntry.chaptersRead || 0) > (manga.chapterCount || 0)
+          ) {
+            if ((newMangaEntry.volumesRead || 0) > (manga.volumeCount || 0)) {
+              for (let number = (manga.volumeCount || 0) + 1; number <= (newMangaEntry.volumesRead || 0); number++) {
+                const volume = new Volume();
+                volume.mangaId = manga.id;
+                volume.number = number;
+                volume.create()
+                  .then(() => { })
+                  .catch(() => { });
+              }
+              manga.volumeCount = newMangaEntry.volumesRead;
+            }
+
+            if ((newMangaEntry.chaptersRead || 0) > (manga.chapterCount || 0)) {
+              manga.chapterCount = newMangaEntry.chaptersRead;
+            }
+
+            manga.update()
+              .then(() => { })
+              .catch(() => { });
+          }
+        }
+      })
+      .catch(err => console.log(err));
+  }
 });
 
 mangaEntryRoutes.delete('/:id(\\d+)', async (req, res) => {

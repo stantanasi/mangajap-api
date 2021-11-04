@@ -12,12 +12,13 @@ requestRoutes.get('/', async (req, res) => {
 });
 
 requestRoutes.post('/', async (req, res) => {
-  const user = User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null) {
     throw new PermissionDenied();
   }
 
   const request: Request = req.body;
+  request.user = user;
   const newRequest = await request.create();
   res.json(await JsonApi.encode(req, newRequest));
 });

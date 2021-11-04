@@ -12,12 +12,13 @@ followRoutes.get('/', async (req, res) => {
 });
 
 followRoutes.post('/', async (req, res) => {
-  const user = User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null) {
     throw new PermissionDenied();
   }
 
   const follow: Follow = req.body;
+  follow.follower = user;
   const newFollow = await follow.create();
   res.json(await JsonApi.encode(req, newFollow));
 });

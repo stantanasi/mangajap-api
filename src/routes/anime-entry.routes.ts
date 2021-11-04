@@ -13,12 +13,13 @@ animeEntryRoutes.get('/', async (req, res) => {
 });
 
 animeEntryRoutes.post('/', async (req, res) => {
-  const user = User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null) {
     throw new PermissionDenied();
   }
 
   const animeEntry: AnimeEntry = req.body;
+  animeEntry.user = user;
   const newAnimeEntry = await animeEntry.create();
   res.json(await JsonApi.encode(req, newAnimeEntry));
 });

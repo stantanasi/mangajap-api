@@ -14,12 +14,13 @@ mangaEntryRoutes.get('/', async (req, res) => {
 });
 
 mangaEntryRoutes.post('/', async (req, res) => {
-  const user = User.fromAccessToken();
+  const user = await User.fromAccessToken(req);
   if (user === null) {
     throw new PermissionDenied();
   }
 
   const mangaEntry: MangaEntry = req.body;
+  mangaEntry.user = user;
   const newMangaEntry = await mangaEntry.create();
   res.json(await JsonApi.encode(req, newMangaEntry));
 });

@@ -40,10 +40,6 @@ export default class Episode extends MySqlModel {
   @JsonApiAttribute("titles.ja_jp")
   title_ja_jp?: string;
 
-  @Column("episode_seasonnumber")
-  @JsonApiAttribute()
-  seasonNumber?: number;
-
   @Column("episode_relativenumber")
   @JsonApiAttribute()
   relativeNumber?: number;

@@ -517,7 +517,7 @@ export default abstract class MySqlModel {
 
     await this.preSaveRelated();
 
-    let sql: string = `UPDATE ${mysqlConfig.schema.table} `
+    let sql: string = `UPDATE ${mysqlConfig.schema.table}`
 
     const data: { [field: string]: string } = {}
     for (const [property, config] of Object.entries(mysqlConfig.schema.properties || {})) {

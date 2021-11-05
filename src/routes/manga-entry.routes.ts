@@ -47,6 +47,8 @@ mangaEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
       .then(response => {
         if (response && !Array.isArray(response)) {
           const manga = response as Manga;
+          const newManga = new Manga();
+          newManga.id = manga.id;
 
           if (
             (newMangaEntry.volumesRead || 0) > (manga.volumeCount || 0) ||
@@ -61,14 +63,14 @@ mangaEntryRoutes.patch('/:id(\\d+)', async (req, res) => {
                   .then(() => { })
                   .catch(() => { });
               }
-              manga.volumeCount = newMangaEntry.volumesRead;
+              newManga.volumeCount = newMangaEntry.volumesRead;
             }
 
             if ((newMangaEntry.chaptersRead || 0) > (manga.chapterCount || 0)) {
-              manga.chapterCount = newMangaEntry.chaptersRead;
+              newManga.chapterCount = newMangaEntry.chaptersRead;
             }
 
-            manga.update()
+            newManga.update()
               .then(() => { })
               .catch(() => { });
           }

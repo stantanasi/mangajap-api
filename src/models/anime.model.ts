@@ -221,7 +221,8 @@ export default class Anime extends MySqlModel {
       deleteObject(storageRef)
         .then()
         .catch();
-    } else if (!(value instanceof Promise)) {
+    } else if (typeof value === 'string') {
+      value = value.replace(/(\r\n|\n|\r)/gm, '')
       if (value.startsWith('data')) {
         uploadString(storageRef, value, 'data_url')
           .then();

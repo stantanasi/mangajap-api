@@ -210,7 +210,8 @@ export default class Manga extends MySqlModel {
       deleteObject(storageRef)
         .then()
         .catch();
-    } else if (!(value instanceof Promise)) {
+    } else if (typeof value === 'string') {
+      value = value.replace(/(\r\n|\n|\r)/gm, '')
       if (value.startsWith('data')) {
         uploadString(storageRef, value, 'data_url')
           .then();
@@ -236,7 +237,8 @@ export default class Manga extends MySqlModel {
       deleteObject(storageRef)
         .then()
         .catch();
-    } else if (!(value instanceof Promise)) {
+    } else if (typeof value === 'string') {
+      value = value.replace(/(\r\n|\n|\r)/gm, '')
       if (value.startsWith('data')) {
         uploadString(storageRef, value, 'data_url')
           .then();

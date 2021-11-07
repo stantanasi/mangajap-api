@@ -11,6 +11,7 @@ import MangaEntry from "./manga-entry.model";
 import Review from "./review.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
+import { StorageReference } from 'firebase/storage';
 
 @Entity({
   database: db,
@@ -208,6 +209,7 @@ export default class User extends MySqlModel {
   reviews?: Review[];
 
 
+  private _avatar?: string | null;
   @JsonApiAttribute()
   get avatar(): any | null | Promise<string | null> {
     const downloadURL = `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`users/${this.id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`;
@@ -218,7 +220,7 @@ export default class User extends MySqlModel {
       large: downloadURL,
       original: downloadURL,
     }
-    return (async () => getDownloadURL(ref(storage, `users/${this.id}/images/profile.jpg`))
+    return getDownloadURL(ref(storage, `users/${this.id}/images/profile.jpg`))
       .then(downloadURL => ({
         tiny: downloadURL,
         small: downloadURL,
@@ -226,25 +228,11 @@ export default class User extends MySqlModel {
         large: downloadURL,
         original: downloadURL,
       }))
-      .catch(error => null)
-    )();
+      .catch(() => null);
   }
   set avatar(value: string | null | Promise<string | null>) {
-    const storageRef = ref(storage, `users/${this.id}/images/profile.jpg`);
-
-    if (value === null) {
-      deleteObject(storageRef)
-        .then()
-        .catch();
-    } else if (typeof value === 'string') {
-      value = value.replace(/(\r\n|\n|\r)/gm, '')
-      if (value.startsWith('data')) {
-        uploadString(storageRef, value, 'data_url')
-          .then();
-      } else {
-        uploadString(storageRef, value, 'base64')
-          .then();
-      }
+    if (!(value instanceof Promise)) {
+      this._avatar = value;
     }
   }
 
@@ -344,6 +332,33 @@ export default class User extends MySqlModel {
             user_id = ${this.id}`)
       .then()
       .catch();
+  }
+
+  async afterSave(old: User) {
+    const uploadFile = (storageRef: StorageReference, file: string | null) => {
+      if (file === null) {
+        return deleteObject(storageRef)
+          .then()
+          .catch();
+      } else {
+        file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+        if (file.startsWith('data')) {
+          return uploadString(storageRef, file, 'data_url')
+            .then();
+        } else {
+          return uploadString(storageRef, file, 'base64')
+            .then();
+        }
+      }
+    }
+
+    if (old._avatar !== undefined) {
+      await uploadFile(
+        ref(storage, `users/${this.id}/images/profile.jpg`),
+        old._avatar,
+      );
+    }
   }
 
 

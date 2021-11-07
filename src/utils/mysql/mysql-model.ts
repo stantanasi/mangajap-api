@@ -170,7 +170,7 @@ export default abstract class MySqlModel {
     const mysqlConfig: MySqlConfig = modelType.prototype.mysql;
     const schema = mysqlConfig.schema;
 
-    let sql = 'SELECT ';
+    let sql = 'SELECT';
 
     if (options) {
       const properties = schema.properties;
@@ -180,7 +180,7 @@ export default abstract class MySqlModel {
       } else if (options.fields) {
         sql += ` ${properties[options.fields]?.name || options.fields}`;
       } else {
-        sql += ` * `;
+        sql += ` *`;
       }
 
       sql += ` FROM ${schema.table} `;
@@ -400,10 +400,7 @@ export default abstract class MySqlModel {
     for (const [property, relation] of Object.entries(mysqlConfig.schema.relations || {})) {
       if (typeof (this as any)[property] === 'undefined') continue;
 
-      if (relation.type === 'BelongsTo') {
-        continue;
-
-      } else if (relation.type === 'OneToOne') {
+      if (relation.type === 'OneToOne') {
         if (!(this as any)[property]) continue;
 
         (this as any)[property][relation.referenceField] = (this as any)[relation.field];
@@ -435,7 +432,7 @@ export default abstract class MySqlModel {
     }
   }
 
-  public async afterSave() { }
+  public async afterSave(old: this) { }
 
 
   /** CREATE */
@@ -451,7 +448,7 @@ export default abstract class MySqlModel {
 
     await this.preSaveRelated();
 
-    let sql: string = `INSERT INTO ${mysqlConfig.schema.table} `
+    let sql: string = `INSERT INTO ${mysqlConfig.schema.table}`
 
     const data: { [field: string]: string } = {};
     for (const [property, config] of Object.entries(mysqlConfig.schema.properties || {})) {
@@ -492,15 +489,17 @@ export default abstract class MySqlModel {
 
     await this.postSaveRelated();
 
-    await this.afterCreate();
-    await this.afterSave();
-
-    return (modelType as any).findById(
+    const model: this = await (modelType as any).findById(
       result.insertId
     );
+
+    await model.afterCreate(this);
+    await model.afterSave(this);
+
+    return model;
   }
 
-  public async afterCreate() { }
+  public async afterCreate(old: this) { }
 
 
 
@@ -562,15 +561,17 @@ export default abstract class MySqlModel {
 
     await this.postSaveRelated();
 
-    await this.afterUpdate();
-    await this.afterSave();
-
-    return await (modelType as any).findById(
+    const model: this = await (modelType as any).findById(
       (this as any)[mysqlConfig.schema.primaryKey.property]
     );
+
+    await model.afterUpdate(this);
+    await model.afterSave(this);
+
+    return model;
   }
 
-  public async afterUpdate() { }
+  public async afterUpdate(old: this) { }
 
 
   /** DELETE */

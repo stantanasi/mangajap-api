@@ -17,6 +17,7 @@ import User from "./user.model";
 import Season from "./season.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
+import { StorageReference } from 'firebase/storage';
 
 @Entity({
   database: db,
@@ -206,30 +207,31 @@ export default class Anime extends MySqlModel {
   animeEntry?: AnimeEntry;
 
 
+  private _coverImage?: string | null;
   @JsonApiAttribute()
   get coverImage(): string | null | Promise<string | null> {
     return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`anime/${this.id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return (async () => getDownloadURL(ref(storage, `anime/${this.id}/images/cover.jpg`))
+    return getDownloadURL(ref(storage, `anime/${this.id}/images/cover.jpg`))
       .then(downloadURL => downloadURL)
-      .catch(error => null)
-    )();
+      .catch(() => null);
   }
   set coverImage(value: string | null | Promise<string | null>) {
-    const storageRef = ref(storage, `anime/${this.id}/images/cover.jpg`);
+    if (!(value instanceof Promise)) {
+      this._coverImage = value;
+    }
+  }
 
-    if (value === null) {
-      deleteObject(storageRef)
-        .then()
-        .catch();
-    } else if (typeof value === 'string') {
-      value = value.replace(/(\r\n|\n|\r)/gm, '')
-      if (value.startsWith('data')) {
-        uploadString(storageRef, value, 'data_url')
-          .then();
-      } else {
-        uploadString(storageRef, value, 'base64')
-          .then();
-      }
+  private _bannerImage?: string | null;
+  @JsonApiAttribute()
+  get bannerImage(): string | null | Promise<string | null> {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`anime/${this.id}/images/banner.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return getDownloadURL(ref(storage, `anime/${this.id}/images/banner.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(() => null);
+  }
+  set banner(value: string | null | Promise<string | null>) {
+    if (!(value instanceof Promise)) {
+      this._bannerImage = value;
     }
   }
 
@@ -320,34 +322,68 @@ export default class Anime extends MySqlModel {
       .then()
       .catch();
 
-      // TODO: cronjobs
-      // $animes = Anime::getInstance()->getWriteConnection()->query("
-      //     SELECT
-      //         *
-      //     FROM
-      //         anime;");
-      // foreach ($animes as &$anime) {
-      //     $rating = $anime['anime_rating'];
-      //     $userCount = $anime['anime_usercount'];
-      //     $favoritesCount = $anime['anime_favoritescount'];
-      //     $anime['anime_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
-      // }
-      // array_multisort(array_column($animes, 'anime_weightedrank'), SORT_DESC, $animes);
-      // for($i=0; $i<count($animes); $i++) {
-      //     $animeId = $animes[$i]["anime_id"];
-      //     $animeRank = $i + 1;
+    // TODO: cronjobs
+    // $animes = Anime::getInstance()->getWriteConnection()->query("
+    //     SELECT
+    //         *
+    //     FROM
+    //         anime;");
+    // foreach ($animes as &$anime) {
+    //     $rating = $anime['anime_rating'];
+    //     $userCount = $anime['anime_usercount'];
+    //     $favoritesCount = $anime['anime_favoritescount'];
+    //     $anime['anime_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
+    // }
+    // array_multisort(array_column($animes, 'anime_weightedrank'), SORT_DESC, $animes);
+    // for($i=0; $i<count($animes); $i++) {
+    //     $animeId = $animes[$i]["anime_id"];
+    //     $animeRank = $i + 1;
 
-      //     Anime::getInstance()->getWriteConnection()->execute("
-      //         UPDATE
-      //             anime
-      //         SET
-      //             anime_ratingrank = :animeRank
-      //         WHERE
-      //           anime_id = :animeId;",
-      //         [
-      //             'animeId' => $animeId,
-      //             'animeRank' => $animeRank
-      //         ]);
-      // }
+    //     Anime::getInstance()->getWriteConnection()->execute("
+    //         UPDATE
+    //             anime
+    //         SET
+    //             anime_ratingrank = :animeRank
+    //         WHERE
+    //           anime_id = :animeId;",
+    //         [
+    //             'animeId' => $animeId,
+    //             'animeRank' => $animeRank
+    //         ]);
+    // }
+  }
+
+  async afterSave(old: Anime) {
+    const uploadFile = (storageRef: StorageReference, file: string | null) => {
+      if (file === null) {
+        return deleteObject(storageRef)
+          .then()
+          .catch();
+      } else {
+        file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+        if (file.startsWith('data')) {
+          return uploadString(storageRef, file, 'data_url')
+            .then();
+        } else {
+          return uploadString(storageRef, file, 'base64')
+            .then();
+        }
+      }
+    }
+
+    if (old._coverImage !== undefined) {
+      await uploadFile(
+        ref(storage, `anime/${this.id}/images/cover.jpg`),
+        old._coverImage,
+      );
+    }
+
+    if (old._bannerImage !== undefined) {
+      await uploadFile(
+        ref(storage, `anime/${this.id}/images/banner.jpg`),
+        old._bannerImage,
+      );
+    }
   }
 }

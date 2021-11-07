@@ -14,7 +14,7 @@ import Review from "./review.model";
 import ThemeRelationships from "./theme-relationships.model";
 import MangaEntry from "./manga-entry.model";
 import User from "./user.model";
-import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
+import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
 import { storage } from '../firebase-app';
 
 @Entity({
@@ -195,57 +195,31 @@ export default class Manga extends MySqlModel {
   mangaEntry?: MangaEntry;
 
 
+  private _coverImage?: string | null;
   @JsonApiAttribute()
   get coverImage(): string | null | Promise<string | null> {
     return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return (async () => getDownloadURL(ref(storage, `manga/${this.id}/images/cover.jpg`))
+    return getDownloadURL(ref(storage, `manga/${this.id}/images/cover.jpg`))
       .then(downloadURL => downloadURL)
-      .catch(error => null)
-    )();
+      .catch(() => null);
   }
   set coverImage(value: string | null | Promise<string | null>) {
-    const storageRef = ref(storage, `manga/${this.id}/images/cover.jpg`);
-
-    if (value === null) {
-      deleteObject(storageRef)
-        .then()
-        .catch();
-    } else if (typeof value === 'string') {
-      value = value.replace(/(\r\n|\n|\r)/gm, '')
-      if (value.startsWith('data')) {
-        uploadString(storageRef, value, 'data_url')
-          .then();
-      } else {
-        uploadString(storageRef, value, 'base64')
-          .then();
-      }
+    if (!(value instanceof Promise)) {
+      this._coverImage = value;
     }
   }
 
+  private _bannerImage?: string | null;
   @JsonApiAttribute()
-  get bannerImage(): string | Promise<string | null> {
+  get bannerImage(): string | null | Promise<string | null> {
     return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.id}/images/banner.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return (async () => getDownloadURL(ref(storage, `manga/${this.id}/images/banner.jpg`))
+    return getDownloadURL(ref(storage, `manga/${this.id}/images/banner.jpg`))
       .then(downloadURL => downloadURL)
-      .catch(error => null)
-    )();
+      .catch(() => null);
   }
   set bannerImage(value: string | null | Promise<string | null>) {
-    const storageRef = ref(storage, `manga/${this.id}/images/banner.jpg`);
-
-    if (value === null) {
-      deleteObject(storageRef)
-        .then()
-        .catch();
-    } else if (typeof value === 'string') {
-      value = value.replace(/(\r\n|\n|\r)/gm, '')
-      if (value.startsWith('data')) {
-        uploadString(storageRef, value, 'data_url')
-          .then();
-      } else {
-        uploadString(storageRef, value, 'base64')
-          .then();
-      }
+    if (!(value instanceof Promise)) {
+      this._bannerImage = value;
     }
   }
 
@@ -326,34 +300,68 @@ export default class Manga extends MySqlModel {
       .then()
       .catch();
 
-      // TODO: cronjobs
-      // $mangas = Manga::getInstance()->getWriteConnection()->query("
-      //     SELECT
-      //         *
-      //     FROM
-      //         manga;");
-      // foreach ($mangas as &$manga) {
-      //     $rating = $manga['manga_rating'];
-      //     $userCount = $manga['manga_usercount'];
-      //     $favoritesCount = $manga['manga_favoritescount'];
-      //     $manga['manga_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
-      // }
-      // array_multisort(array_column($mangas, 'manga_weightedrank'), SORT_DESC, $mangas);
-      // for($i=0; $i<count($mangas); $i++) {
-      //     $mangaId = $mangas[$i]["manga_id"];
-      //     $mangaRank = $i + 1;
+    // TODO: cronjobs
+    // $mangas = Manga::getInstance()->getWriteConnection()->query("
+    //     SELECT
+    //         *
+    //     FROM
+    //         manga;");
+    // foreach ($mangas as &$manga) {
+    //     $rating = $manga['manga_rating'];
+    //     $userCount = $manga['manga_usercount'];
+    //     $favoritesCount = $manga['manga_favoritescount'];
+    //     $manga['manga_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
+    // }
+    // array_multisort(array_column($mangas, 'manga_weightedrank'), SORT_DESC, $mangas);
+    // for($i=0; $i<count($mangas); $i++) {
+    //     $mangaId = $mangas[$i]["manga_id"];
+    //     $mangaRank = $i + 1;
 
-      //     Manga::getInstance()->getWriteConnection()->execute("
-      //         UPDATE
-      //             manga
-      //         SET
-      //             manga_ratingrank = :mangaRank
-      //         WHERE
-      //           manga_id = :mangaId;",
-      //         [
-      //             'mangaId' => $mangaId,
-      //             'mangaRank' => $mangaRank
-      //         ]);
-      // }
+    //     Manga::getInstance()->getWriteConnection()->execute("
+    //         UPDATE
+    //             manga
+    //         SET
+    //             manga_ratingrank = :mangaRank
+    //         WHERE
+    //           manga_id = :mangaId;",
+    //         [
+    //             'mangaId' => $mangaId,
+    //             'mangaRank' => $mangaRank
+    //         ]);
+    // }
+  }
+
+  async afterSave(old: Manga) {
+    const uploadFile = (storageRef: StorageReference, file: string | null) => {
+      if (file === null) {
+        return deleteObject(storageRef)
+          .then()
+          .catch();
+      } else {
+        file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+        if (file.startsWith('data')) {
+          return uploadString(storageRef, file, 'data_url')
+            .then();
+        } else {
+          return uploadString(storageRef, file, 'base64')
+            .then();
+        }
+      }
+    }
+
+    if (old._coverImage !== undefined) {
+      await uploadFile(
+        ref(storage, `manga/${this.id}/images/cover.jpg`),
+        old._coverImage,
+      );
+    }
+
+    if (old._bannerImage !== undefined) {
+      await uploadFile(
+        ref(storage, `manga/${this.id}/images/banner.jpg`),
+        old._bannerImage,
+      );
+    }
   }
 }

@@ -6,6 +6,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Manga from "./manga.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
+import { StorageReference } from 'firebase/storage';
 
 @Entity({
   database: db,
@@ -79,40 +80,46 @@ export default class Volume extends MySqlModel {
   manga?: Manga;
 
 
+  private _coverImage?: string | null;
   @JsonApiAttribute()
   get coverImage(): string | null | Promise<string | null> {
     return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return (async () => getDownloadURL(ref(storage, `manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`))
+    return getDownloadURL(ref(storage, `manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`))
       .then(downloadURL => downloadURL)
-      .catch(error => null)
-    )();
+      .catch(() => null);
   }
   set coverImage(value: string | null | Promise<string | null>) {
-    if (!this.mangaId) {
-      Volume.findById(`${this.id}`).then(volume => {
-        if (volume) {
-          this.mangaId = volume.mangaId;
-          this.coverImage = value;
-        }
-      });
+    if (!(value instanceof Promise)) {
+      this._coverImage = value;
+    }
+  }
 
-    } else {
-      const storageRef = ref(storage, `manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`);
 
-      if (value === null) {
-        deleteObject(storageRef)
+
+  async afterSave(old: Volume) {
+    const uploadFile = (storageRef: StorageReference, file: string | null) => {
+      if (file === null) {
+        return deleteObject(storageRef)
           .then()
           .catch();
-      } else if (typeof value === 'string') {
-        value = value.replace(/(\r\n|\n|\r)/gm, '')
-        if (value.startsWith('data')) {
-          uploadString(storageRef, value, 'data_url')
+      } else {
+        file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+        if (file.startsWith('data')) {
+          return uploadString(storageRef, file, 'data_url')
             .then();
         } else {
-          uploadString(storageRef, value, 'base64')
+          return uploadString(storageRef, file, 'base64')
             .then();
         }
       }
+    }
+
+    if (old._coverImage !== undefined) {
+      await uploadFile(
+        ref(storage, `manga/${this.mangaId}/volumes/${this.id}/images/cover.jpg`),
+        old._coverImage,
+      );
     }
   }
 }

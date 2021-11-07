@@ -6,6 +6,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Staff from "./staff.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
+import { StorageReference } from 'firebase/storage';
 
 @Entity({
   database: db,
@@ -90,30 +91,46 @@ export default class People extends MySqlModel {
   animeStaff?: Staff[];
 
 
+  private _image?: string | null;
   @JsonApiAttribute()
   get image(): string | null | Promise<string | null> {
     return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`peoples/${this.id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return (async () => getDownloadURL(ref(storage, `peoples/${this.id}/images/profile.jpg`))
+    return getDownloadURL(ref(storage, `peoples/${this.id}/images/profile.jpg`))
       .then(downloadURL => downloadURL)
-      .catch(error => null)
-    )();
+      .catch(() => null);
   }
   set image(value: string | null | Promise<string | null>) {
-    const storageRef = ref(storage, `peoples/${this.id}/images/profile.jpg`);
+    if (!(value instanceof Promise)) {
+      this._image = value;
+    }
+  }
 
-    if (value === null) {
-      deleteObject(storageRef)
-        .then()
-        .catch();
-    } else if (typeof value === 'string') {
-      value = value.replace(/(\r\n|\n|\r)/gm, '')
-      if (value.startsWith('data')) {
-        uploadString(storageRef, value, 'data_url')
-          .then();
+
+
+  async afterSave(old: People) {
+    const uploadFile = (storageRef: StorageReference, file: string | null) => {
+      if (file === null) {
+        return deleteObject(storageRef)
+          .then()
+          .catch();
       } else {
-        uploadString(storageRef, value, 'base64')
-          .then();
+        file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+        if (file.startsWith('data')) {
+          return uploadString(storageRef, file, 'data_url')
+            .then();
+        } else {
+          return uploadString(storageRef, file, 'base64')
+            .then();
+        }
       }
+    }
+
+    if (old._image !== undefined) {
+      await uploadFile(
+        ref(storage, `peoples/${this.id}/images/profile.jpg`),
+        old._image,
+      );
     }
   }
 }

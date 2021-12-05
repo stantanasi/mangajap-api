@@ -1,7 +1,7 @@
 <h1 align="center">MangaJap: API</h1>
 
 <p align="center">
-  <img src="./src/assets/images/logo.svg" width="120px" />
+  <img src="https://mangajap.web.app/assets/images/logo.svg" width="120px" />
 </p>
 
 <p align="center">

@@ -24,7 +24,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-app.use('/assets', express.static('src/assets'));
 
 app.use((req, res, next) => {
   if (req.method === 'POST') {
@@ -65,7 +64,7 @@ app.use('/themes', themeRoutes);
 app.use('/users', userRoutes);
 app.use('/volumes', volumeRoutes);
 
-app.get('*', (req, res) => {
+app.all('*', (req, res) => {
   throw new NotFoundError();
 });
 

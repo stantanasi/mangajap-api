@@ -151,4 +151,9 @@ const FollowSchema = new Schema<IFollow>({
   toObject: { virtuals: true }
 });
 
+FollowSchema.index({
+  follower: 1,
+  followed: 1
+}, { unique: true });
+
 export const FollowModel = model<IFollow>('Follow', FollowSchema);

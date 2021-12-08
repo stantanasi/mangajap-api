@@ -141,6 +141,12 @@ export default class AnimeEntry extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await AnimeEntryModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IAnimeEntry {
     return {
       _id: this.id!.toString(),

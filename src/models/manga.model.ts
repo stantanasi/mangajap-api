@@ -381,6 +381,12 @@ export default class Manga extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await MangaModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IManga {
     return {
       _id: this.id!.toString(),

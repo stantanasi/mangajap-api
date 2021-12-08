@@ -89,6 +89,12 @@ export default class Season extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await SeasonModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): ISeason {
     return {
       _id: this.id!.toString(),

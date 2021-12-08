@@ -96,6 +96,12 @@ export default class Request extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await RequestModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IRequest {
     return {
       _id: this.id!.toString(),

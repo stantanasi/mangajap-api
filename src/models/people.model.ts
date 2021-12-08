@@ -150,6 +150,12 @@ export default class People extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await PeopleModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IPeople {
     return {
       _id: this.id!.toString(),

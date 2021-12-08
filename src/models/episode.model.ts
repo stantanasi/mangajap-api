@@ -99,6 +99,12 @@ export default class Episode extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await EpisodeModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IEpisode {
     return {
       _id: this.id!.toString(),

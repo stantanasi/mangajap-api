@@ -107,6 +107,12 @@ export default class Franchise extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await FranchiseModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IFranchise {
     return {
       _id: this.id!.toString(),

@@ -68,6 +68,12 @@ export default class Theme extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await ThemeModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): ITheme {
     return {
       _id: this.id!.toString(),

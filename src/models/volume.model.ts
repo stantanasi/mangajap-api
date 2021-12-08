@@ -139,6 +139,12 @@ export default class Volume extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await VolumeModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IVolume {
     return {
       _id: this.id!.toString(),

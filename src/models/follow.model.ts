@@ -86,6 +86,12 @@ export default class Follow extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await FollowModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IFollow {
     return {
       _id: this.id!.toString(),

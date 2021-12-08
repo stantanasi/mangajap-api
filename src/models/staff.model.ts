@@ -84,6 +84,12 @@ export default class Staff extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await StaffModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IStaff {
     return {
       _id: this.id!.toString(),

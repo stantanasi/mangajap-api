@@ -84,6 +84,12 @@ export default class Review extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await ReviewModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IReview {
     return {
       _id: this.id!.toString(),

@@ -68,6 +68,12 @@ export default class Genre extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await GenreModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IGenre {
     return {
       _id: this.id!.toString(),

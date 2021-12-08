@@ -403,6 +403,12 @@ export default class User extends MySqlModel {
     return model;
   }
 
+  async delete(): Promise<number> {
+    const result = await super.delete();
+    await UserModel.findByIdAndDelete(this.id);
+    return result;
+  }
+
   toMongoModel(): IUser {
     return {
       _id: this.id!.toString(),

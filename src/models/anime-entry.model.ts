@@ -6,6 +6,7 @@ import { BelongsTo, Column, Entity, PrimaryKey } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime from "./anime.model";
 import User from "./user.model";
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -29,7 +30,7 @@ export default class AnimeEntry extends MySqlModel {
   @JsonApiId()
   id?: number;
 
-  
+
   @Column("animeentry_userid", {
     skipOnUpdate: true,
   })
@@ -124,4 +125,137 @@ export default class AnimeEntry extends MySqlModel {
       })
     }
   }
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await AnimeEntryModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await AnimeEntryModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IAnimeEntry {
+    return {
+      _id: this.id!.toString(),
+
+      isAdd: this.isAdd!,
+      isFavorites: this.isFavorites!,
+      status: this.status! as any,
+      episodesWatch: this.episodesWatch!,
+      rating: this.rating!,
+      startedAt: this.startedAt!,
+      finishedAt: this.finishedAt!,
+
+      user: this.userId!.toString(),
+      anime: this.animeId!.toString(),
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+export interface IAnimeEntry {
+  _id: string;
+
+  isAdd: boolean;
+  isFavorites: boolean;
+  status: 'watching' | 'completed' | 'planned' | 'on_hold' | 'dropped';
+  episodesWatch: number;
+  rating: number | null;
+  startedAt: Date | null;
+  finishedAt: Date | null;
+
+  user: string;
+  anime: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AnimeEntrySchema = new Schema<IAnimeEntry>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  isAdd: {
+    type: Boolean,
+    default: true
+  },
+
+  isFavorites: {
+    type: Boolean,
+    default: false
+  },
+
+  status: {
+    type: String,
+    default: 'watching',
+    enum: ['watching', 'completed', 'planned', 'on_hold', 'dropped']
+  },
+
+  episodesWatch: {
+    type: Number,
+    default: 0
+  },
+
+  rating: {
+    type: Number,
+    default: null
+  },
+
+  startedAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  finishedAt: {
+    type: Date,
+    default: null
+  },
+
+
+  user: {
+    type: String,
+    ref: 'User',
+    required: true
+  },
+
+  anime: {
+    type: String,
+    ref: 'Anime',
+    required: true
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+AnimeEntrySchema.index({
+  user: 1,
+  anime: 1
+}, { unique: true });
+
+export const AnimeEntryModel = model<IAnimeEntry>('AnimeEntry', AnimeEntrySchema);

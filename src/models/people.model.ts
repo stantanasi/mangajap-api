@@ -7,6 +7,7 @@ import Staff from "./staff.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -133,4 +134,109 @@ export default class People extends MySqlModel {
       );
     }
   }
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await PeopleModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await PeopleModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IPeople {
+    return {
+      _id: this.id!.toString(),
+
+      firstName: this.firstName!.toString(),
+      lastName: this.lastName!.toString(),
+      pseudo: this.pseudo!.toString(),
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+interface IPeople {
+  _id: string;
+
+  firstName: string;
+  lastName: string;
+  pseudo: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const PeopleSchema = new Schema<IPeople>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  firstName: {
+    type: String,
+    default: ''
+  },
+
+  lastName: {
+    type: String,
+    default: ''
+  },
+
+  pseudo: {
+    type: String,
+    default: ''
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+PeopleSchema.virtual('staff', {
+  ref: 'Staff',
+  localField: '_id',
+  foreignField: 'people'
+});
+
+PeopleSchema.virtual('animeStaff', {
+  ref: 'Staff',
+  localField: '_id',
+  foreignField: 'people',
+  match: {
+    anime: { $exists: true, $ne: null }
+  }
+});
+
+PeopleSchema.virtual('mangaStaff', {
+  ref: 'Staff',
+  localField: '_id',
+  foreignField: 'people',
+  match: {
+    manga: { $exists: true, $ne: null }
+  }
+});
+
+
+export const PeopleModel = model<IPeople>('People', PeopleSchema);

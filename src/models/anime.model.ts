@@ -18,6 +18,7 @@ import Season from "./season.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -201,7 +202,7 @@ export default class Anime extends MySqlModel {
     },
   })
   @JsonApiRelationship()
-  franchise?: Franchise;
+  franchise?: Franchise[];
 
   @JsonApiRelationship("anime-entry", "AnimeEntry")
   animeEntry?: AnimeEntry;
@@ -386,4 +387,266 @@ export default class Anime extends MySqlModel {
       );
     }
   }
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await AnimeModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await AnimeModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IAnime {
+    return {
+      _id: this.id!.toString(),
+
+      title: this.title!,
+      titles: {
+        fr: this.title_fr!,
+        en: this.title_en!,
+        en_jp: this.title_en_jp!,
+        ja_jp: this.title_ja_jp!,
+      },
+      slug: this.slug!,
+      synopsis: this.synopsis!,
+      startDate: this.startDate!,
+      endDate: this.endDate!,
+      origin: this.origin!,
+      animeType: this.animeType! as any,
+      status: this.status! as any,
+      youtubeVideoId: this.youtubeVideoId!,
+
+      genres: this.genres?.filter(genre => !!genre.id)?.map(genre => genre.id!)!,
+      themes: this.themes?.filter(theme => !!theme.id)?.map(theme => theme.id!)!,
+
+      seasonCount: this.seasonCount!,
+      episodeCount: this.episodeCount!,
+      episodeLength: this.episodeLength!,
+
+      averageRating: this.averageRating!,
+      ratingRank: this.ratingRank!,
+      popularity: this.popularity!,
+      userCount: this.popularity!,
+      favoritesCount: this.favoritesCount!,
+      reviewCount: this.reviewCount!,
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+interface IAnime {
+  _id: string;
+
+  title: string;
+  titles: {
+    [language: string]: string
+  };
+  slug: string;
+  synopsis: string;
+  startDate: Date;
+  endDate: Date | null;
+  origin: string;
+  animeType: 'tv' | 'ova' | 'ona' | 'movie' | 'music' | 'special';
+  status: 'airing' | 'finished' | 'unreleased' | 'upcoming';
+  youtubeVideoId: string;
+
+  seasonCount: number;
+  episodeCount: number;
+  episodeLength: number;
+
+  averageRating: number | null;
+  ratingRank: number | null;
+  popularity: number;
+  userCount: number;
+  favoritesCount: number;
+  reviewCount: number;
+
+  genres: string[];
+  themes: string[];
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AnimeSchema = new Schema<IAnime>({
+  _id: {
+    type: String,
+    required: true,
+  },
+
+
+  title: {
+    type: String,
+    required: true,
+  },
+
+  titles: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+
+  slug: {
+    type: String,
+    required: true,
+  },
+
+  synopsis: {
+    type: String,
+    default: '',
+  },
+
+  startDate: {
+    type: Date,
+    required: true,
+  },
+
+  endDate: {
+    type: Date,
+    default: null,
+  },
+
+  origin: {
+    type: String,
+    default: '',
+  },
+
+  animeType: {
+    type: String,
+    required: true,
+    enum: ['tv', 'ova', 'ona', 'movie', 'music', 'special'],
+  },
+
+  status: {
+    type: String,
+    required: true,
+    enum: ['airing', 'finished', 'unreleased', 'upcoming'],
+  },
+
+  youtubeVideoId: {
+    type: String,
+    default: '',
+  },
+
+
+  seasonCount: {
+    type: Number,
+    default: 0,
+  },
+
+  episodeCount: {
+    type: Number,
+    default: 0,
+  },
+
+  episodeLength: {
+    type: Number,
+    default: 0,
+  },
+
+
+  averageRating: {
+    type: Number,
+    default: null,
+  },
+
+  ratingRank: {
+    type: Number,
+    default: null,
+  },
+
+  popularity: {
+    type: Number,
+    default: 0,
+  },
+
+  userCount: {
+    type: Number,
+    default: 0,
+  },
+
+  favoritesCount: {
+    type: Number,
+    default: 0,
+  },
+
+  reviewCount: {
+    type: Number,
+    default: 0,
+  },
+
+
+  genres: [{
+    type: String,
+    ref: 'Genre',
+    default: [],
+  }],
+
+  themes: [{
+    type: String,
+    ref: 'Theme',
+    default: [],
+  }],
+
+
+  createdAt: {
+    type: Date,
+    default: new Date(),
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date(),
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+AnimeSchema.virtual('seasons', {
+  ref: 'Season',
+  localField: '_id',
+  foreignField: 'anime'
+});
+
+AnimeSchema.virtual('episodes', {
+  ref: 'Episode',
+  localField: '_id',
+  foreignField: 'anime'
+});
+
+AnimeSchema.virtual('staff', {
+  ref: 'Staff',
+  localField: '_id',
+  foreignField: 'anime'
+});
+
+AnimeSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'anime'
+});
+
+AnimeSchema.virtual('franchises', {
+  ref: 'Franchise',
+  localField: '_id',
+  foreignField: 'source'
+});
+
+//TODO: animeEntry
+
+//TODO: coverImage
+//TODO: bannerImage
+
+
+export const AnimeModel = model<IAnime>('Anime', AnimeSchema);

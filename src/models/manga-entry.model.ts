@@ -6,6 +6,7 @@ import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Manga from "./manga.model";
 import User from "./user.model";
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -128,4 +129,145 @@ export default class MangaEntry extends MySqlModel {
       })
     }
   }
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await MangaEntryModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await MangaEntryModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IMangaEntry {
+    return {
+      _id: this.id!.toString(),
+
+      isAdd: this.isAdd!,
+      isFavorites: this.isFavorites!,
+      status: this.status! as any,
+      volumesRead: this.volumesRead!,
+      chaptersRead: this.chaptersRead!,
+      rating: this.rating!,
+      startedAt: this.startedAt!,
+      finishedAt: this.finishedAt!,
+
+      user: this.userId!.toString(),
+      manga: this.mangaId!.toString(),
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+interface IMangaEntry {
+  _id: string;
+
+  isAdd: boolean;
+  isFavorites: boolean;
+  status: 'reading' | 'completed' | 'planned' | 'on_hold' | 'dropped';
+  volumesRead: number;
+  chaptersRead: number;
+  rating: number | null;
+  startedAt: Date | null;
+  finishedAt: Date | null;
+
+  user: string;
+  manga: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const MangaEntrySchema = new Schema<IMangaEntry>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  isAdd: {
+    type: Boolean,
+    default: false
+  },
+
+  isFavorites: {
+    type: Boolean,
+    default: false
+  },
+
+  status: {
+    type: String,
+    default: 'reading',
+    enum: ['reading', 'completed', 'planned', 'on_hold', 'dropped']
+  },
+
+  volumesRead: {
+    type: Number,
+    default: 0
+  },
+
+  chaptersRead: {
+    type: Number,
+    default: 0
+  },
+
+  rating: {
+    type: Number,
+    default: null
+  },
+
+  startedAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  finishedAt: {
+    type: Date,
+    default: null
+  },
+
+
+  user: {
+    type: String,
+    ref: 'User',
+    required: true
+  },
+
+  manga: {
+    type: String,
+    ref: 'Manga',
+    required: true
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+MangaEntrySchema.index({
+  user: 1,
+  manga: 1
+}, { unique: true });
+
+
+export const MangaEntryModel = model<IMangaEntry>('MangaEntry', MangaEntrySchema);

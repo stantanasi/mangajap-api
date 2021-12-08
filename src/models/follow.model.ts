@@ -4,6 +4,7 @@ import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import User from "./user.model";
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -31,7 +32,7 @@ export default class Follow extends MySqlModel {
   @PrimaryKey("follow_id")
   @JsonApiId()
   id?: number;
-  
+
 
   @Column("follow_followerid", {
     skipOnUpdate: true,
@@ -42,7 +43,7 @@ export default class Follow extends MySqlModel {
     skipOnUpdate: true,
   })
   followedId?: number;
-  
+
 
   @Column("follow_createdat", {
     type: MySqlColumn.DateTime,
@@ -69,4 +70,79 @@ export default class Follow extends MySqlModel {
   @BelongsTo("followedId", User, "User", "id")
   @JsonApiRelationship()
   followed?: User;
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await FollowModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await FollowModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IFollow {
+    return {
+      _id: this.id!.toString(),
+
+      follower: this.followerId!.toString(),
+      followed: this.followedId!.toString(),
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+interface IFollow {
+  _id: string;
+
+  follower: string;
+  followed: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const FollowSchema = new Schema<IFollow>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  follower: {
+    type: String,
+    ref: 'User',
+    required: true
+  },
+
+  followed: {
+    type: String,
+    ref: 'User',
+    required: true
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+export const FollowModel = model<IFollow>('Follow', FollowSchema);

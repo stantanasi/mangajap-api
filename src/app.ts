@@ -19,6 +19,7 @@ import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
+import { connect } from 'mongoose';
 
 const app = express();
 
@@ -44,6 +45,11 @@ app.use((req, res, next) => {
   if (req.body && Object.keys(req.body).length) {
     req.body = JsonApi.decode(req.body.data);
   }
+  next();
+});
+
+app.use(async (req, res, next) => {
+  await connect(process.env.MONGO_DB_URI!)
   next();
 });
 

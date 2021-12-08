@@ -16,6 +16,7 @@ import MangaEntry from "./manga-entry.model";
 import User from "./user.model";
 import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
 import { storage } from '../firebase-app';
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -364,4 +365,249 @@ export default class Manga extends MySqlModel {
       );
     }
   }
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await MangaModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await MangaModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IManga {
+    return {
+      _id: this.id!.toString(),
+
+      title: this.title!,
+      titles: {
+        fr: this.title_fr!,
+        en: this.title_en!,
+        en_jp: this.title_en_jp!,
+        ja_jp: this.title_ja_jp!,
+        kr: this.title_kr!,
+      },
+      slug: this.slug!,
+      synopsis: this.slug!,
+      startDate: this.startDate!,
+      endDate: this.endDate!,
+      origin: this.origin!,
+      mangaType: this.mangaType! as any,
+      status: this.status! as any,
+
+      genres: this.genres?.filter(genre => !!genre.id)?.map(genre => genre.id!)!,
+      themes: this.themes?.filter(theme => !!theme.id)?.map(theme => theme.id!)!,
+
+      volumeCount: this.volumeCount!,
+      chapterCount: this.chapterCount!,
+
+      averageRating: this.averageRating!,
+      ratingRank: this.ratingRank!,
+      popularity: this.popularity!,
+      userCount: this.popularity!,
+      favoritesCount: this.favoritesCount!,
+      reviewCount: this.reviewCount!,
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+export interface IManga {
+  _id: string;
+
+  title: string;
+  titles: {
+    [language: string]: string
+  };
+  slug: string;
+  synopsis: string;
+  startDate: Date;
+  endDate: Date | null;
+  origin: string;
+  mangaType: 'bd' | 'comics' | 'josei' | 'kodomo' | 'seijin' | 'seinen' | 'shojo' | 'shonen' | 'doujin' | 'novel' | 'oneshot' | 'webtoon';
+  status: 'publishing' | 'finished' | 'unreleased' | 'upcoming';
+
+  genres: string[];
+  themes: string[];
+
+  volumeCount: number;
+  chapterCount: number;
+
+  averageRating: number | null;
+  ratingRank: number | null;
+  popularity: number;
+  userCount: number;
+  favoritesCount: number;
+  reviewCount: number;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const MangaSchema = new Schema<IManga>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  title: {
+    type: String,
+    required: true,
+  },
+
+  titles: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+
+  slug: {
+    type: String,
+    required: true,
+    lowercase: true,
+    // TODO: setter on title
+  },
+
+  synopsis: {
+    type: String,
+    default: '',
+  },
+
+  startDate: {
+    type: Date,
+    required: true
+  },
+
+  endDate: {
+    type: Date,
+    default: null
+  },
+
+  origin: {
+    type: String,
+    default: '',
+  },
+
+  mangaType: {
+    type: String,
+    required: true,
+    enum: ['bd', 'comics', 'josei', 'kodomo', 'seijin', 'seinen', 'shojo', 'shonen', 'doujin', 'novel', 'oneshot', 'webtoon'],
+  },
+
+  status: {
+    type: String,
+    required: true,
+    enum: ['publishing', 'finished', 'unreleased', 'upcoming'],
+  },
+
+
+  genres: [{
+    type: String,
+    ref: 'Genre',
+    default: [],
+  }],
+
+  themes: [{
+    type: String,
+    ref: 'Theme',
+    default: [],
+  }],
+
+
+  volumeCount: {
+    type: Number,
+    default: 0
+  },
+
+  chapterCount: {
+    type: Number,
+    default: 0
+  },
+
+
+  averageRating: {
+    type: Number,
+    default: null
+  },
+
+  ratingRank: {
+    type: Number,
+    default: null
+  },
+
+  popularity: {
+    type: Number,
+    default: 0
+  },
+
+  userCount: {
+    type: Number,
+    default: 0
+  },
+
+  favoritesCount: {
+    type: Number,
+    default: 0
+  },
+
+  reviewCount: {
+    type: Number,
+    default: 0
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+MangaSchema.virtual('volumes', {
+  ref: 'Volume',
+  localField: '_id',
+  foreignField: 'manga'
+});
+
+MangaSchema.virtual('staff', {
+  ref: 'Staff',
+  localField: '_id',
+  foreignField: 'manga'
+});
+
+MangaSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'manga'
+});
+
+MangaSchema.virtual('franchises', {
+  ref: 'Franchise',
+  localField: '_id',
+  foreignField: 'source'
+});
+
+//TODO: mangaEntry
+
+//TODO: coverImage
+//TODO: bannerImage
+
+
+export const MangaModel = model<IManga>('Manga', MangaSchema);

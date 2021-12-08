@@ -7,6 +7,7 @@ import Manga from "./manga.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -122,4 +123,116 @@ export default class Volume extends MySqlModel {
       );
     }
   }
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await VolumeModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await VolumeModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IVolume {
+    return {
+      _id: this.id!.toString(),
+
+      titles: {
+        fr: this.title_fr!,
+        en: this.title_en!,
+        en_jp: this.title_en_jp!,
+        ja_jp: this.title_ja_jp!,
+      },
+      number: this.number!,
+      startChapter: this.startChapter!,
+      endChapter: this.endChapter!,
+      published: this.published!,
+
+      manga: this.mangaId!.toString(),
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+interface IVolume {
+  _id: string;
+
+  titles: {
+    [language: string]: string;
+  };
+  number: number;
+  startChapter: number | null;
+  endChapter: number | null;
+  published: Date | null;
+
+  manga: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const VolumeSchema = new Schema<IVolume>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  titles: {
+    type: Schema.Types.Mixed,
+    default: {}
+  },
+
+  number: {
+    type: Number,
+    required: true
+  },
+
+  startChapter: {
+    type: Number,
+    default: null
+  },
+
+  endChapter: {
+    type: Number,
+    default: null
+  },
+
+  published: {
+    type: Date,
+    default: null
+  },
+
+
+  manga: {
+    type: String,
+    ref: 'Manga',
+    required: true
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+export const VolumeModel = model<IVolume>('Volume', VolumeSchema);

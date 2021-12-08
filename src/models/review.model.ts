@@ -6,6 +6,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime from "./anime.model";
 import Manga from "./manga.model";
 import User from "./user.model";
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -67,4 +68,97 @@ export default class Review extends MySqlModel {
   @BelongsTo("animeId", Anime, "anime", "id")
   @JsonApiRelationship()
   anime?: Anime;
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await ReviewModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await ReviewModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IReview {
+    return {
+      _id: this.id!.toString(),
+
+      content: this.content!,
+
+      user: this.userId!.toString(),
+      manga: this.mangaId?.toString() ?? undefined,
+      anime: this.animeId?.toString() ?? undefined,
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+interface IReview {
+  _id: string;
+
+  content: string;
+
+  user: string;
+  manga?: string;
+  anime?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ReviewSchema = new Schema<IReview>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  content: {
+    type: String,
+    required: true
+  },
+
+
+  user: {
+    type: String,
+    ref: 'User',
+    required: true
+  },
+
+  manga: {
+    type: String,
+    ref: 'Manga',
+    default: undefined
+  },
+
+  anime: {
+    type: String,
+    ref: 'Anime',
+    default: undefined
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+export const ReviewModel = model<IReview>('Review', ReviewSchema);

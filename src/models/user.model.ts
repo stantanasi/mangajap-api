@@ -12,6 +12,7 @@ import Review from "./review.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
+import { Schema, model } from 'mongoose';
 
 @Entity({
   database: db,
@@ -386,4 +387,253 @@ export default class User extends MySqlModel {
 
     return User.selfUser;
   }
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await UserModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await UserModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IUser {
+    return {
+      _id: this.id!.toString(),
+
+      uid: this.uid!,
+      isAdmin: this.isAdmin!,
+      isPremium: this.isPremium!,
+
+      pseudo: this.pseudo!,
+      firstName: this.firstName!,
+      lastName: this.lastName!,
+      about: this.about!,
+      gender: this.gender! as any,
+      birthday: this.birthday!,
+      country: this.country!,
+
+      followersCount: this.followersCount!,
+      followingCount: this.followingCount!,
+      followedMangaCount: this.followedMangaCount!,
+      volumesRead: this.volumesRead!,
+      chaptersRead: this.chaptersRead!,
+      followedAnimeCount: this.followedAnimeCount!,
+      episodesWatch: this.episodesWatch!,
+      timeSpentOnAnime: this.timeSpentOnAnime!,
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+export interface IUser {
+  _id: string;
+
+  uid: string;
+  isAdmin: boolean;
+  isPremium: boolean;
+
+  pseudo: string;
+  firstName: string;
+  lastName: string;
+  about: string;
+  gender: 'men' | 'women' | 'other' | null;
+  birthday: Date | null;
+  country: string;
+
+  followersCount: number;
+  followingCount: number;
+  followedMangaCount: number;
+  volumesRead: number;
+  chaptersRead: number;
+  followedAnimeCount: number;
+  episodesWatch: number;
+  timeSpentOnAnime: number;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const UserSchema = new Schema<IUser>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+
+  uid: {
+    type: String,
+    required: true
+  },
+
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+
+  isPremium: {
+    type: Boolean,
+    default: false
+  },
+
+
+  pseudo: {
+    type: String,
+    required: true
+  },
+
+  firstName: {
+    type: String,
+    default: ''
+  },
+
+  lastName: {
+    type: String,
+    default: ''
+  },
+
+  about: {
+    type: String,
+    default: ''
+  },
+
+  gender: {
+    type: String,
+    default: null,
+    enum: ['men', 'women', 'other', null]
+  },
+
+  birthday: {
+    type: Date,
+    default: null
+  },
+
+  country: {
+    type: String,
+    default: ''
+  },
+
+
+  followersCount: {
+    type: Number,
+    default: 0
+  },
+
+  followingCount: {
+    type: Number,
+    default: 0
+  },
+
+  followedMangaCount: {
+    type: Number,
+    default: 0
+  },
+
+  volumesRead: {
+    type: Number,
+    default: 0
+  },
+
+  chaptersRead: {
+    type: Number,
+    default: 0
+  },
+
+  followedAnimeCount: {
+    type: Number,
+    default: 0
+  },
+
+  episodesWatch: {
+    type: Number,
+    default: 0
+  },
+
+  timeSpentOnAnime: {
+    type: Number,
+    default: 0
+  },
+
+
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+UserSchema.virtual('followers', {
+  ref: 'Follow',
+  localField: '_id',
+  foreignField: 'followed'
+});
+
+UserSchema.virtual('following', {
+  ref: 'Follow',
+  localField: '_id',
+  foreignField: 'follower'
+});
+
+UserSchema.virtual('animeLibrary', {
+  ref: 'AnimeEntry',
+  localField: '_id',
+  foreignField: 'user',
+  match: {
+    isAdd: true,
+  }
+});
+
+UserSchema.virtual('mangaLibrary', {
+  ref: 'MangaEntry',
+  localField: '_id',
+  foreignField: 'user',
+  match: {
+    isAdd: true,
+  }
+});
+
+UserSchema.virtual('animeFavorites', {
+  ref: 'AnimeEntry',
+  localField: '_id',
+  foreignField: 'user',
+  match: {
+    isAdd: true,
+    isFavorites: true,
+  }
+});
+
+UserSchema.virtual('mangaFavorites', {
+  ref: 'MangaEntry',
+  localField: '_id',
+  foreignField: 'user',
+  match: {
+    isAdd: true,
+    isFavorites: true,
+  }
+});
+
+UserSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'user'
+});
+
+
+export const UserModel = model<IUser>('User', UserSchema);

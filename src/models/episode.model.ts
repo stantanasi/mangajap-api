@@ -5,6 +5,7 @@ import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime from "./anime.model";
 import Season from "./season.model";
+import { model, Schema } from 'mongoose';
 
 @Entity({
   database: db,
@@ -82,4 +83,125 @@ export default class Episode extends MySqlModel {
   @BelongsTo("seasonId", Season, "Season", "id")
   @JsonApiRelationship()
   season?: Season;
+
+
+  async create(): Promise<this> {
+    const model = await super.create()
+    await EpisodeModel.create(model.toMongoModel());
+    return model;
+  }
+
+  async update(): Promise<this> {
+    const model = await super.update()
+    await EpisodeModel.findByIdAndUpdate(model.id, {
+      $set: model.toMongoModel(),
+    });
+    return model;
+  }
+
+  toMongoModel(): IEpisode {
+    return {
+      _id: this.id!.toString(),
+
+      titles: {
+        fr: this.title_fr!,
+        en: this.title_en!,
+        en_jp: this.title_en_jp!,
+        ja_jp: this.title_ja_jp!,
+      },
+      relativeNumber: this.relativeNumber!,
+      number: this.number!,
+      airDate: this.airDate!,
+      episodeType: this.episodeType! as any,
+
+      anime: this.animeId!.toString(),
+      season: this.seasonId!.toString(),
+
+      createdAt: this.createdAt!,
+      updatedAt: this.updatedAt!,
+    }
+  }
 }
+
+
+export interface IEpisode {
+  _id: string;
+
+  titles: {
+    [language: string]: string;
+  };
+  relativeNumber: number;
+  number: number;
+  airDate: Date | null;
+  episodeType: '' | 'oav';
+
+  anime: string;
+  season: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const EpisodeSchema = new Schema<IEpisode>({
+  _id: {
+    type: String,
+    required: true
+  },
+
+  
+  titles: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+  
+  relativeNumber: {
+    type: Number,
+    required: true
+  },
+  
+  number: {
+    type: Number,
+    required: true
+  },
+  
+  airDate: {
+    type: Date,
+    default: null
+  },
+  
+  episodeType: {
+    type: String,
+    default: '',
+    enum: ['', 'oav']
+  },
+
+  
+  anime: {
+    type: String,
+    ref: 'Anime',
+    required: true
+  },
+  
+  season: {
+    type: String,
+    ref: 'Season',
+    required: true
+  },
+
+  
+  createdAt: {
+    type: Date,
+    default: new Date()
+  },
+  
+  updatedAt: {
+    type: Date,
+    default: new Date()
+  },
+}, {
+  id: false,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+export const EpisodeModel = model<IEpisode>('Episode', EpisodeSchema);

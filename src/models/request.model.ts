@@ -80,47 +80,10 @@ export default class Request extends MySqlModel {
   @BelongsTo("userId", User, "User", "id")
   @JsonApiRelationship()
   user?: User;
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await RequestModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await RequestModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await RequestModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IRequest {
-    return {
-      _id: this.id!.toString(),
-
-      requestType: this.requestType!,
-      data: this.data!,
-      isDone: this.isDone!,
-      userHasRead: this.userHasRead!,
-
-      user: this.userId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IRequest {
+export interface IRequest {
   _id: string;
 
   requestType: string;
@@ -134,7 +97,7 @@ interface IRequest {
   updatedAt: Date;
 }
 
-const RequestSchema = new Schema<IRequest>({
+export const RequestSchema = new Schema<IRequest>({
   _id: {
     type: String,
     required: true
@@ -167,21 +130,13 @@ const RequestSchema = new Schema<IRequest>({
     ref: 'User',
     required: true
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
 
 export const RequestModel = model<IRequest>('Request', RequestSchema);

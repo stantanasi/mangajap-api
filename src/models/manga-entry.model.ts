@@ -129,52 +129,10 @@ export default class MangaEntry extends MySqlModel {
       })
     }
   }
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await MangaEntryModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await MangaEntryModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await MangaEntryModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IMangaEntry {
-    return {
-      _id: this.id!.toString(),
-
-      isAdd: this.isAdd!,
-      isFavorites: this.isFavorites!,
-      status: this.status! as any,
-      volumesRead: this.volumesRead!,
-      chaptersRead: this.chaptersRead!,
-      rating: this.rating!,
-      startedAt: this.startedAt!,
-      finishedAt: this.finishedAt!,
-
-      user: this.userId!.toString(),
-      manga: this.mangaId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IMangaEntry {
+export interface IMangaEntry {
   _id: string;
 
   isAdd: boolean;
@@ -193,7 +151,7 @@ interface IMangaEntry {
   updatedAt: Date;
 }
 
-const MangaEntrySchema = new Schema<IMangaEntry>({
+export const MangaEntrySchema = new Schema<IMangaEntry>({
   _id: {
     type: String,
     required: true
@@ -253,21 +211,12 @@ const MangaEntrySchema = new Schema<IMangaEntry>({
     ref: 'Manga',
     required: true
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 MangaEntrySchema.index({

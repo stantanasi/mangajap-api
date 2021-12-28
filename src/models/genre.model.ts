@@ -52,43 +52,10 @@ export default class Genre extends MySqlModel {
   @ManyToMany("id", GenreRelationships, "GenreRelationships", "genreId", "animeId", Anime, "Anime", "id")
   @JsonApiRelationship()
   anime?: Anime[];
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await GenreModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await GenreModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await GenreModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IGenre {
-    return {
-      _id: this.id!.toString(),
-
-      title: this.title!,
-      description: this.description!,
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IGenre {
+export interface IGenre {
   _id: string;
 
   title: string;
@@ -98,7 +65,7 @@ interface IGenre {
   updatedAt: Date;
 }
 
-const GenreSchema = new Schema<IGenre>({
+export const GenreSchema = new Schema<IGenre>({
   _id: {
     type: String,
     required: true
@@ -114,21 +81,12 @@ const GenreSchema = new Schema<IGenre>({
     type: String,
     default: '',
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 GenreSchema.virtual('animes', {

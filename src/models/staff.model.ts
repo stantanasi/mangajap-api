@@ -68,46 +68,10 @@ export default class Staff extends MySqlModel {
   @BelongsTo("animeId", Anime, "Anime", "id")
   @JsonApiRelationship()
   anime?: Anime;
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await StaffModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await StaffModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await StaffModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IStaff {
-    return {
-      _id: this.id!.toString(),
-
-      role: this.role! as any,
-
-      people: this.peopleId!.toString(),
-      manga: this.mangaId?.toString() ?? undefined,
-      anime: this.animeId?.toString() ?? undefined,
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IStaff {
+export interface IStaff {
   _id: string;
 
   role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
@@ -120,7 +84,7 @@ interface IStaff {
   updatedAt: Date;
 }
 
-const StaffSchema = new Schema<IStaff>({
+export const StaffSchema = new Schema<IStaff>({
   _id: {
     type: String,
     required: true
@@ -151,21 +115,13 @@ const StaffSchema = new Schema<IStaff>({
     ref: 'Anime',
     default: undefined
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
 
 export const StaffModel = model<IStaff>('Staff', StaffSchema);

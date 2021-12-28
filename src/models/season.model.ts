@@ -73,47 +73,6 @@ export default class Season extends MySqlModel {
   })
   @JsonApiRelationship()
   episodes?: Episode[];
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await SeasonModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await SeasonModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await SeasonModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): ISeason {
-    return {
-      _id: this.id!.toString(),
-
-      titles: {
-        fr: this.title_fr!,
-        en: this.title_en!,
-        en_jp: this.title_en_jp!,
-        ja_jp: this.title_ja_jp!,
-      },
-      number: this.number!,
-      episodeCount: this.episodeCount!,
-
-      anime: this.animeId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
@@ -132,7 +91,7 @@ export interface ISeason {
   updatedAt: Date;
 }
 
-const SeasonSchema = new Schema<ISeason>({
+export const SeasonSchema = new Schema<ISeason>({
   _id: {
     type: String,
     required: true
@@ -160,27 +119,22 @@ const SeasonSchema = new Schema<ISeason>({
     ref: 'Anime',
     required: true
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 SeasonSchema.virtual('episodes', {
   ref: 'Episode',
   localField: '_id',
-  foreignField: 'season'
+  foreignField: 'season',
+  options: {
+    sort: { number: 1 },
+  },
 });
+
 
 export const SeasonModel = model<ISeason>('Season', SeasonSchema);

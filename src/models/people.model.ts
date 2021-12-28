@@ -134,44 +134,10 @@ export default class People extends MySqlModel {
       );
     }
   }
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await PeopleModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await PeopleModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await PeopleModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IPeople {
-    return {
-      _id: this.id!.toString(),
-
-      firstName: this.firstName!.toString(),
-      lastName: this.lastName!.toString(),
-      pseudo: this.pseudo!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IPeople {
+export interface IPeople {
   _id: string;
 
   firstName: string;
@@ -182,7 +148,7 @@ interface IPeople {
   updatedAt: Date;
 }
 
-const PeopleSchema = new Schema<IPeople>({
+export const PeopleSchema = new Schema<IPeople>({
   _id: {
     type: String,
     required: true
@@ -203,22 +169,45 @@ const PeopleSchema = new Schema<IPeople>({
     type: String,
     default: ''
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
+const uploadFile = (storageRef: StorageReference, file: string | null) => {
+  if (file === null) {
+    return deleteObject(storageRef)
+      .then()
+      .catch();
+  } else {
+    file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+    if (file.startsWith('data')) {
+      return uploadString(storageRef, file, 'data_url')
+        .then();
+    } else {
+      return uploadString(storageRef, file, 'base64')
+        .then();
+    }
+  }
+}
+
+PeopleSchema.virtual('image')
+  .get(function (this: IPeople) {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`peoples/${this._id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return getDownloadURL(ref(storage, `peoples/${this._id}/images/profile.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(() => null);
+  })
+  .set(function (this: IPeople, value: string) {
+    uploadFile(
+      ref(storage, `peoples/${this._id}/images/profile.jpg`),
+      value,
+    ).then();
+  });
 
 PeopleSchema.virtual('staff', {
   ref: 'Staff',
@@ -226,7 +215,7 @@ PeopleSchema.virtual('staff', {
   foreignField: 'people'
 });
 
-PeopleSchema.virtual('animeStaff', {
+PeopleSchema.virtual('anime-staff', {
   ref: 'Staff',
   localField: '_id',
   foreignField: 'people',
@@ -235,7 +224,7 @@ PeopleSchema.virtual('animeStaff', {
   }
 });
 
-PeopleSchema.virtual('mangaStaff', {
+PeopleSchema.virtual('manga-staff', {
   ref: 'Staff',
   localField: '_id',
   foreignField: 'people',

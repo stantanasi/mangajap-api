@@ -3,18 +3,18 @@ import { JsonApiAttribute, JsonApiFilter, JsonApiId, JsonApiRelationship, JsonAp
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Episode from "./episode.model";
+import Episode, { EpisodeModel } from "./episode.model";
 import Franchise from "./franchise.model";
 import GenreRelationships from "./genre-relationships.model";
 import Genre from "./genre.model";
-import Review from "./review.model";
+import Review, { ReviewModel } from "./review.model";
 import Staff from "./staff.model";
 import ThemeRelationships from "./theme-relationships.model";
 import Theme from "./theme.model";
 import slugify from "slugify";
-import AnimeEntry from "./anime-entry.model";
+import AnimeEntry, { AnimeEntryModel } from "./anime-entry.model";
 import User from "./user.model";
-import Season from "./season.model";
+import Season, { SeasonModel } from "./season.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
@@ -387,70 +387,10 @@ export default class Anime extends MySqlModel {
       );
     }
   }
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await AnimeModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await AnimeModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await AnimeModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IAnime {
-    return {
-      _id: this.id!.toString(),
-
-      title: this.title!,
-      titles: {
-        fr: this.title_fr!,
-        en: this.title_en!,
-        en_jp: this.title_en_jp!,
-        ja_jp: this.title_ja_jp!,
-      },
-      slug: this.slug!,
-      synopsis: this.synopsis!,
-      startDate: this.startDate!,
-      endDate: this.endDate!,
-      origin: this.origin!,
-      animeType: this.animeType! as any,
-      status: this.status! as any,
-      youtubeVideoId: this.youtubeVideoId!,
-
-      genres: this.genres?.filter(genre => !!genre.id)?.map(genre => genre.id!)!,
-      themes: this.themes?.filter(theme => !!theme.id)?.map(theme => theme.id!)!,
-
-      seasonCount: this.seasonCount!,
-      episodeCount: this.episodeCount!,
-      episodeLength: this.episodeLength!,
-
-      averageRating: this.averageRating!,
-      ratingRank: this.ratingRank!,
-      popularity: this.popularity!,
-      userCount: this.popularity!,
-      favoritesCount: this.favoritesCount!,
-      reviewCount: this.reviewCount!,
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IAnime {
+export interface IAnime {
   _id: string;
 
   title: string;
@@ -484,7 +424,7 @@ interface IAnime {
   updatedAt: Date;
 }
 
-const AnimeSchema = new Schema<IAnime>({
+export const AnimeSchema = new Schema<IAnime>({
   _id: {
     type: String,
     required: true,
@@ -504,6 +444,7 @@ const AnimeSchema = new Schema<IAnime>({
   slug: {
     type: String,
     required: true,
+    lowercase: true,
   },
 
   synopsis: {
@@ -514,11 +455,17 @@ const AnimeSchema = new Schema<IAnime>({
   startDate: {
     type: Date,
     required: true,
+    transform: function (this, val) {
+      return val.toISOString().slice(0, 10);
+    }
   },
 
   endDate: {
     type: Date,
     default: null,
+    transform: function (this, val) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
   },
 
   origin: {
@@ -602,33 +549,77 @@ const AnimeSchema = new Schema<IAnime>({
     ref: 'Theme',
     default: [],
   }],
-
-
-  createdAt: {
-    type: Date,
-    default: new Date(),
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date(),
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
+
+const uploadFile = (storageRef: StorageReference, file: string | null) => {
+  if (file === null) {
+    return deleteObject(storageRef)
+      .then()
+      .catch();
+  } else {
+    file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+    if (file.startsWith('data')) {
+      return uploadString(storageRef, file, 'data_url')
+        .then();
+    } else {
+      return uploadString(storageRef, file, 'base64')
+        .then();
+    }
+  }
+}
+
+AnimeSchema.virtual('coverImage')
+  .get(function (this: IAnime) {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`anime/${this._id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return getDownloadURL(ref(storage, `anime/${this._id}/images/cover.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(() => null);
+  })
+  .set(function (this: IAnime, value: string) {
+    uploadFile(
+      ref(storage, `anime/${this._id}/images/cover.jpg`),
+      value,
+    ).then();
+  });
+
+AnimeSchema.virtual('bannerImage')
+  .get(function (this: IAnime) {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`anime/${this._id}/images/banner.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return getDownloadURL(ref(storage, `anime/${this._id}/images/banner.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(() => null);
+  })
+  .set(function (this: IAnime, value: string) {
+    uploadFile(
+      ref(storage, `anime/${this._id}/images/banner.jpg`),
+      value,
+    ).then();
+  });
 
 AnimeSchema.virtual('seasons', {
   ref: 'Season',
   localField: '_id',
-  foreignField: 'anime'
+  foreignField: 'anime',
+  options: {
+    sort: { number: 1 },
+  },
 });
 
 AnimeSchema.virtual('episodes', {
   ref: 'Episode',
   localField: '_id',
-  foreignField: 'anime'
+  foreignField: 'anime',
+  options: {
+    sort: { number: 1 },
+  },
 });
 
 AnimeSchema.virtual('staff', {
@@ -640,7 +631,10 @@ AnimeSchema.virtual('staff', {
 AnimeSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
-  foreignField: 'anime'
+  foreignField: 'anime',
+  options: {
+    sort: { updatedAt: -1 },
+  },
 });
 
 AnimeSchema.virtual('franchises', {
@@ -649,10 +643,99 @@ AnimeSchema.virtual('franchises', {
   foreignField: 'source'
 });
 
-//TODO: animeEntry
 
-//TODO: coverImage
-//TODO: bannerImage
+// TODO: pre save
+AnimeSchema.pre('save', function () {
+  if (!this.isModified('title')) {
+    this.slug = slugify(this.title);
+  }
+});
+
+AnimeSchema.pre('findOne', async function () {
+  const _id = this.getQuery()._id;
+  if (!_id) return;
+
+  await AnimeModel.findOneAndUpdate(this.getQuery(), {
+    seasonCount: await SeasonModel.count({
+      anime: _id,
+    }),
+
+    episodeCount: await EpisodeModel.count({
+      anime: _id,
+    }),
+
+    averageRating: (await AnimeEntryModel.aggregate([
+      { $match: { anime: _id } },
+      {
+        $group: {
+          _id: null,
+          averageRating: {
+            $avg: '$rating'
+          }
+        }
+      }
+    ]))[0].averageRating,
+
+    userCount: await AnimeEntryModel.count({
+      anime: _id,
+      isAdd: true,
+    }),
+
+    favoritesCount: await AnimeEntryModel.count({
+      anime: _id,
+      isFavorites: true,
+    }),
+
+    reviewCount: await ReviewModel.count({
+      anime: _id,
+    }),
+
+    // TODO
+    // result.popularity = (
+    //         SELECT
+    //         COALESCE(
+    //             (anime_usercount + anime_favoritescount) +
+    //             anime_usercount * COALESCE(anime_rating, 0) +
+    //             2 * COUNT(animeentry_id) * COALESCE(anime_rating, 0) *(anime_usercount + anime_favoritescount),
+    //             0
+    //         )
+    //     FROM
+    //         animeentry
+    //     WHERE
+    //         animeentry_animeid = anime_id AND animeentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
+    // )
+  });
+});
 
 
 export const AnimeModel = model<IAnime>('Anime', AnimeSchema);
+
+// TODO: cronjobs
+// $animes = Anime::getInstance()->getWriteConnection()->query("
+//     SELECT
+//         *
+//     FROM
+//         anime;");
+// foreach ($animes as &$anime) {
+//     $rating = $anime['anime_rating'];
+//     $userCount = $anime['anime_usercount'];
+//     $favoritesCount = $anime['anime_favoritescount'];
+//     $anime['anime_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
+// }
+// array_multisort(array_column($animes, 'anime_weightedrank'), SORT_DESC, $animes);
+// for($i=0; $i<count($animes); $i++) {
+//     $animeId = $animes[$i]["anime_id"];
+//     $animeRank = $i + 1;
+
+//     Anime::getInstance()->getWriteConnection()->execute("
+//         UPDATE
+//             anime
+//         SET
+//             anime_ratingrank = :animeRank
+//         WHERE
+//           anime_id = :animeId;",
+//         [
+//             'animeId' => $animeId,
+//             'animeRank' => $animeRank
+//         ]);
+// }

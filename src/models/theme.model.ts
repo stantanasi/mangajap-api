@@ -52,43 +52,10 @@ export default class Theme extends MySqlModel {
   @ManyToMany("id", ThemeRelationships, "ThemeRelationships", "themeId", "animeId", Anime, "Anime", "id")
   @JsonApiRelationship()
   anime?: Anime[];
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await ThemeModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await ThemeModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await ThemeModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): ITheme {
-    return {
-      _id: this.id!.toString(),
-
-      title: this.title!,
-      description: this.description!,
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface ITheme {
+export interface ITheme {
   _id: string;
 
   title: string;
@@ -98,7 +65,7 @@ interface ITheme {
   updatedAt: Date;
 }
 
-const ThemeSchema = new Schema<ITheme>({
+export const ThemeSchema = new Schema<ITheme>({
   _id: {
     type: String,
     required: true
@@ -114,21 +81,12 @@ const ThemeSchema = new Schema<ITheme>({
     type: String,
     default: '',
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 ThemeSchema.virtual('animes', {
@@ -142,5 +100,6 @@ ThemeSchema.virtual('mangas', {
   localField: '_id',
   foreignField: 'genres'
 });
+
 
 export const ThemeModel = model<ITheme>('Theme', ThemeSchema);

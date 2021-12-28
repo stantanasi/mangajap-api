@@ -125,47 +125,6 @@ export default class AnimeEntry extends MySqlModel {
       })
     }
   }
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await AnimeEntryModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await AnimeEntryModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await AnimeEntryModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IAnimeEntry {
-    return {
-      _id: this.id!.toString(),
-
-      isAdd: this.isAdd!,
-      isFavorites: this.isFavorites!,
-      status: this.status! as any,
-      episodesWatch: this.episodesWatch!,
-      rating: this.rating!,
-      startedAt: this.startedAt!,
-      finishedAt: this.finishedAt!,
-
-      user: this.userId!.toString(),
-      anime: this.animeId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
@@ -187,7 +146,7 @@ export interface IAnimeEntry {
   updatedAt: Date;
 }
 
-const AnimeEntrySchema = new Schema<IAnimeEntry>({
+export const AnimeEntrySchema = new Schema<IAnimeEntry>({
   _id: {
     type: String,
     required: true
@@ -242,26 +201,18 @@ const AnimeEntrySchema = new Schema<IAnimeEntry>({
     ref: 'Anime',
     required: true
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 AnimeEntrySchema.index({
   user: 1,
   anime: 1
 }, { unique: true });
+
 
 export const AnimeEntryModel = model<IAnimeEntry>('AnimeEntry', AnimeEntrySchema);

@@ -83,50 +83,6 @@ export default class Episode extends MySqlModel {
   @BelongsTo("seasonId", Season, "Season", "id")
   @JsonApiRelationship()
   season?: Season;
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await EpisodeModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await EpisodeModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await EpisodeModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IEpisode {
-    return {
-      _id: this.id!.toString(),
-
-      titles: {
-        fr: this.title_fr!,
-        en: this.title_en!,
-        en_jp: this.title_en_jp!,
-        ja_jp: this.title_ja_jp!,
-      },
-      relativeNumber: this.relativeNumber!,
-      number: this.number!,
-      airDate: this.airDate!,
-      episodeType: this.episodeType! as any,
-
-      anime: this.animeId!.toString(),
-      season: this.seasonId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
@@ -148,7 +104,7 @@ export interface IEpisode {
   updatedAt: Date;
 }
 
-const EpisodeSchema = new Schema<IEpisode>({
+export const EpisodeSchema = new Schema<IEpisode>({
   _id: {
     type: String,
     required: true
@@ -193,21 +149,13 @@ const EpisodeSchema = new Schema<IEpisode>({
     ref: 'Season',
     required: true
   },
-
-  
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-  
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
 
 export const EpisodeModel = model<IEpisode>('Episode', EpisodeSchema);

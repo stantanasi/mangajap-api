@@ -6,13 +6,13 @@ import { Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryKey } from "../
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import GenreRelationships from "./genre-relationships.model";
 import Genre from "./genre.model";
-import Volume from "./volume.model";
+import Volume, { VolumeModel } from "./volume.model";
 import Theme from "./theme.model";
 import Staff from "./staff.model";
 import Franchise from "./franchise.model";
-import Review from "./review.model";
+import Review, { ReviewModel } from "./review.model";
 import ThemeRelationships from "./theme-relationships.model";
-import MangaEntry from "./manga-entry.model";
+import MangaEntry, { MangaEntryModel } from "./manga-entry.model";
 import User from "./user.model";
 import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
 import { storage } from '../firebase-app';
@@ -365,65 +365,6 @@ export default class Manga extends MySqlModel {
       );
     }
   }
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await MangaModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await MangaModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await MangaModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IManga {
-    return {
-      _id: this.id!.toString(),
-
-      title: this.title!,
-      titles: {
-        fr: this.title_fr!,
-        en: this.title_en!,
-        en_jp: this.title_en_jp!,
-        ja_jp: this.title_ja_jp!,
-        kr: this.title_kr!,
-      },
-      slug: this.slug!,
-      synopsis: this.slug!,
-      startDate: this.startDate!,
-      endDate: this.endDate!,
-      origin: this.origin!,
-      mangaType: this.mangaType! as any,
-      status: this.status! as any,
-
-      genres: this.genres?.filter(genre => !!genre.id)?.map(genre => genre.id!)!,
-      themes: this.themes?.filter(theme => !!theme.id)?.map(theme => theme.id!)!,
-
-      volumeCount: this.volumeCount!,
-      chapterCount: this.chapterCount!,
-
-      averageRating: this.averageRating!,
-      ratingRank: this.ratingRank!,
-      popularity: this.popularity!,
-      userCount: this.popularity!,
-      favoritesCount: this.favoritesCount!,
-      reviewCount: this.reviewCount!,
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
@@ -459,7 +400,7 @@ export interface IManga {
   updatedAt: Date;
 }
 
-const MangaSchema = new Schema<IManga>({
+export const MangaSchema = new Schema<IManga>({
   _id: {
     type: String,
     required: true
@@ -480,7 +421,6 @@ const MangaSchema = new Schema<IManga>({
     type: String,
     required: true,
     lowercase: true,
-    // TODO: setter on title
   },
 
   synopsis: {
@@ -490,12 +430,18 @@ const MangaSchema = new Schema<IManga>({
 
   startDate: {
     type: Date,
-    required: true
+    required: true,
+    transform: function (this, val) {
+      return val.toISOString().slice(0, 10);
+    }
   },
 
   endDate: {
     type: Date,
-    default: null
+    default: null,
+    transform: function (this, val) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
   },
 
   origin: {
@@ -569,27 +515,68 @@ const MangaSchema = new Schema<IManga>({
     type: Number,
     default: 0
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
+
+const uploadFile = (storageRef: StorageReference, file: string | null) => {
+  if (file === null) {
+    return deleteObject(storageRef)
+      .then()
+      .catch();
+  } else {
+    file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+    if (file.startsWith('data')) {
+      return uploadString(storageRef, file, 'data_url')
+        .then();
+    } else {
+      return uploadString(storageRef, file, 'base64')
+        .then();
+    }
+  }
+}
+
+MangaSchema.virtual('coverImage')
+  .get(function (this: IManga) {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this._id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return getDownloadURL(ref(storage, `manga/${this._id}/images/cover.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(() => null);
+  })
+  .set(function (this: IManga, value: string) {
+    uploadFile(
+      ref(storage, `manga/${this._id}/images/cover.jpg`),
+      value,
+    ).then();
+  });
+
+MangaSchema.virtual('bannerImage')
+  .get(function (this: IManga) {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this._id}/images/banner.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return getDownloadURL(ref(storage, `manga/${this._id}/images/banner.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(() => null);
+  })
+  .set(function (this: IManga, value: string) {
+    uploadFile(
+      ref(storage, `manga/${this._id}/images/banner.jpg`),
+      value,
+    ).then();
+  });
 
 MangaSchema.virtual('volumes', {
   ref: 'Volume',
   localField: '_id',
-  foreignField: 'manga'
+  foreignField: 'manga',
+  options: {
+    sort: { number: 1 },
+  },
 });
 
 MangaSchema.virtual('staff', {
@@ -601,7 +588,10 @@ MangaSchema.virtual('staff', {
 MangaSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
-  foreignField: 'manga'
+  foreignField: 'manga',
+  options: {
+    sort: { updatedAt: -1 },
+  },
 });
 
 MangaSchema.virtual('franchises', {
@@ -610,10 +600,96 @@ MangaSchema.virtual('franchises', {
   foreignField: 'source'
 });
 
-//TODO: mangaEntry
 
-//TODO: coverImage
-//TODO: bannerImage
+// TODO: pre save
+MangaSchema.pre('save', function () {
+  if (!this.isModified('title')) {
+    this.slug = slugify(this.title);
+  }
+});
+
+MangaSchema.pre('findOne', async function () {
+  const _id = this.getQuery()._id;
+  if (!_id) return;
+
+  await MangaModel.findOneAndUpdate(this.getQuery(), {
+    volumeCount: await VolumeModel.count({
+      manga: _id,
+    }),
+
+    averageRating: (await MangaEntryModel.aggregate([
+      { $match: { manga: _id } },
+      {
+        $group: {
+          _id: null,
+          averageRating: {
+            $avg: '$rating'
+          }
+        }
+      }
+    ]))[0].averageRating,
+
+    userCount: await MangaEntryModel.count({
+      manga: _id,
+      isAdd: true,
+    }),
+
+    favoritesCount: await MangaEntryModel.count({
+      manga: _id,
+      isFavorites: true,
+    }),
+
+    reviewCount: await ReviewModel.count({
+      manga: _id,
+    }),
+
+    // TODO
+    // manga_popularity = (
+    //   SELECT
+    //       COALESCE(
+    //           (manga_usercount + manga_favoritescount) +
+    //           manga_usercount * COALESCE(manga_rating, 0) +
+    //           2 * COUNT(mangaentry_id) * COALESCE(manga_rating, 0) *(manga_usercount + manga_favoritescount),
+    //           0
+    //       )
+    //   FROM
+    //       mangaentry
+    //   WHERE
+    //       mangaentry_mangaid = manga_id AND mangaentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
+    // )
+  });
+});
 
 
 export const MangaModel = model<IManga>('Manga', MangaSchema);
+
+
+// TODO: cronjobs
+// $mangas = Manga::getInstance()->getWriteConnection()->query("
+//     SELECT
+//         *
+//     FROM
+//         manga;");
+// foreach ($mangas as &$manga) {
+//     $rating = $manga['manga_rating'];
+//     $userCount = $manga['manga_usercount'];
+//     $favoritesCount = $manga['manga_favoritescount'];
+//     $manga['manga_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
+// }
+// array_multisort(array_column($mangas, 'manga_weightedrank'), SORT_DESC, $mangas);
+// for($i=0; $i<count($mangas); $i++) {
+//     $mangaId = $mangas[$i]["manga_id"];
+//     $mangaRank = $i + 1;
+
+//     Manga::getInstance()->getWriteConnection()->execute("
+//         UPDATE
+//             manga
+//         SET
+//             manga_ratingrank = :mangaRank
+//         WHERE
+//           manga_id = :mangaId;",
+//         [
+//             'mangaId' => $mangaId,
+//             'mangaRank' => $mangaRank
+//         ]);
+// }

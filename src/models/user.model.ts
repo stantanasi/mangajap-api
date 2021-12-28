@@ -5,9 +5,9 @@ import { JsonApiType, JsonApiFilter, JsonApiId, JsonApiAttribute, JsonApiRelatio
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Column, Entity, OneToMany, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import AnimeEntry from "./anime-entry.model";
-import Follow from "./follow.model";
-import MangaEntry from "./manga-entry.model";
+import AnimeEntry, { AnimeEntryModel } from "./anime-entry.model";
+import Follow, { FollowModel } from "./follow.model";
+import MangaEntry, { MangaEntryModel } from "./manga-entry.model";
 import Review from "./review.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
@@ -387,57 +387,6 @@ export default class User extends MySqlModel {
 
     return User.selfUser;
   }
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await UserModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await UserModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await UserModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IUser {
-    return {
-      _id: this.id!.toString(),
-
-      uid: this.uid!,
-      isAdmin: this.isAdmin!,
-      isPremium: this.isPremium!,
-
-      pseudo: this.pseudo!,
-      firstName: this.firstName!,
-      lastName: this.lastName!,
-      about: this.about!,
-      gender: this.gender! as any,
-      birthday: this.birthday!,
-      country: this.country!,
-
-      followersCount: this.followersCount!,
-      followingCount: this.followingCount!,
-      followedMangaCount: this.followedMangaCount!,
-      volumesRead: this.volumesRead!,
-      chaptersRead: this.chaptersRead!,
-      followedAnimeCount: this.followedAnimeCount!,
-      episodesWatch: this.episodesWatch!,
-      timeSpentOnAnime: this.timeSpentOnAnime!,
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
@@ -469,7 +418,7 @@ export interface IUser {
   updatedAt: Date;
 }
 
-const UserSchema = new Schema<IUser>({
+export const UserSchema = new Schema<IUser>({
   _id: {
     type: String,
     required: true
@@ -568,22 +517,58 @@ const UserSchema = new Schema<IUser>({
     type: Number,
     default: 0
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
+const uploadFile = (storageRef: StorageReference, file: string | null) => {
+  if (file === null) {
+    return deleteObject(storageRef)
+      .then()
+      .catch();
+  } else {
+    file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+    if (file.startsWith('data')) {
+      return uploadString(storageRef, file, 'data_url')
+        .then();
+    } else {
+      return uploadString(storageRef, file, 'base64')
+        .then();
+    }
+  }
+}
+
+UserSchema.virtual('avatar')
+  .get(function (this: IUser) {
+    const downloadURL = `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`users/${this._id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`;
+    return {
+      tiny: downloadURL,
+      small: downloadURL,
+      medium: downloadURL,
+      large: downloadURL,
+      original: downloadURL,
+    }
+    return getDownloadURL(ref(storage, `users/${this._id}/images/profile.jpg`))
+      .then(downloadURL => ({
+        tiny: downloadURL,
+        small: downloadURL,
+        medium: downloadURL,
+        large: downloadURL,
+        original: downloadURL,
+      }))
+      .catch(() => null);
+  })
+  .set(function (this: IUser, value: string) {
+    uploadFile(
+      ref(storage, `users/${this._id}/images/profile.jpg`),
+      value,
+    ).then();
+  });
 
 UserSchema.virtual('followers', {
   ref: 'Follow',
@@ -597,48 +582,130 @@ UserSchema.virtual('following', {
   foreignField: 'follower'
 });
 
-UserSchema.virtual('animeLibrary', {
+UserSchema.virtual('anime-library', {
   ref: 'AnimeEntry',
   localField: '_id',
   foreignField: 'user',
   match: {
     isAdd: true,
-  }
+  },
+  options: {
+    sort: { updatedAt: -1 },
+  },
+  limit: 20,
 });
 
-UserSchema.virtual('mangaLibrary', {
+UserSchema.virtual('manga-library', {
   ref: 'MangaEntry',
   localField: '_id',
   foreignField: 'user',
   match: {
     isAdd: true,
-  }
+  },
+  options: {
+    sort: { updatedAt: -1 },
+  },
+  limit: 20,
 });
 
-UserSchema.virtual('animeFavorites', {
+UserSchema.virtual('anime-favorites', {
   ref: 'AnimeEntry',
   localField: '_id',
   foreignField: 'user',
   match: {
     isAdd: true,
     isFavorites: true,
-  }
+  },
+  options: {
+    sort: { updatedAt: -1 },
+  },
+  limit: 20,
 });
 
-UserSchema.virtual('mangaFavorites', {
+UserSchema.virtual('manga-favorites', {
   ref: 'MangaEntry',
   localField: '_id',
   foreignField: 'user',
   match: {
     isAdd: true,
     isFavorites: true,
-  }
+  },
+  options: {
+    sort: { updatedAt: -1 },
+  },
+  limit: 20,
 });
 
 UserSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
   foreignField: 'user'
+});
+
+
+UserSchema.pre('findOne', async function () {
+  const _id = this.getQuery()._id;
+  if (!_id) return;
+
+  await UserModel.findOneAndUpdate(this.getQuery(), {
+    followersCount: await FollowModel.count({
+      followed: _id
+    }),
+
+    followingCount: await FollowModel.count({
+      follower: _id
+    }),
+
+    followedMangaCount: await MangaEntryModel.count({
+      user: _id,
+      isAdd: true,
+    }),
+
+    volumesRead: (await MangaEntryModel.aggregate([
+      { $match: { user: _id } },
+      { $group: { _id: null, total: { $sum: "$volumesRead" } } }
+    ]))[0].total,
+
+    chaptersRead: (await MangaEntryModel.aggregate([
+      { $match: { user: _id } },
+      { $group: { _id: null, total: { $sum: "$chaptersRead" } } }
+    ]))[0].total,
+
+    followedAnimeCount: await AnimeEntryModel.count({
+      user: _id,
+      isAdd: true,
+    }),
+
+    episodesWatch: (await AnimeEntryModel.aggregate([
+      { $match: { user: _id } },
+      { $group: { _id: null, total: { $sum: "$episodesWatch" } } }
+    ]))[0].total,
+
+    timeSpentOnAnime: (await AnimeEntryModel.aggregate([
+      { $match: { user: _id } },
+      {
+        $lookup: {
+          from: 'animes',
+          localField: 'anime',
+          foreignField: '_id',
+          as: 'anime'
+        }
+      },
+      { $unwind: '$anime' },
+      {
+        $group: {
+          _id: null,
+          timeSpentOnAnime: {
+            $sum: {
+              $multiply: [
+                '$episodesWatch', '$anime.episodeLength'
+              ]
+            }
+          }
+        }
+      }
+    ]))[0].timeSpentOnAnime,
+  });
 });
 
 

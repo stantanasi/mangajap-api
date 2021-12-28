@@ -68,46 +68,10 @@ export default class Review extends MySqlModel {
   @BelongsTo("animeId", Anime, "anime", "id")
   @JsonApiRelationship()
   anime?: Anime;
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await ReviewModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await ReviewModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await ReviewModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IReview {
-    return {
-      _id: this.id!.toString(),
-
-      content: this.content!,
-
-      user: this.userId!.toString(),
-      manga: this.mangaId?.toString() ?? undefined,
-      anime: this.animeId?.toString() ?? undefined,
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IReview {
+export interface IReview {
   _id: string;
 
   content: string;
@@ -120,7 +84,7 @@ interface IReview {
   updatedAt: Date;
 }
 
-const ReviewSchema = new Schema<IReview>({
+export const ReviewSchema = new Schema<IReview>({
   _id: {
     type: String,
     required: true
@@ -150,21 +114,13 @@ const ReviewSchema = new Schema<IReview>({
     ref: 'Anime',
     default: undefined
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
 
 export const ReviewModel = model<IReview>('Review', ReviewSchema);

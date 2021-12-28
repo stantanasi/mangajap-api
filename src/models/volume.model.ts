@@ -123,53 +123,10 @@ export default class Volume extends MySqlModel {
       );
     }
   }
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await VolumeModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await VolumeModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await VolumeModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IVolume {
-    return {
-      _id: this.id!.toString(),
-
-      titles: {
-        fr: this.title_fr!,
-        en: this.title_en!,
-        en_jp: this.title_en_jp!,
-        ja_jp: this.title_ja_jp!,
-      },
-      number: this.number!,
-      startChapter: this.startChapter!,
-      endChapter: this.endChapter!,
-      published: this.published!,
-
-      manga: this.mangaId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IVolume {
+export interface IVolume {
   _id: string;
 
   titles: {
@@ -179,6 +136,7 @@ interface IVolume {
   startChapter: number | null;
   endChapter: number | null;
   published: Date | null;
+  coverImage: string | null;
 
   manga: string;
 
@@ -186,7 +144,7 @@ interface IVolume {
   updatedAt: Date;
 }
 
-const VolumeSchema = new Schema<IVolume>({
+export const VolumeSchema = new Schema<IVolume>({
   _id: {
     type: String,
     required: true
@@ -215,7 +173,10 @@ const VolumeSchema = new Schema<IVolume>({
 
   published: {
     type: Date,
-    default: null
+    default: null,
+    transform: function (this, val) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
   },
 
 
@@ -224,21 +185,45 @@ const VolumeSchema = new Schema<IVolume>({
     ref: 'Manga',
     required: true
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
+
+const uploadFile = (storageRef: StorageReference, file: string | null) => {
+  if (file === null) {
+    return deleteObject(storageRef)
+      .then()
+      .catch();
+  } else {
+    file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+    if (file.startsWith('data')) {
+      return uploadString(storageRef, file, 'data_url')
+        .then();
+    } else {
+      return uploadString(storageRef, file, 'base64')
+        .then();
+    }
+  }
+}
+
+VolumeSchema.virtual('coverImage')
+  .get(function (this: IVolume) {
+    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.manga}/volumes/${this._id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
+    return getDownloadURL(ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`))
+      .then(downloadURL => downloadURL)
+      .catch(() => null);
+  })
+  .set(function (this: IVolume, value: string) {
+    uploadFile(
+      ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`),
+      value,
+    ).then();
+  });
+
 
 export const VolumeModel = model<IVolume>('Volume', VolumeSchema);

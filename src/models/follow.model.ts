@@ -70,43 +70,10 @@ export default class Follow extends MySqlModel {
   @BelongsTo("followedId", User, "User", "id")
   @JsonApiRelationship()
   followed?: User;
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await FollowModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await FollowModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await FollowModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IFollow {
-    return {
-      _id: this.id!.toString(),
-
-      follower: this.followerId!.toString(),
-      followed: this.followedId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
 }
 
 
-interface IFollow {
+export interface IFollow {
   _id: string;
 
   follower: string;
@@ -116,7 +83,7 @@ interface IFollow {
   updatedAt: Date;
 }
 
-const FollowSchema = new Schema<IFollow>({
+export const FollowSchema = new Schema<IFollow>({
   _id: {
     type: String,
     required: true
@@ -134,26 +101,18 @@ const FollowSchema = new Schema<IFollow>({
     ref: 'User',
     required: true
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 FollowSchema.index({
   follower: 1,
   followed: 1
 }, { unique: true });
+
 
 export const FollowModel = model<IFollow>('Follow', FollowSchema);

@@ -5,6 +5,7 @@ import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import User from "./user.model";
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -140,3 +141,6 @@ export const RequestSchema = new Schema<IRequest>({
 
 
 export const RequestModel = model<IRequest>('Request', RequestSchema);
+
+
+JsonApiSerializer.register('requests', RequestModel);

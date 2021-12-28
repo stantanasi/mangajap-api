@@ -7,6 +7,7 @@ import Anime from "./anime.model";
 import Manga from "./manga.model";
 import ThemeRelationships from "./theme-relationships.model";
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -103,3 +104,6 @@ ThemeSchema.virtual('mangas', {
 
 
 export const ThemeModel = model<ITheme>('Theme', ThemeSchema);
+
+
+JsonApiSerializer.register('themes', ThemeModel);

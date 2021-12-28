@@ -8,6 +8,7 @@ import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/stora
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -235,3 +236,32 @@ PeopleSchema.virtual('manga-staff', {
 
 
 export const PeopleModel = model<IPeople>('People', PeopleSchema);
+
+
+JsonApiSerializer.register('peoples', PeopleModel, {
+  query: (query: string) => {
+    return {
+      $or: [
+        {
+          firstName: {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          lastName: {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          pseudo: {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+      ]
+    };
+  }
+});
+// TODO: order by query

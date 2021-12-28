@@ -8,6 +8,7 @@ import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/stora
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -227,3 +228,6 @@ VolumeSchema.virtual('coverImage')
 
 
 export const VolumeModel = model<IVolume>('Volume', VolumeSchema);
+
+
+JsonApiSerializer.register('volumes', VolumeModel);

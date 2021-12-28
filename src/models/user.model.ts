@@ -13,6 +13,7 @@ import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/stora
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -20,7 +21,7 @@ import { Schema, model } from 'mongoose';
 })
 @JsonApiType("users")
 @JsonApiFilter({
-  self: (self: string, req: Request) => {
+  self: (self: string, req: Request) => { // TODO: filter self
     let bearerToken = req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {
       bearerToken = bearerToken.substring(7);
@@ -710,3 +711,23 @@ UserSchema.pre('findOne', async function () {
 
 
 export const UserModel = model<IUser>('User', UserSchema);
+
+
+JsonApiSerializer.register('users', UserModel, {
+  self: (self: string) => {
+    return {}
+  },
+  query: (query: string) => {
+    return {
+      $or: [
+        {
+          pseudo: {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+      ]
+    };
+  }
+});
+// TODO: order by query

@@ -5,6 +5,7 @@ import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import User from "./user.model";
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -116,3 +117,17 @@ FollowSchema.index({
 
 
 export const FollowModel = model<IFollow>('Follow', FollowSchema);
+
+
+JsonApiSerializer.register('follows', FollowModel, {
+  followerId: (followerId: string) => {
+    return {
+      follower: followerId,
+    };
+  },
+  followedId: (followedId: string) => {
+    return {
+      followed: followedId,
+    };
+  },
+});

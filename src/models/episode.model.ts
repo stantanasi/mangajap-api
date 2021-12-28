@@ -6,6 +6,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime from "./anime.model";
 import Season from "./season.model";
 import { model, Schema } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -159,3 +160,6 @@ export const EpisodeSchema = new Schema<IEpisode>({
 
 
 export const EpisodeModel = model<IEpisode>('Episode', EpisodeSchema);
+
+
+JsonApiSerializer.register('episodes', EpisodeModel);

@@ -19,6 +19,7 @@ import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/stora
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -709,6 +710,48 @@ AnimeSchema.pre('findOne', async function () {
 
 
 export const AnimeModel = model<IAnime>('Anime', AnimeSchema);
+
+
+JsonApiSerializer.register('anime', AnimeModel, {
+  query: (query: string) => {
+    return {
+      $or: [
+        {
+          title: {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.fr': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.en': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.en_jp': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.ja_jp': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+      ]
+    };
+  }
+});
+// TODO: order by query
+
 
 // TODO: cronjobs
 // $animes = Anime::getInstance()->getWriteConnection()->query("

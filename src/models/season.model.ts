@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import db from "../db";
 import { JsonApiAttribute, JsonApiId, JsonApiRelationship, JsonApiType } from "../utils/json-api/json-api-annotations";
+import JsonApiSerializer from '../utils/mongoose-jsonapi/jsonapi-serializer';
 import { BelongsTo, Column, Entity, OneToMany, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import MySqlModel from "../utils/mysql/mysql-model";
@@ -138,3 +139,6 @@ SeasonSchema.virtual('episodes', {
 
 
 export const SeasonModel = model<ISeason>('Season', SeasonSchema);
+
+
+JsonApiSerializer.register('seeasons', SeasonModel);

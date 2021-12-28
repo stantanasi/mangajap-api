@@ -17,6 +17,7 @@ import User from "./user.model";
 import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -662,6 +663,47 @@ MangaSchema.pre('findOne', async function () {
 
 
 export const MangaModel = model<IManga>('Manga', MangaSchema);
+
+
+JsonApiSerializer.register('manga', MangaModel, {
+  query: (query: string) => {
+    return {
+      $or: [
+        {
+          title: {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.fr': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.en': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.en_jp': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+        {
+          'titles.ja_jp': {
+            $regex: query,
+            $options: 'i',
+          },
+        },
+      ]
+    };
+  }
+});
+// TODO: order by query
 
 
 // TODO: cronjobs

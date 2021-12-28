@@ -7,6 +7,7 @@ import Anime from "./anime.model";
 import Manga from "./manga.model";
 import User from "./user.model";
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -124,3 +125,6 @@ export const ReviewSchema = new Schema<IReview>({
 
 
 export const ReviewModel = model<IReview>('Review', ReviewSchema);
+
+
+JsonApiSerializer.register('reviews', ReviewModel);

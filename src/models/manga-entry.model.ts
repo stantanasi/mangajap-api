@@ -7,6 +7,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Manga from "./manga.model";
 import User from "./user.model";
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -226,3 +227,6 @@ MangaEntrySchema.index({
 
 
 export const MangaEntryModel = model<IMangaEntry>('MangaEntry', MangaEntrySchema);
+
+
+JsonApiSerializer.register('manga-entries', MangaEntryModel);

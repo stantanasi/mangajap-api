@@ -7,6 +7,7 @@ import Anime from "./anime.model";
 import GenreRelationships from "./genre-relationships.model";
 import Manga from "./manga.model";
 import { Schema, model } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
   database: db,
@@ -103,3 +104,6 @@ GenreSchema.virtual('mangas', {
 
 
 export const GenreModel = model<IGenre>('Genre', GenreSchema);
+
+
+JsonApiSerializer.register('genres', GenreModel);

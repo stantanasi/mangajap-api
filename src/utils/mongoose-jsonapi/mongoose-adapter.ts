@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { Model, Document } from "mongoose";
 import { MongooseQuery } from "./jsonapi-query-parser";
 
 export default class MongooseAdapter {
@@ -59,44 +59,37 @@ export default class MongooseAdapter {
   }
 
 
-  static async findRelationship<T, E>(model: Model<T>, id: any, relationship: string, relationshipModel: Model<E>, query: MongooseQuery) {
-    const related = ((await model.findById(id)
-      .populate(relationship)) as any)
+  static async findRelationship<T>(model: Model<T>, id: any, relationship: string, query: MongooseQuery) {
+    const data: Document | Document[] = (await model.findById(id)
+      .populate<any>({
+        path: relationship,
+        match: query.filter,
+        populate: query.populate,
+        options: {
+          limit: query.limit,
+          skip: query.skip,
+          sort: query.sort,
+        },
+      }))
       ?.[relationship];
 
-    if (Array.isArray(related)) {
-      //   const data = (await Anime.findById(req.params.id)
-      //     .populate<{ seasons: (Document & ISeason)[] }>({
-      //       path: 'seasons',
-      //       match: query.filter,
-      //       populate: query.populate,
-      //       options: {
-      //         limit: query.limit,
-      //         skip: query.skip,
-      //       },
-      //     }))
-      //     .seasons;
-      //   const count = (await Anime.findById(req.params.id)
-      //     .populate<{ seasons: (Document & ISeason)[] }>({
-      //       path: 'seasons',
-      //       match: query.filter,
-      //     }))
-      //     .seasons
-      //     .length;
+    if (Array.isArray(data)) {
+      const count = (await model.findById(id)
+        .populate<any>({
+          path: relationship,
+          match: query.filter,
+        }))
+        ?.[relationship]
+        .length ?? 0;
 
-      return MongooseAdapter.findByIds(
-        relationshipModel,
-        related.map(r => r._id),
-        query
-      );
+      return {
+        data: data,
+        count: count,
+      };
 
     } else {
       return {
-        data: await MongooseAdapter.findById(
-          relationshipModel,
-          related._id,
-          query
-        ),
+        data: data,
         count: undefined,
       };
     }

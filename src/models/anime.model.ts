@@ -644,6 +644,8 @@ AnimeSchema.virtual('franchises', {
   foreignField: 'source'
 });
 
+AnimeSchema.virtual('anime-entry');
+
 
 // TODO: pre save
 AnimeSchema.pre('save', function () {
@@ -670,9 +672,7 @@ AnimeSchema.pre('findOne', async function () {
       {
         $group: {
           _id: null,
-          averageRating: {
-            $avg: '$rating'
-          }
+          averageRating: { $avg: '$rating' }
         }
       }
     ]))[0].averageRating,

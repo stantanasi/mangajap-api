@@ -601,6 +601,8 @@ MangaSchema.virtual('franchises', {
   foreignField: 'source'
 });
 
+MangaSchema.virtual('manga-entry');
+
 
 // TODO: pre save
 MangaSchema.pre('save', function () {
@@ -623,9 +625,7 @@ MangaSchema.pre('findOne', async function () {
       {
         $group: {
           _id: null,
-          averageRating: {
-            $avg: '$rating'
-          }
+          averageRating: { $avg: '$rating' }
         }
       }
     ]))[0].averageRating,

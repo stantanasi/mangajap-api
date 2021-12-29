@@ -664,12 +664,22 @@ UserSchema.pre('findOne', async function () {
 
     volumesRead: (await MangaEntryModel.aggregate([
       { $match: { user: _id } },
-      { $group: { _id: null, total: { $sum: "$volumesRead" } } }
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$volumesRead" }
+        }
+      }
     ]))[0].total,
 
     chaptersRead: (await MangaEntryModel.aggregate([
       { $match: { user: _id } },
-      { $group: { _id: null, total: { $sum: "$chaptersRead" } } }
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$chaptersRead" }
+        }
+      }
     ]))[0].total,
 
     followedAnimeCount: await AnimeEntryModel.count({
@@ -679,7 +689,12 @@ UserSchema.pre('findOne', async function () {
 
     episodesWatch: (await AnimeEntryModel.aggregate([
       { $match: { user: _id } },
-      { $group: { _id: null, total: { $sum: "$episodesWatch" } } }
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$episodesWatch" }
+        }
+      }
     ]))[0].total,
 
     timeSpentOnAnime: (await AnimeEntryModel.aggregate([
@@ -696,13 +711,7 @@ UserSchema.pre('findOne', async function () {
       {
         $group: {
           _id: null,
-          timeSpentOnAnime: {
-            $sum: {
-              $multiply: [
-                '$episodesWatch', '$anime.episodeLength'
-              ]
-            }
-          }
+          timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } }
         }
       }
     ]))[0].timeSpentOnAnime,

@@ -20,6 +20,9 @@ import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
 import { connect } from 'mongoose';
+import { AnimeSchema } from './models/anime.model';
+import { UserModel } from './models/user.model';
+import { MangaSchema } from './models/manga.model';
 
 const app = express();
 
@@ -53,6 +56,42 @@ app.use(async (req, res, next) => {
   next();
 });
 
+app.use(async (req, res, next) => {
+  // TODO: create static function User.fromAccessToken()
+  // TODO: use firebase instead
+  let bearerToken = req.headers.authorization;
+  if (bearerToken?.startsWith('Bearer ')) {
+    bearerToken = bearerToken.substring(7);
+  }
+
+  const user = await UserModel.findOne({
+    uid: bearerToken,
+  });
+  if (user) {
+    AnimeSchema.virtual('anime-entry', {
+      ref: 'AnimeEntry',
+      localField: '_id',
+      foreignField: 'anime',
+      justOne: true,
+      match: {
+        user: user._id,
+      },
+    });
+
+    MangaSchema.virtual('manga-entry', {
+      ref: 'MangaEntry',
+      localField: '_id',
+      foreignField: 'manga',
+      justOne: true,
+      match: {
+        user: user._id,
+      },
+    });
+  }
+
+  next();
+});
+
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);
 app.use('/episodes', episodeRoutes);
@@ -80,6 +119,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(+(err.data.status || 500)).json(JsonApi.encodeError(err));
   } else {
     res.status(500).json(JsonApi.encodeError(err));
+    console.log(err);
   }
 });
 

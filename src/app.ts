@@ -22,6 +22,8 @@ import volumeRoutes from './routes/volume.routes';
 import { connect } from 'mongoose';
 import { AnimeSchema } from './models/anime.model';
 import { UserModel } from './models/user.model';
+import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
+import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
 import { MangaSchema } from './models/manga.model';
 
 const app = express();
@@ -41,6 +43,15 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   JsonApi.initialize(req, res);
+  JsonApiSerializer.initialize({
+    baseUrl: `${req.protocol}://${req.get('host')}`,
+  });
+  JsonApiQueryParser.initialize({
+    defaultPagination: {
+      limit: 10,
+      offset: 0,
+    },
+  });
   next();
 });
 

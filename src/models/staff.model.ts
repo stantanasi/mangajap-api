@@ -101,7 +101,7 @@ export const StaffSchema = new Schema<IStaff>({
 
   people: {
     type: String,
-    ref: 'User',
+    ref: 'People',
     required: true
   },
 

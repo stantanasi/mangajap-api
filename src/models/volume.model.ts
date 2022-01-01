@@ -3,7 +3,7 @@ import { JsonApiId, JsonApiAttribute, JsonApiType, JsonApiRelationship } from ".
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Manga from "./manga.model";
+import Manga, { IManga } from "./manga.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
@@ -139,7 +139,7 @@ export interface IVolume {
   published: Date | null;
   coverImage: string | null;
 
-  manga: string;
+  manga: string & IManga;
 
   createdAt: Date;
   updatedAt: Date;

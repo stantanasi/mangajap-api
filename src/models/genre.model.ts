@@ -3,9 +3,9 @@ import { JsonApiAttribute, JsonApiId, JsonApiRelationship, JsonApiType } from ".
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Column, Entity, ManyToMany, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime from "./anime.model";
+import Anime, { IAnime } from "./anime.model";
 import GenreRelationships from "./genre-relationships.model";
-import Manga from "./manga.model";
+import Manga, { IManga } from "./manga.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -61,6 +61,9 @@ export interface IGenre {
 
   title: string;
   description: string;
+
+  animes?: IAnime[];
+  mangas?: IManga[];
 
   createdAt: Date;
   updatedAt: Date;

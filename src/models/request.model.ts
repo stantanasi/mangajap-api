@@ -3,7 +3,7 @@ import { JsonApiType, JsonApiId, JsonApiAttribute, JsonApiFilter, JsonApiRelatio
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import User from "./user.model";
+import User, { IUser } from "./user.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -92,7 +92,7 @@ export interface IRequest {
   isDone: boolean;
   userHasRead: boolean;
 
-  user: string;
+  user: string & IUser;
 
   createdAt: Date;
   updatedAt: Date;

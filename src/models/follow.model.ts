@@ -3,7 +3,7 @@ import { JsonApiAttribute, JsonApiFilter, JsonApiId, JsonApiRelationship, JsonAp
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import User from "./user.model";
+import User, { IUser } from "./user.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -77,8 +77,8 @@ export default class Follow extends MySqlModel {
 export interface IFollow {
   _id: string;
 
-  follower: string;
-  followed: string;
+  follower: string & IUser;
+  followed: string & IUser;
 
   createdAt: Date;
   updatedAt: Date;

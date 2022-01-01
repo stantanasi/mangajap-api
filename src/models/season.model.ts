@@ -5,8 +5,8 @@ import JsonApiSerializer from '../utils/mongoose-jsonapi/jsonapi-serializer';
 import { BelongsTo, Column, Entity, OneToMany, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import MySqlModel from "../utils/mysql/mysql-model";
-import Anime from "./anime.model";
-import Episode from "./episode.model";
+import Anime, { IAnime } from "./anime.model";
+import Episode, { IEpisode } from "./episode.model";
 
 @Entity({
   database: db,
@@ -86,7 +86,8 @@ export interface ISeason {
   number: number;
   episodeCount: number;
 
-  anime: string;
+  anime: string & IAnime;
+  episodes?: IEpisode[];
 
   createdAt: Date;
   updatedAt: Date;

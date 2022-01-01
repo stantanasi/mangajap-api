@@ -3,7 +3,7 @@ import { JsonApiType, JsonApiFilter, JsonApiId, JsonApiAttribute, JsonApiRelatio
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, OneToMany } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Staff from "./staff.model";
+import Staff, { IStaff } from "./staff.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
@@ -144,6 +144,11 @@ export interface IPeople {
   firstName: string;
   lastName: string;
   pseudo: string;
+  image: string | null;
+
+  staff?: IStaff[];
+  'anime-staff'?: IStaff[];
+  'manga-staff'?: IStaff[];
 
   createdAt: Date;
   updatedAt: Date;

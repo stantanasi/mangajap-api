@@ -3,9 +3,9 @@ import { JsonApiType, JsonApiId, JsonApiAttribute, JsonApiRelationship } from ".
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime from "./anime.model";
-import Manga from "./manga.model";
-import People from "./people.model";
+import Anime, { IAnime } from "./anime.model";
+import Manga, { IManga } from "./manga.model";
+import People, { IPeople } from "./people.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -77,9 +77,9 @@ export interface IStaff {
 
   role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
 
-  people: string;
-  manga?: string;
-  anime?: string;
+  people: string & IPeople;
+  anime?: string & IAnime;
+  manga?: string & IManga;
 
   createdAt: Date;
   updatedAt: Date;
@@ -105,15 +105,15 @@ export const StaffSchema = new Schema<IStaff>({
     required: true
   },
 
-  manga: {
-    type: String,
-    ref: 'Manga',
-    default: undefined
-  },
-
   anime: {
     type: String,
     ref: 'Anime',
+    default: undefined
+  },
+
+  manga: {
+    type: String,
+    ref: 'Manga',
     default: undefined
   },
 }, {

@@ -3,9 +3,9 @@ import { JsonApiId, JsonApiAttribute, JsonApiType, JsonApiRelationship } from ".
 import MySqlModel from "../utils/mysql/mysql-model";
 import { PrimaryKey, Column, BelongsTo, Entity } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime from "./anime.model";
-import Manga from "./manga.model";
-import User from "./user.model";
+import Anime, { IAnime } from "./anime.model";
+import Manga, { IManga } from "./manga.model";
+import User, { IUser } from "./user.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -77,9 +77,9 @@ export interface IReview {
 
   content: string;
 
-  user: string;
-  manga?: string;
-  anime?: string;
+  user: string & IUser;
+  anime?: string & IAnime;
+  manga?: string & IManga;
 
   createdAt: Date;
   updatedAt: Date;
@@ -104,15 +104,15 @@ export const ReviewSchema = new Schema<IReview>({
     required: true
   },
 
-  manga: {
-    type: String,
-    ref: 'Manga',
-    default: undefined
-  },
-
   anime: {
     type: String,
     ref: 'Anime',
+    default: undefined
+  },
+
+  manga: {
+    type: String,
+    ref: 'Manga',
     default: undefined
   },
 }, {

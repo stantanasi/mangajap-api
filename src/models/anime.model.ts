@@ -3,18 +3,18 @@ import { JsonApiAttribute, JsonApiFilter, JsonApiId, JsonApiRelationship, JsonAp
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Episode, { EpisodeModel } from "./episode.model";
-import Franchise from "./franchise.model";
+import Episode, { EpisodeModel, IEpisode } from "./episode.model";
+import Franchise, { IFranchise } from "./franchise.model";
 import GenreRelationships from "./genre-relationships.model";
-import Genre from "./genre.model";
-import Review, { ReviewModel } from "./review.model";
-import Staff from "./staff.model";
+import Genre, { IGenre } from "./genre.model";
+import Review, { IReview, ReviewModel } from "./review.model";
+import Staff, { IStaff } from "./staff.model";
 import ThemeRelationships from "./theme-relationships.model";
-import Theme from "./theme.model";
+import Theme, { ITheme } from "./theme.model";
 import slugify from "slugify";
-import AnimeEntry, { AnimeEntryModel } from "./anime-entry.model";
+import AnimeEntry, { AnimeEntryModel, IAnimeEntry } from "./anime-entry.model";
 import User from "./user.model";
-import Season, { SeasonModel } from "./season.model";
+import Season, { ISeason, SeasonModel } from "./season.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
@@ -406,6 +406,8 @@ export interface IAnime {
   animeType: 'tv' | 'ova' | 'ona' | 'movie' | 'music' | 'special';
   status: 'airing' | 'finished' | 'unreleased' | 'upcoming';
   youtubeVideoId: string;
+  coverImage: string | null;
+  bannerImage: string | null;
 
   seasonCount: number;
   episodeCount: number;
@@ -418,8 +420,14 @@ export interface IAnime {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: string[];
-  themes: string[];
+  genres: string[] & IGenre[];
+  themes: string[] & ITheme[];
+  seasons?: ISeason[];
+  episodes?: IEpisode[];
+  staff?: IStaff[];
+  reviews?: IReview[];
+  franchises?: IFranchise[];
+  'anime-entry'?: IAnimeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -675,7 +683,7 @@ AnimeSchema.pre('findOne', async function () {
           averageRating: { $avg: '$rating' }
         }
       }
-    ]))[0].averageRating,
+    ]))[0]?.averageRating,
 
     userCount: await AnimeEntryModel.count({
       anime: _id,

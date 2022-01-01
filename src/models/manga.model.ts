@@ -5,14 +5,14 @@ import MySqlModel from "../utils/mysql/mysql-model";
 import { Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import GenreRelationships from "./genre-relationships.model";
-import Genre from "./genre.model";
-import Volume, { VolumeModel } from "./volume.model";
-import Theme from "./theme.model";
-import Staff from "./staff.model";
-import Franchise from "./franchise.model";
-import Review, { ReviewModel } from "./review.model";
+import Genre, { IGenre } from "./genre.model";
+import Volume, { IVolume, VolumeModel } from "./volume.model";
+import Theme, { ITheme } from "./theme.model";
+import Staff, { IStaff } from "./staff.model";
+import Franchise, { IFranchise } from "./franchise.model";
+import Review, { IReview, ReviewModel } from "./review.model";
 import ThemeRelationships from "./theme-relationships.model";
-import MangaEntry, { MangaEntryModel } from "./manga-entry.model";
+import MangaEntry, { IMangaEntry, MangaEntryModel } from "./manga-entry.model";
 import User from "./user.model";
 import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
 import { storage } from '../firebase-app';
@@ -383,9 +383,8 @@ export interface IManga {
   origin: string;
   mangaType: 'bd' | 'comics' | 'josei' | 'kodomo' | 'seijin' | 'seinen' | 'shojo' | 'shonen' | 'doujin' | 'novel' | 'oneshot' | 'webtoon';
   status: 'publishing' | 'finished' | 'unreleased' | 'upcoming';
-
-  genres: string[];
-  themes: string[];
+  coverImage: string | null;
+  bannerImage: string | null;
 
   volumeCount: number;
   chapterCount: number;
@@ -396,6 +395,14 @@ export interface IManga {
   userCount: number;
   favoritesCount: number;
   reviewCount: number;
+
+  genres: string[] & IGenre[];
+  themes: string[] & ITheme[];
+  volumes?: IVolume[];
+  staff?: IStaff[];
+  reviews?: IReview[];
+  franchises?: IFranchise[];
+  'manga-entry'?: IMangaEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -463,19 +470,6 @@ export const MangaSchema = new Schema<IManga>({
   },
 
 
-  genres: [{
-    type: String,
-    ref: 'Genre',
-    default: [],
-  }],
-
-  themes: [{
-    type: String,
-    ref: 'Theme',
-    default: [],
-  }],
-
-
   volumeCount: {
     type: Number,
     default: 0
@@ -516,6 +510,19 @@ export const MangaSchema = new Schema<IManga>({
     type: Number,
     default: 0
   },
+
+
+  genres: [{
+    type: String,
+    ref: 'Genre',
+    default: [],
+  }],
+
+  themes: [{
+    type: String,
+    ref: 'Theme',
+    default: [],
+  }],
 }, {
   id: false,
   versionKey: false,
@@ -628,7 +635,7 @@ MangaSchema.pre('findOne', async function () {
           averageRating: { $avg: '$rating' }
         }
       }
-    ]))[0].averageRating,
+    ]))[0]?.averageRating,
 
     userCount: await MangaEntryModel.count({
       manga: _id,

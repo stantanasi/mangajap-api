@@ -4,8 +4,8 @@ import JsonApiError from "../utils/json-api/json-api.error";
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Manga from "./manga.model";
-import User from "./user.model";
+import Manga, { IManga } from "./manga.model";
+import User, { IUser } from "./user.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -145,8 +145,8 @@ export interface IMangaEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: string;
-  manga: string;
+  user: string & IUser;
+  manga: string & IManga;
 
   createdAt: Date;
   updatedAt: Date;

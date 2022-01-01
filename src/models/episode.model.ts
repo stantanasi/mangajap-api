@@ -3,8 +3,8 @@ import { JsonApiType, JsonApiId, JsonApiAttribute, JsonApiRelationship } from ".
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime from "./anime.model";
-import Season from "./season.model";
+import Anime, { IAnime } from "./anime.model";
+import Season, { ISeason } from "./season.model";
 import { model, Schema } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -98,8 +98,8 @@ export interface IEpisode {
   airDate: Date | null;
   episodeType: '' | 'oav';
 
-  anime: string;
-  season: string;
+  anime: string & IAnime;
+  season: string & ISeason;
 
   createdAt: Date;
   updatedAt: Date;

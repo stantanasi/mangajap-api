@@ -5,10 +5,10 @@ import { JsonApiType, JsonApiFilter, JsonApiId, JsonApiAttribute, JsonApiRelatio
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Column, Entity, OneToMany, PrimaryKey } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import AnimeEntry, { AnimeEntryModel } from "./anime-entry.model";
-import Follow, { FollowModel } from "./follow.model";
-import MangaEntry, { MangaEntryModel } from "./manga-entry.model";
-import Review from "./review.model";
+import AnimeEntry, { AnimeEntryModel, IAnimeEntry } from "./anime-entry.model";
+import Follow, { FollowModel, IFollow } from "./follow.model";
+import MangaEntry, { IMangaEntry, MangaEntryModel } from "./manga-entry.model";
+import Review, { IReview } from "./review.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
@@ -405,6 +405,13 @@ export interface IUser {
   gender: 'men' | 'women' | 'other' | null;
   birthday: Date | null;
   country: string;
+  avatar: {
+    tiny: string;
+    small: string;
+    medium: string;
+    large: string;
+    original: string;
+  } | null;
 
   followersCount: number;
   followingCount: number;
@@ -414,6 +421,14 @@ export interface IUser {
   followedAnimeCount: number;
   episodesWatch: number;
   timeSpentOnAnime: number;
+
+  followers?: IFollow[];
+  following?: IFollow[];
+  'anime-library'?: IAnimeEntry[];
+  'manga-library'?: IMangaEntry[];
+  'anime-favorites'?: IAnimeEntry[];
+  'manga-favorites'?: IMangaEntry[];
+  reviews?: IReview[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -670,7 +685,7 @@ UserSchema.pre('findOne', async function () {
           total: { $sum: "$volumesRead" }
         }
       }
-    ]))[0].total,
+    ]))[0]?.total,
 
     chaptersRead: (await MangaEntryModel.aggregate([
       { $match: { user: _id } },
@@ -680,7 +695,7 @@ UserSchema.pre('findOne', async function () {
           total: { $sum: "$chaptersRead" }
         }
       }
-    ]))[0].total,
+    ]))[0]?.total,
 
     followedAnimeCount: await AnimeEntryModel.count({
       user: _id,
@@ -695,7 +710,7 @@ UserSchema.pre('findOne', async function () {
           total: { $sum: "$episodesWatch" }
         }
       }
-    ]))[0].total,
+    ]))[0]?.total,
 
     timeSpentOnAnime: (await AnimeEntryModel.aggregate([
       { $match: { user: _id } },
@@ -714,7 +729,7 @@ UserSchema.pre('findOne', async function () {
           timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } }
         }
       }
-    ]))[0].timeSpentOnAnime,
+    ]))[0]?.timeSpentOnAnime,
   });
 });
 

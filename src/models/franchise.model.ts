@@ -3,8 +3,8 @@ import { JsonApiType, JsonApiId, JsonApiAttribute, JsonApiRelationship } from ".
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime from "./anime.model";
-import Manga from "./manga.model";
+import Anime, { IAnime } from "./anime.model";
+import Manga, { IManga } from "./manga.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -100,8 +100,8 @@ export interface IFranchise {
 
   role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
 
-  source: string;
-  destination: string;
+  source: string & (IAnime | IManga);
+  destination: string & (IAnime | IManga);
 
   sourceModel: 'Anime' | 'Manga';
   destinationModel: 'Anime' | 'Manga';

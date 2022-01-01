@@ -3,8 +3,8 @@ import { JsonApiType, JsonApiId, JsonApiAttribute, JsonApiRelationship } from ".
 import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, ManyToMany } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime from "./anime.model";
-import Manga from "./manga.model";
+import Anime, { IAnime } from "./anime.model";
+import Manga, { IManga } from "./manga.model";
 import ThemeRelationships from "./theme-relationships.model";
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -61,6 +61,9 @@ export interface ITheme {
 
   title: string;
   description: string;
+
+  animes?: IAnime[];
+  mangas?: IManga[];
 
   createdAt: Date;
   updatedAt: Date;

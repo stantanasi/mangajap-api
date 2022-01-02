@@ -169,16 +169,20 @@ export default abstract class JsonApiSerializer {
   static deserialize(body: any): any {
     const data: any = {};
 
-    Object.assign(data, body.attributes);
+    if (body.data?.attributes) {
+      Object.assign(data, body.data.attributes);
+    }
 
-    // Relationships
-    Object.entries(body.relationships).forEach(([key, value]: [string, any]) => {
-      if (Array.isArray(value.data)) {
-        data[key] = value.data.map((d: any) => d.id)
-      } else {
-        data[key] = value.data.id;
-      }
-    });
+    if (body.data?.relationships) {
+      Object.entries(body.data.relationships)
+        .forEach(([key, value]: [string, any]) => {
+          if (Array.isArray(value.data)) {
+            data[key] = value.data.map((d: any) => d.id)
+          } else {
+            data[key] = value.data.id;
+          }
+        });
+    }
 
     return data;
   }

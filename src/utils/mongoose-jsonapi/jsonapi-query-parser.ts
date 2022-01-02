@@ -99,8 +99,8 @@ export default class JsonApiQueryParser {
       mongooseQuery.sort = query.sort
         .split(',')
         .reduce((acc, sort) => {
-          if (sort.startsWith('-')) {
-            acc[sort] = -1;
+          if (sort.charAt(0) === '-') {
+            acc[sort.slice(1)] = -1;
           } else {
             acc[sort] = 1;
           }

@@ -21,10 +21,10 @@ import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
 import { connect } from 'mongoose';
 import { AnimeSchema } from './models/anime.model';
+import { MangaSchema } from './models/manga.model';
 import { UserModel } from './models/user.model';
 import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
 import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
-import { MangaSchema } from './models/manga.model';
 
 const app = express();
 
@@ -42,7 +42,6 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  JsonApi.initialize(req, res);
   JsonApiSerializer.initialize({
     baseUrl: `${req.protocol}://${req.get('host')}`,
   });
@@ -52,13 +51,6 @@ app.use((req, res, next) => {
       offset: 0,
     },
   });
-  next();
-});
-
-app.use((req, res, next) => {
-  if (req.body && Object.keys(req.body).length) {
-    req.body = JsonApi.decode(req.body.data);
-  }
   next();
 });
 
@@ -126,11 +118,11 @@ app.all('*', (req, res) => {
 
 // Error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.log(err);
   if (err instanceof JsonApiError) {
     res.status(+(err.data.status || 500)).json(JsonApi.encodeError(err));
   } else {
     res.status(500).json(JsonApi.encodeError(err));
-    console.log(err);
   }
 });
 

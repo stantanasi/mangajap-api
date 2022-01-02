@@ -16,7 +16,7 @@ import AnimeEntry, { AnimeEntryModel, IAnimeEntry } from "./anime-entry.model";
 import User from "./user.model";
 import Season, { ISeason, SeasonModel } from "./season.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
-import { storage } from '../firebase-app';
+import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -565,25 +565,6 @@ export const AnimeSchema = new Schema<IAnime>({
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
-
-
-const uploadFile = (storageRef: StorageReference, file: string | null) => {
-  if (file === null) {
-    return deleteObject(storageRef)
-      .then()
-      .catch();
-  } else {
-    file = file.replace(/(\r\n|\n|\r)/gm, '');
-
-    if (file.startsWith('data')) {
-      return uploadString(storageRef, file, 'data_url')
-        .then();
-    } else {
-      return uploadString(storageRef, file, 'base64')
-        .then();
-    }
-  }
-}
 
 AnimeSchema.virtual('coverImage')
   .get(function (this: IAnime) {

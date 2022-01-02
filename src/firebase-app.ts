@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getStorage } from "firebase/storage";
+import { deleteObject, getStorage, StorageReference, uploadString } from "firebase/storage";
 
 const firebaseApp = initializeApp({
   apiKey: "AIzaSyBERviz4ObXOcBPCHiY8weoU_zdA8UNcIk",
@@ -14,3 +14,21 @@ const firebaseApp = initializeApp({
 export default firebaseApp
 
 export const storage = getStorage(firebaseApp);
+
+export const uploadFile = (storageRef: StorageReference, file: string | null) => {
+  if (file === null) {
+    return deleteObject(storageRef)
+      .then()
+      .catch();
+  } else {
+    file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+    if (file.startsWith('data')) {
+      return uploadString(storageRef, file, 'data_url')
+        .then();
+    } else {
+      return uploadString(storageRef, file, 'base64')
+        .then();
+    }
+  }
+}

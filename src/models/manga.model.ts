@@ -15,7 +15,7 @@ import ThemeRelationships from "./theme-relationships.model";
 import MangaEntry, { IMangaEntry, MangaEntryModel } from "./manga-entry.model";
 import User from "./user.model";
 import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
-import { storage } from '../firebase-app';
+import { storage, uploadFile } from '../firebase-app';
 import { Schema, model } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
@@ -530,25 +530,6 @@ export const MangaSchema = new Schema<IManga>({
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
-
-
-const uploadFile = (storageRef: StorageReference, file: string | null) => {
-  if (file === null) {
-    return deleteObject(storageRef)
-      .then()
-      .catch();
-  } else {
-    file = file.replace(/(\r\n|\n|\r)/gm, '');
-
-    if (file.startsWith('data')) {
-      return uploadString(storageRef, file, 'data_url')
-        .then();
-    } else {
-      return uploadString(storageRef, file, 'base64')
-        .then();
-    }
-  }
-}
 
 MangaSchema.virtual('coverImage')
   .get(function (this: IManga) {

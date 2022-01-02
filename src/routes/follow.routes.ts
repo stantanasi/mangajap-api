@@ -1,73 +1,144 @@
 import express from "express";
-import Follow from "../models/follow.model";
-import User from "../models/user.model";
-import JsonApi from "../utils/json-api/json-api";
+import { FollowModel } from "../models/follow.model";
+import { UserModel } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { isLogin } from "../utils/middlewares/middlewares";
+import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const followRoutes = express.Router();
 
-followRoutes.get('/', async (req, res) => {
-  const [follows, count] = await Follow.findAll(JsonApi.parameters(req, Follow));
-  res.json(await JsonApi.encode(req, follows, count));
-});
+followRoutes.get('/', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.find(
+      FollowModel,
+      JsonApiQueryParser.parse(req.query, FollowModel)
+    );
 
-followRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null) {
-    throw new PermissionDenied();
-  }
-
-  const follow: Follow = req.body;
-  follow.follower = user;
-  const newFollow = await follow.create();
-  res.json(await JsonApi.encode(req, newFollow));
-});
-
-followRoutes.get('/:id(\\d+)', async (req, res) => {
-  const id: string = (req.params as any).id
-  const follow = await Follow.findById(id, JsonApi.parameters(req, Follow));
-  res.json(await JsonApi.encode(req, follow));
-});
-
-followRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  const oldFollow = await Follow.findById((req.params as any).id)
-  if (user === null || oldFollow === null || (user.id !== oldFollow.followerId && user.id !== oldFollow.followedId)) {
-    throw new PermissionDenied();
-  }
-
-  const follow: Follow = req.body;
-  const newFollow = await follow.update();
-  res.json(await JsonApi.encode(req, newFollow));
-});
-
-followRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  const follow = await Follow.findById((req.params as any).id);
-  if (user === null || follow === null || (user.id !== follow.followerId && user.id !== follow.followedId)) {
-    throw new PermissionDenied();
-  }
-
-  await follow.delete();
-  res.status(204).send();
-});
-
-
-followRoutes.get('/:id(\\d+)/follower', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const follow = await Follow.findById(id);
-  const response = await follow?.getRelated("follower", JsonApi.parameters(req, User));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 
-followRoutes.get('/:id(\\d+)/followed', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const follow = await Follow.findById(id);
-  const response = await follow?.getRelated("followed", JsonApi.parameters(req, User));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+followRoutes.post('/', isLogin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.create(
+      FollowModel,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+followRoutes.get('/:id', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.findById(
+      FollowModel,
+      req.params.id,
+      JsonApiQueryParser.parse(req.query, FollowModel)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+  try {
+    let bearerToken = req.headers.authorization;
+    if (bearerToken?.startsWith('Bearer ')) {
+      bearerToken = bearerToken.substring(7);
+    }
+
+    const user = await UserModel.findOne({
+      uid: bearerToken,
+    });
+    const old = await FollowModel.findById(req.params.id);
+    if (user?.id !== old?.follower && user?.id !== old?.followed) {
+      throw new PermissionDenied();
+    }
+
+    const data = await MongooseAdapter.update(
+      FollowModel,
+      req.params.id,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+  try {
+    let bearerToken = req.headers.authorization;
+    if (bearerToken?.startsWith('Bearer ')) {
+      bearerToken = bearerToken.substring(7);
+    }
+
+    const user = await UserModel.findOne({
+      uid: bearerToken,
+    });
+    const old = await FollowModel.findById(req.params.id);
+    if (user?.id !== old?.follower && user?.id !== old?.followed) {
+      throw new PermissionDenied();
+    }
+
+    await MongooseAdapter.delete(
+      FollowModel,
+      req.params.id,
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+followRoutes.get('/:id/follower', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      FollowModel,
+      req.params.id,
+      'follower',
+      JsonApiQueryParser.parse(req.query, UserModel),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+followRoutes.get('/:id/followed', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      FollowModel,
+      req.params.id,
+      'followed',
+      JsonApiQueryParser.parse(req.query, UserModel),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 

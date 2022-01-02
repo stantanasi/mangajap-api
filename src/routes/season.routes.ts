@@ -1,75 +1,127 @@
 import express from "express";
-import Anime from "../models/anime.model";
-import Episode from "../models/episode.model";
-import Season from "../models/season.model";
-import User from "../models/user.model";
-import JsonApi from "../utils/json-api/json-api";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { AnimeModel } from "../models/anime.model";
+import { EpisodeModel } from "../models/episode.model";
+import { SeasonModel } from "../models/season.model";
+import { isAdmin } from "../utils/middlewares/middlewares";
+import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const seasonRoutes = express.Router();
 
-seasonRoutes.get('/', async (req, res) => {
-  const [seasons, count] = await Season.findAll(JsonApi.parameters(req, Season));
-  res.json(await JsonApi.encode(req, seasons, count))
-});
+seasonRoutes.get('/', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.find(
+      SeasonModel,
+      JsonApiQueryParser.parse(req.query, SeasonModel)
+    );
 
-seasonRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const season: Season = req.body;
-  const newSeason = await season.create();
-  res.json(await JsonApi.encode(req, newSeason));
-});
-
-seasonRoutes.get('/:id(\\d+)', async (req, res) => {
-  const id: string = (req.params as any).id
-  const season = await Season.findById(id, JsonApi.parameters(req, Season))
-  res.json(await JsonApi.encode(req, season));
-});
-
-seasonRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const season: Season = req.body;
-  const newSeason = await season.update();
-  res.json(await JsonApi.encode(req, newSeason));
-});
-
-seasonRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const season = new Season(); 
-  season.id = (req.params as any).id;
-  await season.delete();
-  res.status(204).send();
-});
-
-
-seasonRoutes.get('/:id(\\d+)/anime', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const season = await Season.findById(id);
-  const response = await season?.getRelated("anime", JsonApi.parameters(req, Anime));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 
-seasonRoutes.get('/:id(\\d+)/episodes', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const season = await Season.findById(id);
-  const response = await season?.getRelated("episodes", JsonApi.parameters(req, Episode));
-  if (Array.isArray(response)) {
-    const [episodes, count] = response;
-    res.json(await JsonApi.encode(req, episodes, count));
+seasonRoutes.post('/', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.create(
+      SeasonModel,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+seasonRoutes.get('/:id', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.findById(
+      SeasonModel,
+      req.params.id,
+      JsonApiQueryParser.parse(req.query, SeasonModel)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+seasonRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.update(
+      SeasonModel,
+      req.params.id,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+seasonRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    await MongooseAdapter.delete(
+      SeasonModel,
+      req.params.id,
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+seasonRoutes.get('/:id/anime', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      SeasonModel,
+      req.params.id,
+      'anime',
+      JsonApiQueryParser.parse(req.query, AnimeModel),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+seasonRoutes.get('/:id/episodes', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      SeasonModel,
+      req.params.id,
+      'episodes',
+      JsonApiQueryParser.parse(req.query, EpisodeModel),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 

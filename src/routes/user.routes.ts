@@ -15,7 +15,7 @@ const userRoutes = express.Router();
 userRoutes.get('/', async (req, res, next) => {
   // TODO: filter self
   const filter = req.query.filter as any;
-  if (filter.self) {
+  if (filter?.self) {
     let bearerToken = req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {
       bearerToken = bearerToken.substring(7);

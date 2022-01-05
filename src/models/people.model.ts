@@ -7,7 +7,7 @@ import Staff, { IStaff } from "./staff.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -169,6 +169,11 @@ export const PeopleSchema = new Schema<IPeople>({
     type: String,
     default: ''
   },
+
+  image: {
+    type: String,
+    default: null,
+  },
 }, {
   id: false,
   versionKey: false,
@@ -176,20 +181,6 @@ export const PeopleSchema = new Schema<IPeople>({
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
-
-PeopleSchema.virtual('image')
-  .get(function (this: IPeople) {
-    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`peoples/${this._id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return getDownloadURL(ref(storage, `peoples/${this._id}/images/profile.jpg`))
-      .then(downloadURL => downloadURL)
-      .catch(() => null);
-  })
-  .set(function (this: IPeople, value: string) {
-    uploadFile(
-      ref(storage, `peoples/${this._id}/images/profile.jpg`),
-      value,
-    ).then();
-  });
 
 PeopleSchema.virtual('staff', {
   ref: 'Staff',
@@ -212,6 +203,16 @@ PeopleSchema.virtual('manga-staff', {
   foreignField: 'people',
   match: {
     manga: { $exists: true, $ne: null }
+  }
+});
+
+
+PeopleSchema.pre<EnforceDocument<IPeople, {}, {}>>('save', async function () {
+  if (this.isModified('image')) {
+    this.image = await uploadFile(
+      ref(storage, `peoples/${this._id}/images/profile.jpg`),
+      this.image,
+    );
   }
 });
 

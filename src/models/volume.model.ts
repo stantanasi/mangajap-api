@@ -7,7 +7,7 @@ import Manga, { IManga } from "./manga.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -174,6 +174,11 @@ export const VolumeSchema = new Schema<IVolume>({
     },
   },
 
+  coverImage: {
+    type: String,
+    default: null,
+  },
+
 
   manga: {
     type: Schema.Types.ObjectId,
@@ -188,19 +193,15 @@ export const VolumeSchema = new Schema<IVolume>({
   toObject: { virtuals: true },
 });
 
-VolumeSchema.virtual('coverImage')
-  .get(function (this: IVolume) {
-    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this.manga}/volumes/${this._id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return getDownloadURL(ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`))
-      .then(downloadURL => downloadURL)
-      .catch(() => null);
-  })
-  .set(function (this: IVolume, value: string) {
-    uploadFile(
+
+VolumeSchema.pre<EnforceDocument<IVolume, {}, {}>>('save', async function () {
+  if (this.isModified('coverImage')) {
+    this.coverImage = await uploadFile(
       ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`),
-      value,
-    ).then();
-  });
+      this.coverImage,
+    );
+  }
+});
 
 
 export const VolumeModel = model<IVolume>('Volume', VolumeSchema);

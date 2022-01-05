@@ -18,7 +18,7 @@ import Season, { ISeason, SeasonModel } from "./season.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -493,6 +493,16 @@ export const AnimeSchema = new Schema<IAnime>({
     default: '',
   },
 
+  coverImage: {
+    type: String,
+    default: null,
+  },
+
+  bannerImage: {
+    type: String,
+    default: null,
+  },
+
 
   seasonCount: {
     type: Number,
@@ -560,34 +570,6 @@ export const AnimeSchema = new Schema<IAnime>({
   toObject: { virtuals: true },
 });
 
-AnimeSchema.virtual('coverImage')
-  .get(function (this: IAnime) {
-    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`anime/${this._id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return getDownloadURL(ref(storage, `anime/${this._id}/images/cover.jpg`))
-      .then(downloadURL => downloadURL)
-      .catch(() => null);
-  })
-  .set(function (this: IAnime, value: string) {
-    uploadFile(
-      ref(storage, `anime/${this._id}/images/cover.jpg`),
-      value,
-    ).then();
-  });
-
-AnimeSchema.virtual('bannerImage')
-  .get(function (this: IAnime) {
-    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`anime/${this._id}/images/banner.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return getDownloadURL(ref(storage, `anime/${this._id}/images/banner.jpg`))
-      .then(downloadURL => downloadURL)
-      .catch(() => null);
-  })
-  .set(function (this: IAnime, value: string) {
-    uploadFile(
-      ref(storage, `anime/${this._id}/images/banner.jpg`),
-      value,
-    ).then();
-  });
-
 AnimeSchema.virtual('seasons', {
   ref: 'Season',
   localField: '_id',
@@ -630,10 +612,24 @@ AnimeSchema.virtual('franchises', {
 AnimeSchema.virtual('anime-entry');
 
 
-// TODO: pre save
-AnimeSchema.pre('save', function () {
-  if (!this.isModified('title')) {
+AnimeSchema.pre<EnforceDocument<IAnime, {}, {}>>('save', async function () {
+  // TODO: _id sera nul lors du create
+  if (this.isModified('title')) {
     this.slug = slugify(this.title);
+  }
+
+  if (this.isModified('coverImage')) {
+    this.coverImage = await uploadFile(
+      ref(storage, `anime/${this._id}/images/cover.jpg`),
+      this.coverImage,
+    );
+  }
+
+  if (this.isModified('bannerImage')) {
+    this.bannerImage = await uploadFile(
+      ref(storage, `anime/${this._id}/images/banner.jpg`),
+      this.bannerImage,
+    );
   }
 });
 

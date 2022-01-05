@@ -16,7 +16,7 @@ import MangaEntry, { IMangaEntry, MangaEntryModel } from "./manga-entry.model";
 import User from "./user.model";
 import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -463,6 +463,16 @@ export const MangaSchema = new Schema<IManga>({
     enum: ['publishing', 'finished', 'unreleased', 'upcoming'],
   },
 
+  coverImage: {
+    type: String,
+    default: null,
+  },
+
+  bannerImage: {
+    type: String,
+    default: null,
+  },
+
 
   volumeCount: {
     type: Number,
@@ -525,34 +535,6 @@ export const MangaSchema = new Schema<IManga>({
   toObject: { virtuals: true },
 });
 
-MangaSchema.virtual('coverImage')
-  .get(function (this: IManga) {
-    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this._id}/images/cover.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return getDownloadURL(ref(storage, `manga/${this._id}/images/cover.jpg`))
-      .then(downloadURL => downloadURL)
-      .catch(() => null);
-  })
-  .set(function (this: IManga, value: string) {
-    uploadFile(
-      ref(storage, `manga/${this._id}/images/cover.jpg`),
-      value,
-    ).then();
-  });
-
-MangaSchema.virtual('bannerImage')
-  .get(function (this: IManga) {
-    return `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`manga/${this._id}/images/banner.jpg`.replace(/\//g, '%2F')}?alt=media`
-    return getDownloadURL(ref(storage, `manga/${this._id}/images/banner.jpg`))
-      .then(downloadURL => downloadURL)
-      .catch(() => null);
-  })
-  .set(function (this: IManga, value: string) {
-    uploadFile(
-      ref(storage, `manga/${this._id}/images/banner.jpg`),
-      value,
-    ).then();
-  });
-
 MangaSchema.virtual('volumes', {
   ref: 'Volume',
   localField: '_id',
@@ -586,10 +568,23 @@ MangaSchema.virtual('franchises', {
 MangaSchema.virtual('manga-entry');
 
 
-// TODO: pre save
-MangaSchema.pre('save', function () {
-  if (!this.isModified('title')) {
+MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('save', async function () {
+  if (this.isModified('title')) {
     this.slug = slugify(this.title);
+  }
+
+  if (this.isModified('coverImage')) {
+    this.coverImage = await uploadFile(
+      ref(storage, `manga/${this._id}/images/cover.jpg`),
+      this.coverImage,
+    );
+  }
+
+  if (this.isModified('bannerImage')) {
+    this.bannerImage = await uploadFile(
+      ref(storage, `manga/${this._id}/images/banner.jpg`),
+      this.bannerImage,
+    );
   }
 });
 

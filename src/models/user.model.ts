@@ -12,8 +12,9 @@ import Review, { IReview } from "./review.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { transform } from "typescript";
 
 @Entity({
   database: db,
@@ -405,13 +406,7 @@ export interface IUser {
   gender: 'men' | 'women' | 'other' | null;
   birthday: Date | null;
   country: string;
-  avatar: {
-    tiny: string;
-    small: string;
-    medium: string;
-    large: string;
-    original: string;
-  } | null;
+  avatar: string | null;
 
   followersCount: number;
   followingCount: number;
@@ -479,12 +474,29 @@ export const UserSchema = new Schema<IUser>({
 
   birthday: {
     type: Date,
-    default: null
+    default: null,
+    transform: function (this, val) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
   },
 
   country: {
     type: String,
     default: ''
+  },
+
+  avatar: {
+    type: String,
+    default: null,
+    transform: function (this, val) {
+      return val ? {
+        tiny: val,
+        small: val,
+        medium: val,
+        large: val,
+        original: val,
+      } : null;
+    }
   },
 
 
@@ -534,33 +546,6 @@ export const UserSchema = new Schema<IUser>({
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
-
-UserSchema.virtual('avatar')
-  .get(function (this: IUser) {
-    const downloadURL = `https://firebasestorage.googleapis.com/v0/b/mangajap.appspot.com/o/${`users/${this._id}/images/profile.jpg`.replace(/\//g, '%2F')}?alt=media`;
-    return {
-      tiny: downloadURL,
-      small: downloadURL,
-      medium: downloadURL,
-      large: downloadURL,
-      original: downloadURL,
-    }
-    return getDownloadURL(ref(storage, `users/${this._id}/images/profile.jpg`))
-      .then(downloadURL => ({
-        tiny: downloadURL,
-        small: downloadURL,
-        medium: downloadURL,
-        large: downloadURL,
-        original: downloadURL,
-      }))
-      .catch(() => null);
-  })
-  .set(function (this: IUser, value: string) {
-    uploadFile(
-      ref(storage, `users/${this._id}/images/profile.jpg`),
-      value,
-    ).then();
-  });
 
 UserSchema.virtual('followers', {
   ref: 'Follow',
@@ -634,6 +619,16 @@ UserSchema.virtual('reviews', {
   foreignField: 'user'
 });
 
+
+UserSchema.pre<EnforceDocument<IUser, {}, {}>>('save', async function () {
+  if (this.isModified('avatar')) {
+    // TODO: faire ça pour toute les images
+    this.avatar = await uploadFile(
+      ref(storage, `users/${this._id}/images/profile.jpg`),
+      this.avatar,
+    );
+  }
+});
 
 UserSchema.pre('findOne', async function () {
   const _id = this.getQuery()._id;

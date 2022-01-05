@@ -6,7 +6,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime, { IAnime } from "./anime.model";
 import GenreRelationships from "./genre-relationships.model";
 import Manga, { IManga } from "./manga.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -57,7 +57,7 @@ export default class Genre extends MySqlModel {
 
 
 export interface IGenre {
-  _id: string;
+  _id: Types.ObjectId;
 
   title: string;
   description: string;
@@ -70,12 +70,6 @@ export interface IGenre {
 }
 
 export const GenreSchema = new Schema<IGenre>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   title: {
     type: String,
     required: true

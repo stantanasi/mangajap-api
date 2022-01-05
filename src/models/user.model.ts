@@ -12,7 +12,7 @@ import Review, { IReview } from "./review.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -392,7 +392,7 @@ export default class User extends MySqlModel {
 
 
 export interface IUser {
-  _id: string;
+  _id: Types.ObjectId;
 
   uid: string;
   isAdmin: boolean;
@@ -435,12 +435,6 @@ export interface IUser {
 }
 
 export const UserSchema = new Schema<IUser>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   uid: {
     type: String,
     required: true

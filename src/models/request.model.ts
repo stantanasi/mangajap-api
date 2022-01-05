@@ -4,7 +4,7 @@ import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import User, { IUser } from "./user.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -85,26 +85,20 @@ export default class Request extends MySqlModel {
 
 
 export interface IRequest {
-  _id: string;
+  _id: Types.ObjectId;
 
   requestType: string;
   data: string;
   isDone: boolean;
   userHasRead: boolean;
 
-  user: string & IUser;
+  user: Types.ObjectId & IUser;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const RequestSchema = new Schema<IRequest>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   requestType: {
     type: String,
     required: true
@@ -127,7 +121,7 @@ export const RequestSchema = new Schema<IRequest>({
 
 
   user: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },

@@ -16,7 +16,7 @@ import MangaEntry, { IMangaEntry, MangaEntryModel } from "./manga-entry.model";
 import User from "./user.model";
 import { getDownloadURL, ref, uploadString, deleteObject, StorageReference } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -370,7 +370,7 @@ export default class Manga extends MySqlModel {
 
 
 export interface IManga {
-  _id: string;
+  _id: Types.ObjectId;
 
   title: string;
   titles: {
@@ -396,8 +396,8 @@ export interface IManga {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: string[] & IGenre[];
-  themes: string[] & ITheme[];
+  genres: Types.ObjectId[] & IGenre[];
+  themes: Types.ObjectId[] & ITheme[];
   volumes?: IVolume[];
   staff?: IStaff[];
   reviews?: IReview[];
@@ -409,12 +409,6 @@ export interface IManga {
 }
 
 export const MangaSchema = new Schema<IManga>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   title: {
     type: String,
     required: true,
@@ -513,13 +507,13 @@ export const MangaSchema = new Schema<IManga>({
 
 
   genres: [{
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Genre',
     default: [],
   }],
 
   themes: [{
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Theme',
     default: [],
   }],

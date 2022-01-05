@@ -6,7 +6,7 @@ import { BelongsTo, Column, Entity, PrimaryKey } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime, { IAnime } from "./anime.model";
 import User, { IUser } from "./user.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -130,7 +130,7 @@ export default class AnimeEntry extends MySqlModel {
 
 
 export interface IAnimeEntry {
-  _id: string;
+  _id: Types.ObjectId;
 
   isAdd: boolean;
   isFavorites: boolean;
@@ -140,20 +140,14 @@ export interface IAnimeEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: string & IUser;
-  anime: string & IAnime;
+  user: Types.ObjectId & IUser;
+  anime: Types.ObjectId & IAnime;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const AnimeEntrySchema = new Schema<IAnimeEntry>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   isAdd: {
     type: Boolean,
     default: true
@@ -192,13 +186,13 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry>({
 
 
   user: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
 
   anime: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Anime',
     required: true
   },

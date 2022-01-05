@@ -5,7 +5,7 @@ import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -96,12 +96,12 @@ export default class Franchise extends MySqlModel {
 
 
 export interface IFranchise {
-  _id: string;
+  _id: Types.ObjectId;
 
   role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
 
-  source: string & (IAnime | IManga);
-  destination: string & (IAnime | IManga);
+  source: Types.ObjectId & (IAnime | IManga);
+  destination: Types.ObjectId & (IAnime | IManga);
 
   sourceModel: 'Anime' | 'Manga';
   destinationModel: 'Anime' | 'Manga';
@@ -111,12 +111,6 @@ export interface IFranchise {
 }
 
 export const FranchiseSchema = new Schema<IFranchise>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   role: {
     type: String,
     required: true,
@@ -125,13 +119,13 @@ export const FranchiseSchema = new Schema<IFranchise>({
 
 
   source: {
-    type: String,
+    type: Schema.Types.ObjectId,
     refPath: 'sourceModel',
     required: true
   },
 
   destination: {
-    type: String,
+    type: Schema.Types.ObjectId,
     refPath: 'destinationModel',
     required: true
   },

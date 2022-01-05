@@ -5,7 +5,7 @@ import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime, { IAnime } from "./anime.model";
 import Season, { ISeason } from "./season.model";
-import { model, Schema } from 'mongoose';
+import { model, Schema, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -88,7 +88,7 @@ export default class Episode extends MySqlModel {
 
 
 export interface IEpisode {
-  _id: string;
+  _id: Types.ObjectId;
 
   titles: {
     [language: string]: string;
@@ -98,20 +98,14 @@ export interface IEpisode {
   airDate: Date | null;
   episodeType: '' | 'oav';
 
-  anime: string & IAnime;
-  season: string & ISeason;
+  anime: Types.ObjectId & IAnime;
+  season: Types.ObjectId & ISeason;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const EpisodeSchema = new Schema<IEpisode>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-  
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -140,13 +134,13 @@ export const EpisodeSchema = new Schema<IEpisode>({
 
   
   anime: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Anime',
     required: true
   },
   
   season: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Season',
     required: true
   },

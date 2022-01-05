@@ -7,7 +7,7 @@ import Staff, { IStaff } from "./staff.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -139,7 +139,7 @@ export default class People extends MySqlModel {
 
 
 export interface IPeople {
-  _id: string;
+  _id: Types.ObjectId;
 
   firstName: string;
   lastName: string;
@@ -155,12 +155,6 @@ export interface IPeople {
 }
 
 export const PeopleSchema = new Schema<IPeople>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   firstName: {
     type: String,
     default: ''

@@ -6,7 +6,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
 import People, { IPeople } from "./people.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -73,25 +73,19 @@ export default class Staff extends MySqlModel {
 
 
 export interface IStaff {
-  _id: string;
+  _id: Types.ObjectId;
 
   role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
 
-  people: string & IPeople;
-  anime?: string & IAnime;
-  manga?: string & IManga;
+  people: Types.ObjectId & IPeople;
+  anime?: Types.ObjectId & IAnime;
+  manga?: Types.ObjectId & IManga;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const StaffSchema = new Schema<IStaff>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   role: {
     type: String,
     required: true,
@@ -100,19 +94,19 @@ export const StaffSchema = new Schema<IStaff>({
 
 
   people: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'People',
     required: true
   },
 
   anime: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Anime',
     default: undefined
   },
 
   manga: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Manga',
     default: undefined
   },

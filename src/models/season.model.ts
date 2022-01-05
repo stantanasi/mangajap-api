@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import db from "../db";
 import { JsonApiAttribute, JsonApiId, JsonApiRelationship, JsonApiType } from "../utils/json-api/json-api-annotations";
 import JsonApiSerializer from '../utils/mongoose-jsonapi/jsonapi-serializer';
@@ -78,7 +78,7 @@ export default class Season extends MySqlModel {
 
 
 export interface ISeason {
-  _id: string;
+  _id: Types.ObjectId;
 
   titles: {
     [language: string]: string;
@@ -86,7 +86,7 @@ export interface ISeason {
   number: number;
   episodeCount: number;
 
-  anime: string & IAnime;
+  anime: Types.ObjectId & IAnime;
   episodes?: IEpisode[];
 
   createdAt: Date;
@@ -94,12 +94,6 @@ export interface ISeason {
 }
 
 export const SeasonSchema = new Schema<ISeason>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -117,7 +111,7 @@ export const SeasonSchema = new Schema<ISeason>({
 
 
   anime: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Anime',
     required: true
   },

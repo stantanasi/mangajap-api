@@ -4,7 +4,7 @@ import MySqlModel from "../utils/mysql/mysql-model";
 import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import User, { IUser } from "./user.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -75,30 +75,24 @@ export default class Follow extends MySqlModel {
 
 
 export interface IFollow {
-  _id: string;
+  _id: Types.ObjectId;
 
-  follower: string & IUser;
-  followed: string & IUser;
+  follower: Types.ObjectId & IUser;
+  followed: Types.ObjectId & IUser;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const FollowSchema = new Schema<IFollow>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   follower: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
 
   followed: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },

@@ -6,7 +6,7 @@ import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-anno
 import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Manga, { IManga } from "./manga.model";
 import User, { IUser } from "./user.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -134,7 +134,7 @@ export default class MangaEntry extends MySqlModel {
 
 
 export interface IMangaEntry {
-  _id: string;
+  _id: Types.ObjectId;
 
   isAdd: boolean;
   isFavorites: boolean;
@@ -145,20 +145,14 @@ export interface IMangaEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: string & IUser;
-  manga: string & IManga;
+  user: Types.ObjectId & IUser;
+  manga: Types.ObjectId & IManga;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const MangaEntrySchema = new Schema<IMangaEntry>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   isAdd: {
     type: Boolean,
     default: false
@@ -202,13 +196,13 @@ export const MangaEntrySchema = new Schema<IMangaEntry>({
 
 
   user: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
 
   manga: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Manga',
     required: true
   },

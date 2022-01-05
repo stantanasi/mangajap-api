@@ -6,7 +6,7 @@ import { MySqlColumn } from "../utils/mysql/mysql-column";
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
 import User, { IUser } from "./user.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -73,25 +73,19 @@ export default class Review extends MySqlModel {
 
 
 export interface IReview {
-  _id: string;
+  _id: Types.ObjectId;
 
   content: string;
 
-  user: string & IUser;
-  anime?: string & IAnime;
-  manga?: string & IManga;
+  user: Types.ObjectId & IUser;
+  anime?: Types.ObjectId & IAnime;
+  manga?: Types.ObjectId & IManga;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const ReviewSchema = new Schema<IReview>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   content: {
     type: String,
     required: true
@@ -99,19 +93,19 @@ export const ReviewSchema = new Schema<IReview>({
 
 
   user: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
 
   anime: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Anime',
     default: undefined
   },
 
   manga: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Manga',
     default: undefined
   },

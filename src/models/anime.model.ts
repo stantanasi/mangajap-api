@@ -18,7 +18,7 @@ import Season, { ISeason, SeasonModel } from "./season.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -392,7 +392,7 @@ export default class Anime extends MySqlModel {
 
 
 export interface IAnime {
-  _id: string;
+  _id: Types.ObjectId;
 
   title: string;
   titles: {
@@ -420,8 +420,8 @@ export interface IAnime {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: string[] & IGenre[];
-  themes: string[] & ITheme[];
+  genres: Types.ObjectId[] & IGenre[];
+  themes: Types.ObjectId[] & ITheme[];
   seasons?: ISeason[];
   episodes?: IEpisode[];
   staff?: IStaff[];
@@ -434,12 +434,6 @@ export interface IAnime {
 }
 
 export const AnimeSchema = new Schema<IAnime>({
-  _id: {
-    type: String,
-    required: true,
-  },
-
-
   title: {
     type: String,
     required: true,
@@ -548,13 +542,13 @@ export const AnimeSchema = new Schema<IAnime>({
 
 
   genres: [{
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Genre',
     default: [],
   }],
 
   themes: [{
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Theme',
     default: [],
   }],
@@ -739,7 +733,6 @@ JsonApiSerializer.register('anime', AnimeModel, {
     };
   }
 });
-// TODO: order by query
 
 
 // TODO: cronjobs

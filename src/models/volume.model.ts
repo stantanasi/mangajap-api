@@ -7,7 +7,7 @@ import Manga, { IManga } from "./manga.model";
 import { getDownloadURL, ref, uploadString, deleteObject } from '@firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 
 @Entity({
@@ -128,7 +128,7 @@ export default class Volume extends MySqlModel {
 
 
 export interface IVolume {
-  _id: string;
+  _id: Types.ObjectId;
 
   titles: {
     [language: string]: string;
@@ -139,19 +139,13 @@ export interface IVolume {
   published: Date | null;
   coverImage: string | null;
 
-  manga: string & IManga;
+  manga: Types.ObjectId & IManga;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const VolumeSchema = new Schema<IVolume>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
   titles: {
     type: Schema.Types.Mixed,
     default: {}
@@ -182,7 +176,7 @@ export const VolumeSchema = new Schema<IVolume>({
 
 
   manga: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Manga',
     required: true
   },

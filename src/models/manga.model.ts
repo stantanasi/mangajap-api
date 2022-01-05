@@ -400,7 +400,7 @@ export default class Manga extends MySqlModel {
         kr: this.title_kr!,
       },
       slug: this.slug!,
-      synopsis: this.slug!,
+      synopsis: this.synopsis!,
       startDate: this.startDate!,
       endDate: this.endDate!,
       origin: this.origin!,
@@ -416,7 +416,7 @@ export default class Manga extends MySqlModel {
       averageRating: this.averageRating!,
       ratingRank: this.ratingRank!,
       popularity: this.popularity!,
-      userCount: this.popularity!,
+      userCount: this.userCount!,
       favoritesCount: this.favoritesCount!,
       reviewCount: this.reviewCount!,
 

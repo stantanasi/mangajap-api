@@ -439,7 +439,7 @@ export default class Anime extends MySqlModel {
       averageRating: this.averageRating!,
       ratingRank: this.ratingRank!,
       popularity: this.popularity!,
-      userCount: this.popularity!,
+      userCount: this.userCount!,
       favoritesCount: this.favoritesCount!,
       reviewCount: this.reviewCount!,
 

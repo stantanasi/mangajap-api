@@ -84,7 +84,7 @@ userRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await UserModel.findById(req.params.id);
-    if (user?.id !== old?.id) {
+    if (!user?._id?.equals(old?._id)) {
       throw new PermissionDenied();
     }
 
@@ -111,7 +111,7 @@ userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await UserModel.findById(req.params.id);
-    if (user?.id !== old?.id) {
+    if (!user?._id?.equals(old?._id)) {
       throw new PermissionDenied();
     }
 

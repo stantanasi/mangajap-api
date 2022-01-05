@@ -70,7 +70,7 @@ animeEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await AnimeEntryModel.findById(req.params.id);
-    if (user?.id !== old?.user) {
+    if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
@@ -97,7 +97,7 @@ animeEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await AnimeEntryModel.findById(req.params.id);
-    if (user?.id !== old?.user) {
+    if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 

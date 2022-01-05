@@ -71,7 +71,7 @@ reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await ReviewModel.findById(req.params.id);
-    if (user?.id !== old?.user) {
+    if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
@@ -98,7 +98,7 @@ reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await ReviewModel.findById(req.params.id);
-    if (user?.id !== old?.user) {
+    if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 

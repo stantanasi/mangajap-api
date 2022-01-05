@@ -69,7 +69,7 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await FollowModel.findById(req.params.id);
-    if (user?.id !== old?.follower && user?.id !== old?.followed) {
+    if (!user?._id?.equals(old?.follower) && !user?._id?.equals(old?.followed)) {
       throw new PermissionDenied();
     }
 
@@ -96,7 +96,7 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await FollowModel.findById(req.params.id);
-    if (user?.id !== old?.follower && user?.id !== old?.followed) {
+    if (!user?._id?.equals(old?.follower) && !user?._id?.equals(old?.followed)) {
       throw new PermissionDenied();
     }
 

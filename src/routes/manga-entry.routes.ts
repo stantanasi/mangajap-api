@@ -70,7 +70,7 @@ mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await MangaEntryModel.findById(req.params.id);
-    if (user?._id !== old?.user) {
+    if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
@@ -135,7 +135,7 @@ mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       uid: bearerToken,
     });
     const old = await MangaEntryModel.findById(req.params.id);
-    if (user?.id !== old?.user) {
+    if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 

@@ -50,7 +50,7 @@ export const ReviewSchema = new Schema<IReview>({
 });
 
 
-export const ReviewModel = model<IReview>('Review', ReviewSchema);
+export const Review = model<IReview>('Review', ReviewSchema);
 
 
-JsonApiSerializer.register('reviews', ReviewModel);
+JsonApiSerializer.register('reviews', Review);

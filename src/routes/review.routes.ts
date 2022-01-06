@@ -1,8 +1,8 @@
 import express from "express";
-import { AnimeModel } from "../models/anime.model";
-import { MangaModel } from "../models/manga.model";
-import { ReviewModel } from "../models/review.model";
-import { UserModel } from "../models/user.model";
+import { Anime } from "../models/anime.model";
+import { Manga } from "../models/manga.model";
+import { Review } from "../models/review.model";
+import { User } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
@@ -14,8 +14,8 @@ const reviewRoutes = express.Router();
 reviewRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      ReviewModel,
-      JsonApiQueryParser.parse(req.query, ReviewModel)
+      Review,
+      JsonApiQueryParser.parse(req.query, Review)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -36,7 +36,7 @@ reviewRoutes.get('/', async (req, res, next) => {
 reviewRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      ReviewModel,
+      Review,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -49,9 +49,9 @@ reviewRoutes.post('/', isLogin(), async (req, res, next) => {
 reviewRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      ReviewModel,
+      Review,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, ReviewModel)
+      JsonApiQueryParser.parse(req.query, Review)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -67,16 +67,16 @@ reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await ReviewModel.findById(req.params.id);
+    const old = await Review.findById(req.params.id);
     if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
     const data = await MongooseAdapter.update(
-      ReviewModel,
+      Review,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -94,16 +94,16 @@ reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await ReviewModel.findById(req.params.id);
+    const old = await Review.findById(req.params.id);
     if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
     await MongooseAdapter.delete(
-      ReviewModel,
+      Review,
       req.params.id,
     );
 
@@ -117,10 +117,10 @@ reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 reviewRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      ReviewModel,
+      Review,
       req.params.id,
       'user',
-      JsonApiQueryParser.parse(req.query, UserModel),
+      JsonApiQueryParser.parse(req.query, User),
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -132,10 +132,10 @@ reviewRoutes.get('/:id/user', async (req, res, next) => {
 reviewRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      ReviewModel,
+      Review,
       req.params.id,
       'manga',
-      JsonApiQueryParser.parse(req.query, MangaModel),
+      JsonApiQueryParser.parse(req.query, Manga),
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -147,10 +147,10 @@ reviewRoutes.get('/:id/manga', async (req, res, next) => {
 reviewRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      ReviewModel,
+      Review,
       req.params.id,
       'anime',
-      JsonApiQueryParser.parse(req.query, AnimeModel),
+      JsonApiQueryParser.parse(req.query, Anime),
     );
 
     res.json(JsonApiSerializer.serialize(data));

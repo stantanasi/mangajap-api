@@ -90,7 +90,7 @@ MangaEntrySchema.index({
 }, { unique: true });
 
 
-export const MangaEntryModel = model<IMangaEntry>('MangaEntry', MangaEntrySchema);
+export const MangaEntry = model<IMangaEntry>('MangaEntry', MangaEntrySchema);
 
 
-JsonApiSerializer.register('manga-entries', MangaEntryModel);
+JsonApiSerializer.register('manga-entries', MangaEntry);

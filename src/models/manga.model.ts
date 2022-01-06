@@ -5,11 +5,11 @@ import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
-import { IMangaEntry, MangaEntryModel } from "./manga-entry.model";
-import { IReview, ReviewModel } from "./review.model";
+import { IMangaEntry, MangaEntry } from "./manga-entry.model";
+import { IReview, Review } from "./review.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
-import { IVolume, VolumeModel } from "./volume.model";
+import { IVolume, Volume } from "./volume.model";
 
 export interface IManga {
   _id: Types.ObjectId;
@@ -234,12 +234,12 @@ MangaSchema.pre('findOne', async function () {
   const _id = this.getQuery()._id;
   if (!_id) return;
 
-  await MangaModel.findOneAndUpdate(this.getQuery(), {
-    volumeCount: await VolumeModel.count({
+  await Manga.findOneAndUpdate(this.getQuery(), {
+    volumeCount: await Volume.count({
       manga: _id,
     }),
 
-    averageRating: (await MangaEntryModel.aggregate([
+    averageRating: (await MangaEntry.aggregate([
       { $match: { manga: _id } },
       {
         $group: {
@@ -249,17 +249,17 @@ MangaSchema.pre('findOne', async function () {
       }
     ]))[0]?.averageRating,
 
-    userCount: await MangaEntryModel.count({
+    userCount: await MangaEntry.count({
       manga: _id,
       isAdd: true,
     }),
 
-    favoritesCount: await MangaEntryModel.count({
+    favoritesCount: await MangaEntry.count({
       manga: _id,
       isFavorites: true,
     }),
 
-    reviewCount: await ReviewModel.count({
+    reviewCount: await Review.count({
       manga: _id,
     }),
 
@@ -281,10 +281,10 @@ MangaSchema.pre('findOne', async function () {
 });
 
 
-export const MangaModel = model<IManga>('Manga', MangaSchema);
+export const Manga = model<IManga>('Manga', MangaSchema);
 
 
-JsonApiSerializer.register('manga', MangaModel, {
+JsonApiSerializer.register('manga', Manga, {
   query: (query: string) => {
     return {
       $or: [

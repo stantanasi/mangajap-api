@@ -83,10 +83,10 @@ PeopleSchema.pre<EnforceDocument<IPeople, {}, {}>>('save', async function () {
 });
 
 
-export const PeopleModel = model<IPeople>('People', PeopleSchema);
+export const People = model<IPeople>('People', PeopleSchema);
 
 
-JsonApiSerializer.register('peoples', PeopleModel, {
+JsonApiSerializer.register('peoples', People, {
   query: (query: string) => {
     return {
       $or: [

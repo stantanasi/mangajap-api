@@ -59,7 +59,7 @@ SeasonSchema.virtual('episodes', {
 });
 
 
-export const SeasonModel = model<ISeason>('Season', SeasonSchema);
+export const Season = model<ISeason>('Season', SeasonSchema);
 
 
-JsonApiSerializer.register('seasons', SeasonModel);
+JsonApiSerializer.register('seasons', Season);

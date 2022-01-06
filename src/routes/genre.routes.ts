@@ -1,7 +1,7 @@
 import express from "express";
-import { AnimeModel } from "../models/anime.model";
-import { GenreModel } from "../models/genre.model";
-import { MangaModel } from "../models/manga.model";
+import { Anime } from "../models/anime.model";
+import { Genre } from "../models/genre.model";
+import { Manga } from "../models/manga.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -12,8 +12,8 @@ const genreRoutes = express.Router();
 genreRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      GenreModel,
-      JsonApiQueryParser.parse(req.query, GenreModel)
+      Genre,
+      JsonApiQueryParser.parse(req.query, Genre)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -34,7 +34,7 @@ genreRoutes.get('/', async (req, res, next) => {
 genreRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      GenreModel,
+      Genre,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -47,9 +47,9 @@ genreRoutes.post('/', isAdmin(), async (req, res, next) => {
 genreRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      GenreModel,
+      Genre,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, GenreModel)
+      JsonApiQueryParser.parse(req.query, Genre)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -61,7 +61,7 @@ genreRoutes.get('/:id', async (req, res, next) => {
 genreRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      GenreModel,
+      Genre,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -75,7 +75,7 @@ genreRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 genreRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      GenreModel,
+      Genre,
       req.params.id,
     );
 
@@ -89,10 +89,10 @@ genreRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 genreRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      GenreModel,
+      Genre,
       req.params.id,
       'manga',
-      JsonApiQueryParser.parse(req.query, MangaModel),
+      JsonApiQueryParser.parse(req.query, Manga),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -113,10 +113,10 @@ genreRoutes.get('/:id/manga', async (req, res, next) => {
 genreRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      GenreModel,
+      Genre,
       req.params.id,
       'anime',
-      JsonApiQueryParser.parse(req.query, AnimeModel),
+      JsonApiQueryParser.parse(req.query, Anime),
     );
 
     res.json(JsonApiSerializer.serialize(data, {

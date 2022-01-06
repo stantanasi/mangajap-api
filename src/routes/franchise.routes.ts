@@ -1,6 +1,6 @@
 import express from "express";
-import { AnimeModel } from "../models/anime.model";
-import { FranchiseModel } from "../models/franchise.model";
+import { Anime } from "../models/anime.model";
+import { Franchise } from "../models/franchise.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -11,8 +11,8 @@ const franchiseRoutes = express.Router();
 franchiseRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      FranchiseModel,
-      JsonApiQueryParser.parse(req.query, FranchiseModel)
+      Franchise,
+      JsonApiQueryParser.parse(req.query, Franchise)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -33,7 +33,7 @@ franchiseRoutes.get('/', async (req, res, next) => {
 franchiseRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      FranchiseModel,
+      Franchise,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -46,9 +46,9 @@ franchiseRoutes.post('/', isAdmin(), async (req, res, next) => {
 franchiseRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      FranchiseModel,
+      Franchise,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, FranchiseModel)
+      JsonApiQueryParser.parse(req.query, Franchise)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -60,7 +60,7 @@ franchiseRoutes.get('/:id', async (req, res, next) => {
 franchiseRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      FranchiseModel,
+      Franchise,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -74,7 +74,7 @@ franchiseRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 franchiseRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      FranchiseModel,
+      Franchise,
       req.params.id,
     );
 
@@ -88,10 +88,10 @@ franchiseRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 franchiseRoutes.get('/:id/source', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      FranchiseModel,
+      Franchise,
       req.params.id,
       'source',
-      JsonApiQueryParser.parse(req.query, AnimeModel), // TODO: JsonApi.parameters(req, Anime | Manga)
+      JsonApiQueryParser.parse(req.query, Anime), // TODO: JsonApi.parameters(req, Anime | Manga)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -103,10 +103,10 @@ franchiseRoutes.get('/:id/source', async (req, res, next) => {
 franchiseRoutes.get('/:id/destination', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      FranchiseModel,
+      Franchise,
       req.params.id,
       'destination',
-      JsonApiQueryParser.parse(req.query, AnimeModel), // TODO: JsonApi.parameters(req, Anime | Manga)
+      JsonApiQueryParser.parse(req.query, Anime), // TODO: JsonApi.parameters(req, Anime | Manga)
     );
 
     res.json(JsonApiSerializer.serialize(data));

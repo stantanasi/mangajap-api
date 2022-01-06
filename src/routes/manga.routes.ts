@@ -1,12 +1,12 @@
 import express from "express";
-import { FranchiseModel } from "../models/franchise.model";
-import { GenreModel } from "../models/genre.model";
-import { MangaEntryModel } from "../models/manga-entry.model";
-import { MangaModel } from "../models/manga.model";
-import { ReviewModel } from "../models/review.model";
-import { StaffModel } from "../models/staff.model";
-import { ThemeModel } from "../models/theme.model";
-import { VolumeModel } from "../models/volume.model";
+import { Franchise } from "../models/franchise.model";
+import { Genre } from "../models/genre.model";
+import { MangaEntry } from "../models/manga-entry.model";
+import { Manga } from "../models/manga.model";
+import { Review } from "../models/review.model";
+import { Staff } from "../models/staff.model";
+import { Theme } from "../models/theme.model";
+import { Volume } from "../models/volume.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -17,8 +17,8 @@ const mangaRoutes = express.Router();
 mangaRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      MangaModel,
-      JsonApiQueryParser.parse(req.query, MangaModel)
+      Manga,
+      JsonApiQueryParser.parse(req.query, Manga)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -39,7 +39,7 @@ mangaRoutes.get('/', async (req, res, next) => {
 mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      MangaModel,
+      Manga,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -52,9 +52,9 @@ mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
 mangaRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      MangaModel,
+      Manga,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, MangaModel)
+      JsonApiQueryParser.parse(req.query, Manga)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -66,7 +66,7 @@ mangaRoutes.get('/:id', async (req, res, next) => {
 mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      MangaModel,
+      Manga,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -80,7 +80,7 @@ mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      MangaModel,
+      Manga,
       req.params.id,
     );
 
@@ -94,10 +94,10 @@ mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 mangaRoutes.get('/:id/volumes', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      MangaModel,
+      Manga,
       req.params.id,
       'volumes',
-      JsonApiQueryParser.parse(req.query, VolumeModel),
+      JsonApiQueryParser.parse(req.query, Volume),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -118,10 +118,10 @@ mangaRoutes.get('/:id/volumes', async (req, res, next) => {
 mangaRoutes.get('/:id/genres', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      MangaModel,
+      Manga,
       req.params.id,
       'genres',
-      JsonApiQueryParser.parse(req.query, GenreModel),
+      JsonApiQueryParser.parse(req.query, Genre),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -142,10 +142,10 @@ mangaRoutes.get('/:id/genres', async (req, res, next) => {
 mangaRoutes.get('/:id/themes', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      MangaModel,
+      Manga,
       req.params.id,
       'themes',
-      JsonApiQueryParser.parse(req.query, ThemeModel),
+      JsonApiQueryParser.parse(req.query, Theme),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -166,10 +166,10 @@ mangaRoutes.get('/:id/themes', async (req, res, next) => {
 mangaRoutes.get('/:id/staff', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      MangaModel,
+      Manga,
       req.params.id,
       'staff',
-      JsonApiQueryParser.parse(req.query, StaffModel),
+      JsonApiQueryParser.parse(req.query, Staff),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -190,10 +190,10 @@ mangaRoutes.get('/:id/staff', async (req, res, next) => {
 mangaRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      MangaModel,
+      Manga,
       req.params.id,
       'reviews',
-      JsonApiQueryParser.parse(req.query, ReviewModel),
+      JsonApiQueryParser.parse(req.query, Review),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -214,10 +214,10 @@ mangaRoutes.get('/:id/reviews', async (req, res, next) => {
 mangaRoutes.get('/:id/franchises', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      MangaModel,
+      Manga,
       req.params.id,
       'franchises',
-      JsonApiQueryParser.parse(req.query, FranchiseModel),
+      JsonApiQueryParser.parse(req.query, Franchise),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -238,10 +238,10 @@ mangaRoutes.get('/:id/franchises', async (req, res, next) => {
 mangaRoutes.get('/:id/manga-entry', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      MangaModel,
+      Manga,
       req.params.id,
       'manga-entry',
-      JsonApiQueryParser.parse(req.query, MangaEntryModel),
+      JsonApiQueryParser.parse(req.query, MangaEntry),
     );
 
     res.json(JsonApiSerializer.serialize(data));

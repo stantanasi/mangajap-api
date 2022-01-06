@@ -52,7 +52,7 @@ export const RequestSchema = new Schema<IRequest>({
 });
 
 
-export const RequestModel = model<IRequest>('Request', RequestSchema);
+export const Request = model<IRequest>('Request', RequestSchema);
 
 
-JsonApiSerializer.register('requests', RequestModel);
+JsonApiSerializer.register('requests', Request);

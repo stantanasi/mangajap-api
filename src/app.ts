@@ -22,7 +22,7 @@ import volumeRoutes from './routes/volume.routes';
 import { connect } from 'mongoose';
 import { AnimeSchema } from './models/anime.model';
 import { MangaSchema } from './models/manga.model';
-import { UserModel } from './models/user.model';
+import { User } from './models/user.model';
 import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
 import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
 
@@ -69,7 +69,7 @@ app.use(async (req, res, next) => {
     bearerToken = bearerToken.substring(7);
   }
 
-  const user = await UserModel.findOne({
+  const user = await User.findOne({
     uid: bearerToken,
   });
   if (user) {

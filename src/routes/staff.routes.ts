@@ -1,8 +1,8 @@
 import express from "express";
-import { AnimeModel } from "../models/anime.model";
-import { MangaModel } from "../models/manga.model";
-import { PeopleModel } from "../models/people.model";
-import { StaffModel } from "../models/staff.model";
+import { Anime } from "../models/anime.model";
+import { Manga } from "../models/manga.model";
+import { People } from "../models/people.model";
+import { Staff } from "../models/staff.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -13,8 +13,8 @@ const staffRoutes = express.Router();
 staffRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      StaffModel,
-      JsonApiQueryParser.parse(req.query, StaffModel)
+      Staff,
+      JsonApiQueryParser.parse(req.query, Staff)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -35,7 +35,7 @@ staffRoutes.get('/', async (req, res, next) => {
 staffRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      StaffModel,
+      Staff,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -48,9 +48,9 @@ staffRoutes.post('/', isAdmin(), async (req, res, next) => {
 staffRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      StaffModel,
+      Staff,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, StaffModel)
+      JsonApiQueryParser.parse(req.query, Staff)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -62,7 +62,7 @@ staffRoutes.get('/:id', async (req, res, next) => {
 staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      StaffModel,
+      Staff,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -76,7 +76,7 @@ staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      StaffModel,
+      Staff,
       req.params.id,
     );
 
@@ -90,10 +90,10 @@ staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 staffRoutes.get('/:id/people', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      StaffModel,
+      Staff,
       req.params.id,
       'people',
-      JsonApiQueryParser.parse(req.query, PeopleModel),
+      JsonApiQueryParser.parse(req.query, People),
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -105,10 +105,10 @@ staffRoutes.get('/:id/people', async (req, res, next) => {
 staffRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      StaffModel,
+      Staff,
       req.params.id,
       'anime',
-      JsonApiQueryParser.parse(req.query, AnimeModel),
+      JsonApiQueryParser.parse(req.query, Anime),
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -120,10 +120,10 @@ staffRoutes.get('/:id/anime', async (req, res, next) => {
 staffRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      StaffModel,
+      Staff,
       req.params.id,
       'manga',
-      JsonApiQueryParser.parse(req.query, MangaModel),
+      JsonApiQueryParser.parse(req.query, Manga),
     );
 
     res.json(JsonApiSerializer.serialize(data));

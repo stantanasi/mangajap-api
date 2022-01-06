@@ -1,13 +1,13 @@
 import express from "express";
-import { AnimeEntryModel } from "../models/anime-entry.model";
-import { AnimeModel } from "../models/anime.model";
-import { EpisodeModel } from "../models/episode.model";
-import { FranchiseModel } from "../models/franchise.model";
-import { GenreModel } from "../models/genre.model";
-import { ReviewModel } from "../models/review.model";
-import { SeasonModel } from "../models/season.model";
-import { StaffModel } from "../models/staff.model";
-import { ThemeModel } from "../models/theme.model";
+import { AnimeEntry } from "../models/anime-entry.model";
+import { Anime } from "../models/anime.model";
+import { Episode } from "../models/episode.model";
+import { Franchise } from "../models/franchise.model";
+import { Genre } from "../models/genre.model";
+import { Review } from "../models/review.model";
+import { Season } from "../models/season.model";
+import { Staff } from "../models/staff.model";
+import { Theme } from "../models/theme.model";
 import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -18,8 +18,8 @@ const animeRoutes = express.Router();
 animeRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      AnimeModel,
-      JsonApiQueryParser.parse(req.query, AnimeModel)
+      Anime,
+      JsonApiQueryParser.parse(req.query, Anime)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -40,7 +40,7 @@ animeRoutes.get('/', async (req, res, next) => {
 animeRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      AnimeModel,
+      Anime,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -53,9 +53,9 @@ animeRoutes.post('/', isAdmin(), async (req, res, next) => {
 animeRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      AnimeModel,
+      Anime,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, AnimeModel)
+      JsonApiQueryParser.parse(req.query, Anime)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -67,7 +67,7 @@ animeRoutes.get('/:id', async (req, res, next) => {
 animeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      AnimeModel,
+      Anime,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -81,7 +81,7 @@ animeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 animeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      AnimeModel,
+      Anime,
       req.params.id,
     );
 
@@ -95,10 +95,10 @@ animeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 animeRoutes.get('/:id/seasons', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'seasons',
-      JsonApiQueryParser.parse(req.query, SeasonModel),
+      JsonApiQueryParser.parse(req.query, Season),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -119,10 +119,10 @@ animeRoutes.get('/:id/seasons', async (req, res, next) => {
 animeRoutes.get('/:id/episodes', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'episodes',
-      JsonApiQueryParser.parse(req.query, EpisodeModel),
+      JsonApiQueryParser.parse(req.query, Episode),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -143,10 +143,10 @@ animeRoutes.get('/:id/episodes', async (req, res, next) => {
 animeRoutes.get('/:id/genres', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'genres',
-      JsonApiQueryParser.parse(req.query, GenreModel),
+      JsonApiQueryParser.parse(req.query, Genre),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -167,10 +167,10 @@ animeRoutes.get('/:id/genres', async (req, res, next) => {
 animeRoutes.get('/:id/themes', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'themes',
-      JsonApiQueryParser.parse(req.query, ThemeModel),
+      JsonApiQueryParser.parse(req.query, Theme),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -191,10 +191,10 @@ animeRoutes.get('/:id/themes', async (req, res, next) => {
 animeRoutes.get('/:id/staff', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'staff',
-      JsonApiQueryParser.parse(req.query, StaffModel),
+      JsonApiQueryParser.parse(req.query, Staff),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -215,10 +215,10 @@ animeRoutes.get('/:id/staff', async (req, res, next) => {
 animeRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'reviews',
-      JsonApiQueryParser.parse(req.query, ReviewModel),
+      JsonApiQueryParser.parse(req.query, Review),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -239,10 +239,10 @@ animeRoutes.get('/:id/reviews', async (req, res, next) => {
 animeRoutes.get('/:id/franchises', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'franchises',
-      JsonApiQueryParser.parse(req.query, FranchiseModel),
+      JsonApiQueryParser.parse(req.query, Franchise),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -263,10 +263,10 @@ animeRoutes.get('/:id/franchises', async (req, res, next) => {
 animeRoutes.get('/:id/anime-entry', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      AnimeModel,
+      Anime,
       req.params.id,
       'anime-entry',
-      JsonApiQueryParser.parse(req.query, AnimeEntryModel),
+      JsonApiQueryParser.parse(req.query, AnimeEntry),
     );
 
     res.json(JsonApiSerializer.serialize(data));

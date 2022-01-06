@@ -47,7 +47,7 @@ ThemeSchema.virtual('mangas', {
 });
 
 
-export const ThemeModel = model<ITheme>('Theme', ThemeSchema);
+export const Theme = model<ITheme>('Theme', ThemeSchema);
 
 
-JsonApiSerializer.register('themes', ThemeModel);
+JsonApiSerializer.register('themes', Theme);

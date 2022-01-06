@@ -1,6 +1,6 @@
 import express from "express";
-import { RequestModel } from "../models/request.model";
-import { UserModel } from "../models/user.model";
+import { Request } from "../models/request.model";
+import { User } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
@@ -12,8 +12,8 @@ const requestRoutes = express.Router();
 requestRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      RequestModel,
-      JsonApiQueryParser.parse(req.query, RequestModel)
+      Request,
+      JsonApiQueryParser.parse(req.query, Request)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -34,7 +34,7 @@ requestRoutes.get('/', async (req, res, next) => {
 requestRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      RequestModel,
+      Request,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -47,9 +47,9 @@ requestRoutes.post('/', isLogin(), async (req, res, next) => {
 requestRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      RequestModel,
+      Request,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, RequestModel)
+      JsonApiQueryParser.parse(req.query, Request)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -65,16 +65,16 @@ requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await RequestModel.findById(req.params.id);
+    const old = await Request.findById(req.params.id);
     if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
     const data = await MongooseAdapter.update(
-      RequestModel,
+      Request,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -92,16 +92,16 @@ requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await RequestModel.findById(req.params.id);
+    const old = await Request.findById(req.params.id);
     if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
     await MongooseAdapter.delete(
-      RequestModel,
+      Request,
       req.params.id,
     );
 
@@ -115,10 +115,10 @@ requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 requestRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      RequestModel,
+      Request,
       req.params.id,
       'user',
-      JsonApiQueryParser.parse(req.query, UserModel),
+      JsonApiQueryParser.parse(req.query, User),
     );
 
     res.json(JsonApiSerializer.serialize(data));

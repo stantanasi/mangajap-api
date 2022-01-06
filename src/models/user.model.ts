@@ -2,9 +2,9 @@ import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import { AnimeEntryModel, IAnimeEntry } from "./anime-entry.model";
-import { FollowModel, IFollow } from "./follow.model";
-import { IMangaEntry, MangaEntryModel } from "./manga-entry.model";
+import { AnimeEntry, IAnimeEntry } from "./anime-entry.model";
+import { Follow, IFollow } from "./follow.model";
+import { IMangaEntry, MangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
 export interface IUser {
@@ -249,21 +249,21 @@ UserSchema.pre('findOne', async function () {
   const _id = this.getQuery()._id;
   if (!_id) return;
 
-  await UserModel.findOneAndUpdate(this.getQuery(), {
-    followersCount: await FollowModel.count({
+  await User.findOneAndUpdate(this.getQuery(), {
+    followersCount: await Follow.count({
       followed: _id
     }),
 
-    followingCount: await FollowModel.count({
+    followingCount: await Follow.count({
       follower: _id
     }),
 
-    followedMangaCount: await MangaEntryModel.count({
+    followedMangaCount: await MangaEntry.count({
       user: _id,
       isAdd: true,
     }),
 
-    volumesRead: (await MangaEntryModel.aggregate([
+    volumesRead: (await MangaEntry.aggregate([
       { $match: { user: _id } },
       {
         $group: {
@@ -273,7 +273,7 @@ UserSchema.pre('findOne', async function () {
       }
     ]))[0]?.total,
 
-    chaptersRead: (await MangaEntryModel.aggregate([
+    chaptersRead: (await MangaEntry.aggregate([
       { $match: { user: _id } },
       {
         $group: {
@@ -283,12 +283,12 @@ UserSchema.pre('findOne', async function () {
       }
     ]))[0]?.total,
 
-    followedAnimeCount: await AnimeEntryModel.count({
+    followedAnimeCount: await AnimeEntry.count({
       user: _id,
       isAdd: true,
     }),
 
-    episodesWatch: (await AnimeEntryModel.aggregate([
+    episodesWatch: (await AnimeEntry.aggregate([
       { $match: { user: _id } },
       {
         $group: {
@@ -298,7 +298,7 @@ UserSchema.pre('findOne', async function () {
       }
     ]))[0]?.total,
 
-    timeSpentOnAnime: (await AnimeEntryModel.aggregate([
+    timeSpentOnAnime: (await AnimeEntry.aggregate([
       { $match: { user: _id } },
       {
         $lookup: {
@@ -320,10 +320,10 @@ UserSchema.pre('findOne', async function () {
 });
 
 
-export const UserModel = model<IUser>('User', UserSchema);
+export const User = model<IUser>('User', UserSchema);
 
 
-JsonApiSerializer.register('users', UserModel, {
+JsonApiSerializer.register('users', User, {
   self: (self: string) => {
     return {}
   },

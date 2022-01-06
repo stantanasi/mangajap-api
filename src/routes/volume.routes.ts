@@ -1,6 +1,6 @@
 import express from "express";
-import { MangaModel } from "../models/manga.model";
-import { VolumeModel } from "../models/volume.model";
+import { Manga } from "../models/manga.model";
+import { Volume } from "../models/volume.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -11,8 +11,8 @@ const volumeRoutes = express.Router();
 volumeRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      VolumeModel,
-      JsonApiQueryParser.parse(req.query, VolumeModel)
+      Volume,
+      JsonApiQueryParser.parse(req.query, Volume)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -33,7 +33,7 @@ volumeRoutes.get('/', async (req, res, next) => {
 volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      VolumeModel,
+      Volume,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -46,9 +46,9 @@ volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
 volumeRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      VolumeModel,
+      Volume,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, VolumeModel)
+      JsonApiQueryParser.parse(req.query, Volume)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -60,7 +60,7 @@ volumeRoutes.get('/:id', async (req, res, next) => {
 volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      VolumeModel,
+      Volume,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -74,7 +74,7 @@ volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      VolumeModel,
+      Volume,
       req.params.id,
     );
 
@@ -88,10 +88,10 @@ volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 volumeRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      VolumeModel,
+      Volume,
       req.params.id,
       'manga',
-      JsonApiQueryParser.parse(req.query, MangaModel),
+      JsonApiQueryParser.parse(req.query, Manga),
     );
 
     res.json(JsonApiSerializer.serialize(data));

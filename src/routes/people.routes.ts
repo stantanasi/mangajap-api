@@ -1,6 +1,6 @@
 import express from "express";
-import { PeopleModel } from "../models/people.model";
-import { StaffModel } from "../models/staff.model";
+import { People } from "../models/people.model";
+import { Staff } from "../models/staff.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -11,8 +11,8 @@ const peopleRoutes = express.Router();
 peopleRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      PeopleModel,
-      JsonApiQueryParser.parse(req.query, PeopleModel)
+      People,
+      JsonApiQueryParser.parse(req.query, People)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -33,7 +33,7 @@ peopleRoutes.get('/', async (req, res, next) => {
 peopleRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      PeopleModel,
+      People,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -46,9 +46,9 @@ peopleRoutes.post('/', isAdmin(), async (req, res, next) => {
 peopleRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      PeopleModel,
+      People,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, PeopleModel)
+      JsonApiQueryParser.parse(req.query, People)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -60,7 +60,7 @@ peopleRoutes.get('/:id', async (req, res, next) => {
 peopleRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      PeopleModel,
+      People,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -74,7 +74,7 @@ peopleRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 peopleRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      PeopleModel,
+      People,
       req.params.id,
     );
 
@@ -88,10 +88,10 @@ peopleRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 peopleRoutes.get('/:id/staff', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      PeopleModel,
+      People,
       req.params.id,
       'staff',
-      JsonApiQueryParser.parse(req.query, StaffModel),
+      JsonApiQueryParser.parse(req.query, Staff),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -112,10 +112,10 @@ peopleRoutes.get('/:id/staff', async (req, res, next) => {
 peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      PeopleModel,
+      People,
       req.params.id,
       'manga-staff',
-      JsonApiQueryParser.parse(req.query, StaffModel),
+      JsonApiQueryParser.parse(req.query, Staff),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -136,10 +136,10 @@ peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
 peopleRoutes.get('/:id/anime-staff', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      PeopleModel,
+      People,
       req.params.id,
       'anime-staff',
-      JsonApiQueryParser.parse(req.query, StaffModel),
+      JsonApiQueryParser.parse(req.query, Staff),
     );
 
     res.json(JsonApiSerializer.serialize(data, {

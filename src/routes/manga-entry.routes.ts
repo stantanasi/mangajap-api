@@ -1,7 +1,7 @@
 import express from "express";
-import { MangaEntryModel } from "../models/manga-entry.model";
-import { MangaModel } from "../models/manga.model";
-import { UserModel } from "../models/user.model";
+import { MangaEntry } from "../models/manga-entry.model";
+import { Manga } from "../models/manga.model";
+import { User } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
@@ -13,8 +13,8 @@ const mangaEntryRoutes = express.Router();
 mangaEntryRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      MangaEntryModel,
-      JsonApiQueryParser.parse(req.query, MangaEntryModel)
+      MangaEntry,
+      JsonApiQueryParser.parse(req.query, MangaEntry)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -35,7 +35,7 @@ mangaEntryRoutes.get('/', async (req, res, next) => {
 mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      MangaEntryModel,
+      MangaEntry,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -48,9 +48,9 @@ mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
 mangaEntryRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      MangaEntryModel,
+      MangaEntry,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, MangaEntryModel)
+      JsonApiQueryParser.parse(req.query, MangaEntry)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -66,16 +66,16 @@ mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await MangaEntryModel.findById(req.params.id);
+    const old = await MangaEntry.findById(req.params.id);
     if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
     const data = await MongooseAdapter.update(
-      MangaEntryModel,
+      MangaEntry,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -131,16 +131,16 @@ mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await MangaEntryModel.findById(req.params.id);
+    const old = await MangaEntry.findById(req.params.id);
     if (!user?._id?.equals(old?.user)) {
       throw new PermissionDenied();
     }
 
     await MongooseAdapter.delete(
-      MangaEntryModel,
+      MangaEntry,
       req.params.id,
     );
 
@@ -154,10 +154,10 @@ mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 mangaEntryRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      MangaEntryModel,
+      MangaEntry,
       req.params.id,
       'manga',
-      JsonApiQueryParser.parse(req.query, MangaModel),
+      JsonApiQueryParser.parse(req.query, Manga),
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -169,10 +169,10 @@ mangaEntryRoutes.get('/:id/manga', async (req, res, next) => {
 mangaEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      MangaEntryModel,
+      MangaEntry,
       req.params.id,
       'user',
-      JsonApiQueryParser.parse(req.query, UserModel),
+      JsonApiQueryParser.parse(req.query, User),
     );
 
     res.json(JsonApiSerializer.serialize(data));

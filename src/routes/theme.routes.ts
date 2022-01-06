@@ -1,7 +1,7 @@
 import express from "express";
-import { AnimeModel } from "../models/anime.model";
-import { MangaModel } from "../models/manga.model";
-import { ThemeModel } from "../models/theme.model";
+import { Anime } from "../models/anime.model";
+import { Manga } from "../models/manga.model";
+import { Theme } from "../models/theme.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -12,8 +12,8 @@ const themeRoutes = express.Router();
 themeRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      ThemeModel,
-      JsonApiQueryParser.parse(req.query, ThemeModel)
+      Theme,
+      JsonApiQueryParser.parse(req.query, Theme)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -34,7 +34,7 @@ themeRoutes.get('/', async (req, res, next) => {
 themeRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      ThemeModel,
+      Theme,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -47,9 +47,9 @@ themeRoutes.post('/', isAdmin(), async (req, res, next) => {
 themeRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      ThemeModel,
+      Theme,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, ThemeModel)
+      JsonApiQueryParser.parse(req.query, Theme)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -61,7 +61,7 @@ themeRoutes.get('/:id', async (req, res, next) => {
 themeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      ThemeModel,
+      Theme,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -75,7 +75,7 @@ themeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 themeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      ThemeModel,
+      Theme,
       req.params.id,
     );
 
@@ -89,10 +89,10 @@ themeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 themeRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      ThemeModel,
+      Theme,
       req.params.id,
       'manga',
-      JsonApiQueryParser.parse(req.query, MangaModel),
+      JsonApiQueryParser.parse(req.query, Manga),
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -113,10 +113,10 @@ themeRoutes.get('/:id/manga', async (req, res, next) => {
 themeRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      ThemeModel,
+      Theme,
       req.params.id,
       'anime',
-      JsonApiQueryParser.parse(req.query, AnimeModel),
+      JsonApiQueryParser.parse(req.query, Anime),
     );
 
     res.json(JsonApiSerializer.serialize(data, {

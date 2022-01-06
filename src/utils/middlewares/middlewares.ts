@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { UserModel } from "../../models/user.model";
+import { User } from "../../models/user.model";
 import { PermissionDenied } from "../json-api/json-api.error";
 
 export const isLogin = () => async (req: Request, res: Response, next: NextFunction) => {
@@ -13,7 +13,7 @@ export const isLogin = () => async (req: Request, res: Response, next: NextFunct
       throw new PermissionDenied();
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
     if (!user) {
@@ -37,7 +37,7 @@ export const isAdmin = () => async (req: Request, res: Response, next: NextFunct
       throw new PermissionDenied();
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
     if (!user?.isAdmin) {

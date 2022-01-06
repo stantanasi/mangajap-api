@@ -1,6 +1,6 @@
 import express from "express";
-import { FollowModel } from "../models/follow.model";
-import { UserModel } from "../models/user.model";
+import { Follow } from "../models/follow.model";
+import { User } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
@@ -12,8 +12,8 @@ const followRoutes = express.Router();
 followRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      FollowModel,
-      JsonApiQueryParser.parse(req.query, FollowModel)
+      Follow,
+      JsonApiQueryParser.parse(req.query, Follow)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -34,7 +34,7 @@ followRoutes.get('/', async (req, res, next) => {
 followRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      FollowModel,
+      Follow,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -47,9 +47,9 @@ followRoutes.post('/', isLogin(), async (req, res, next) => {
 followRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      FollowModel,
+      Follow,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, FollowModel)
+      JsonApiQueryParser.parse(req.query, Follow)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -65,16 +65,16 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await FollowModel.findById(req.params.id);
+    const old = await Follow.findById(req.params.id);
     if (!user?._id?.equals(old?.follower) && !user?._id?.equals(old?.followed)) {
       throw new PermissionDenied();
     }
 
     const data = await MongooseAdapter.update(
-      FollowModel,
+      Follow,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -92,16 +92,16 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await UserModel.findOne({
+    const user = await User.findOne({
       uid: bearerToken,
     });
-    const old = await FollowModel.findById(req.params.id);
+    const old = await Follow.findById(req.params.id);
     if (!user?._id?.equals(old?.follower) && !user?._id?.equals(old?.followed)) {
       throw new PermissionDenied();
     }
 
     await MongooseAdapter.delete(
-      FollowModel,
+      Follow,
       req.params.id,
     );
 
@@ -115,10 +115,10 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 followRoutes.get('/:id/follower', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      FollowModel,
+      Follow,
       req.params.id,
       'follower',
-      JsonApiQueryParser.parse(req.query, UserModel),
+      JsonApiQueryParser.parse(req.query, User),
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -130,10 +130,10 @@ followRoutes.get('/:id/follower', async (req, res, next) => {
 followRoutes.get('/:id/followed', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      FollowModel,
+      Follow,
       req.params.id,
       'followed',
-      JsonApiQueryParser.parse(req.query, UserModel),
+      JsonApiQueryParser.parse(req.query, User),
     );
 
     res.json(JsonApiSerializer.serialize(data));

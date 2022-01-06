@@ -3,12 +3,12 @@ import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import { AnimeEntryModel, IAnimeEntry } from "./anime-entry.model";
-import { EpisodeModel, IEpisode } from "./episode.model";
+import { AnimeEntry, IAnimeEntry } from "./anime-entry.model";
+import { Episode, IEpisode } from "./episode.model";
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
-import { IReview, ReviewModel } from "./review.model";
-import { ISeason, SeasonModel } from "./season.model";
+import { IReview, Review } from "./review.model";
+import { ISeason, Season } from "./season.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
 
@@ -258,16 +258,16 @@ AnimeSchema.pre('findOne', async function () {
   const _id = this.getQuery()._id;
   if (!_id) return;
 
-  await AnimeModel.findOneAndUpdate(this.getQuery(), {
-    seasonCount: await SeasonModel.count({
+  await Anime.findOneAndUpdate(this.getQuery(), {
+    seasonCount: await Season.count({
       anime: _id,
     }),
 
-    episodeCount: await EpisodeModel.count({
+    episodeCount: await Episode.count({
       anime: _id,
     }),
 
-    averageRating: (await AnimeEntryModel.aggregate([
+    averageRating: (await AnimeEntry.aggregate([
       { $match: { anime: _id } },
       {
         $group: {
@@ -277,17 +277,17 @@ AnimeSchema.pre('findOne', async function () {
       }
     ]))[0]?.averageRating,
 
-    userCount: await AnimeEntryModel.count({
+    userCount: await AnimeEntry.count({
       anime: _id,
       isAdd: true,
     }),
 
-    favoritesCount: await AnimeEntryModel.count({
+    favoritesCount: await AnimeEntry.count({
       anime: _id,
       isFavorites: true,
     }),
 
-    reviewCount: await ReviewModel.count({
+    reviewCount: await Review.count({
       anime: _id,
     }),
 
@@ -309,10 +309,10 @@ AnimeSchema.pre('findOne', async function () {
 });
 
 
-export const AnimeModel = model<IAnime>('Anime', AnimeSchema);
+export const Anime = model<IAnime>('Anime', AnimeSchema);
 
 
-JsonApiSerializer.register('anime', AnimeModel, {
+JsonApiSerializer.register('anime', Anime, {
   query: (query: string) => {
     return {
       $or: [

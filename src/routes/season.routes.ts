@@ -1,7 +1,7 @@
 import express from "express";
-import { AnimeModel } from "../models/anime.model";
-import { EpisodeModel } from "../models/episode.model";
-import { SeasonModel } from "../models/season.model";
+import { Anime } from "../models/anime.model";
+import { Episode } from "../models/episode.model";
+import { Season } from "../models/season.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -12,8 +12,8 @@ const seasonRoutes = express.Router();
 seasonRoutes.get('/', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.find(
-      SeasonModel,
-      JsonApiQueryParser.parse(req.query, SeasonModel)
+      Season,
+      JsonApiQueryParser.parse(req.query, Season)
     );
 
     res.json(JsonApiSerializer.serialize(data, {
@@ -34,7 +34,7 @@ seasonRoutes.get('/', async (req, res, next) => {
 seasonRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.create(
-      SeasonModel,
+      Season,
       JsonApiSerializer.deserialize(req.body)
     );
 
@@ -47,9 +47,9 @@ seasonRoutes.post('/', isAdmin(), async (req, res, next) => {
 seasonRoutes.get('/:id', async (req, res, next) => {
   try {
     const data = await MongooseAdapter.findById(
-      SeasonModel,
+      Season,
       req.params.id,
-      JsonApiQueryParser.parse(req.query, SeasonModel)
+      JsonApiQueryParser.parse(req.query, Season)
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -61,7 +61,7 @@ seasonRoutes.get('/:id', async (req, res, next) => {
 seasonRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     const data = await MongooseAdapter.update(
-      SeasonModel,
+      Season,
       req.params.id,
       JsonApiSerializer.deserialize(req.body)
     );
@@ -75,7 +75,7 @@ seasonRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 seasonRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await MongooseAdapter.delete(
-      SeasonModel,
+      Season,
       req.params.id,
     );
 
@@ -89,10 +89,10 @@ seasonRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 seasonRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const { data } = await MongooseAdapter.findRelationship(
-      SeasonModel,
+      Season,
       req.params.id,
       'anime',
-      JsonApiQueryParser.parse(req.query, AnimeModel),
+      JsonApiQueryParser.parse(req.query, Anime),
     );
 
     res.json(JsonApiSerializer.serialize(data));
@@ -104,10 +104,10 @@ seasonRoutes.get('/:id/anime', async (req, res, next) => {
 seasonRoutes.get('/:id/episodes', async (req, res, next) => {
   try {
     const { data, count } = await MongooseAdapter.findRelationship(
-      SeasonModel,
+      Season,
       req.params.id,
       'episodes',
-      JsonApiQueryParser.parse(req.query, EpisodeModel),
+      JsonApiQueryParser.parse(req.query, Episode),
     );
 
     res.json(JsonApiSerializer.serialize(data, {

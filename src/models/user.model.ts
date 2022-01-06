@@ -14,7 +14,6 @@ import { storage, uploadFile } from '../firebase-app';
 import { StorageReference } from 'firebase/storage';
 import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import { transform } from "typescript";
 
 @Entity({
   database: db,

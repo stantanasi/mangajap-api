@@ -670,7 +670,7 @@ AnimeSchema.pre('findOne', async function () {
       anime: _id,
     }),
 
-    // TODO
+    // TODO: popularity
     // result.popularity = (
     //         SELECT
     //         COALESCE(

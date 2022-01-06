@@ -24,11 +24,19 @@ export const uploadFile = async (storageRef: StorageReference, file: string | nu
     file = file.replace(/(\r\n|\n|\r)/gm, '');
 
     if (file.startsWith('data')) {
-      return uploadString(storageRef, file, 'data_url')
-        .then((result) => getDownloadURL(result.ref));
+      return uploadString(
+        storageRef,
+        file,
+        'data_url',
+        { contentType: 'image/jpeg' },
+      ).then((result) => getDownloadURL(result.ref));
     } else {
-      return uploadString(storageRef, file, 'base64')
-        .then((result) => getDownloadURL(result.ref));
+      return uploadString(
+        storageRef,
+        file,
+        'base64',
+        { contentType: 'image/jpeg' },
+      ).then((result) => getDownloadURL(result.ref));
     }
   }
 }

@@ -621,7 +621,7 @@ MangaSchema.pre('findOne', async function () {
       manga: _id,
     }),
 
-    // TODO
+    // TODO: popularity
     // manga_popularity = (
     //   SELECT
     //       COALESCE(

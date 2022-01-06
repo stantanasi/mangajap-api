@@ -58,7 +58,8 @@ export const FranchiseSchema = new Schema<IFranchise>({
   toObject: { virtuals: true },
 });
 
-export const Franchise = model<IFranchise>('Franchise', FranchiseSchema);
+const Franchise = model<IFranchise>('Franchise', FranchiseSchema);
+export default Franchise;
 
 
 JsonApiSerializer.register('franchises', Franchise);

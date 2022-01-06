@@ -47,7 +47,8 @@ GenreSchema.virtual('mangas', {
 });
 
 
-export const Genre = model<IGenre>('Genre', GenreSchema);
+const Genre = model<IGenre>('Genre', GenreSchema);
+export default Genre;
 
 
 JsonApiSerializer.register('genres', Genre);

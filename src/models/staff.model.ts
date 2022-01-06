@@ -51,7 +51,8 @@ export const StaffSchema = new Schema<IStaff>({
 });
 
 
-export const Staff = model<IStaff>('Staff', StaffSchema);
+const Staff = model<IStaff>('Staff', StaffSchema);
+export default Staff;
 
 
 JsonApiSerializer.register('staff', Staff);

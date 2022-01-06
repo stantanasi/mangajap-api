@@ -1,8 +1,14 @@
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
+import { connect } from 'mongoose';
 import cors from 'cors';
 import JsonApi from './utils/json-api/json-api';
 import JsonApiError, { NotFoundError } from './utils/json-api/json-api.error';
+import { AnimeSchema } from './models/anime.model';
+import { MangaSchema } from './models/manga.model';
+import User from './models/user.model';
+import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
+import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
 import animeEntryRoutes from './routes/anime-entry.routes';
 import animeRoutes from './routes/anime.routes';
 import episodeRoutes from './routes/episode.routes';
@@ -19,12 +25,6 @@ import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
-import { connect } from 'mongoose';
-import { AnimeSchema } from './models/anime.model';
-import { MangaSchema } from './models/manga.model';
-import { User } from './models/user.model';
-import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
-import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
 
 dotenv.config();
 

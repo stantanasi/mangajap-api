@@ -5,11 +5,11 @@ import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
-import { IMangaEntry, MangaEntry } from "./manga-entry.model";
-import { IReview, Review } from "./review.model";
+import MangaEntry, { IMangaEntry } from "./manga-entry.model";
+import Review, { IReview } from "./review.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
-import { IVolume, Volume } from "./volume.model";
+import Volume, { IVolume } from "./volume.model";
 
 export interface IManga {
   _id: Types.ObjectId;
@@ -281,7 +281,8 @@ MangaSchema.pre('findOne', async function () {
 });
 
 
-export const Manga = model<IManga>('Manga', MangaSchema);
+const Manga = model<IManga>('Manga', MangaSchema);
+export default Manga;
 
 
 JsonApiSerializer.register('manga', Manga, {

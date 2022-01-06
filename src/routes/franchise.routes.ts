@@ -1,6 +1,6 @@
 import express from "express";
-import { Anime } from "../models/anime.model";
-import { Franchise } from "../models/franchise.model";
+import Anime from "../models/anime.model";
+import Franchise from "../models/franchise.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "../../models/user.model";
+import User from "../../models/user.model";
 import { PermissionDenied } from "../json-api/json-api.error";
 
 export const isLogin = () => async (req: Request, res: Response, next: NextFunction) => {

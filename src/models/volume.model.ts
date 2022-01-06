@@ -81,7 +81,8 @@ VolumeSchema.pre<EnforceDocument<IVolume, {}, {}>>('save', async function () {
 });
 
 
-export const Volume = model<IVolume>('Volume', VolumeSchema);
+const Volume = model<IVolume>('Volume', VolumeSchema);
+export default Volume;
 
 
 JsonApiSerializer.register('volumes', Volume);

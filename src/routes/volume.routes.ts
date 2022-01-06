@@ -1,6 +1,6 @@
 import express from "express";
-import { Manga } from "../models/manga.model";
-import { Volume } from "../models/volume.model";
+import Manga from "../models/manga.model";
+import Volume from "../models/volume.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";

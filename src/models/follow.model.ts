@@ -38,7 +38,8 @@ FollowSchema.index({
 }, { unique: true });
 
 
-export const Follow = model<IFollow>('Follow', FollowSchema);
+const Follow = model<IFollow>('Follow', FollowSchema);
+export default Follow;
 
 
 JsonApiSerializer.register('follows', Follow, {

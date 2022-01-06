@@ -1,8 +1,8 @@
 import express from "express";
-import { Anime } from "../models/anime.model";
-import { Manga } from "../models/manga.model";
-import { Review } from "../models/review.model";
-import { User } from "../models/user.model";
+import Anime from "../models/anime.model";
+import Manga from "../models/manga.model";
+import Review from "../models/review.model";
+import User from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";

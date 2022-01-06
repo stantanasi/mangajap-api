@@ -84,7 +84,8 @@ AnimeEntrySchema.index({
 }, { unique: true });
 
 
-export const AnimeEntry = model<IAnimeEntry>('AnimeEntry', AnimeEntrySchema);
+const AnimeEntry = model<IAnimeEntry>('AnimeEntry', AnimeEntrySchema);
+export default AnimeEntry;
 
 
 JsonApiSerializer.register('anime-entries', AnimeEntry);

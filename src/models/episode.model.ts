@@ -69,7 +69,8 @@ export const EpisodeSchema = new Schema<IEpisode>({
 });
 
 
-export const Episode = model<IEpisode>('Episode', EpisodeSchema);
+const Episode = model<IEpisode>('Episode', EpisodeSchema);
+export default Episode;
 
 
 JsonApiSerializer.register('episodes', Episode);

@@ -3,12 +3,12 @@ import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import { AnimeEntry, IAnimeEntry } from "./anime-entry.model";
-import { Episode, IEpisode } from "./episode.model";
+import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
+import Episode, { IEpisode } from "./episode.model";
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
-import { IReview, Review } from "./review.model";
-import { ISeason, Season } from "./season.model";
+import Review, { IReview } from "./review.model";
+import Season, { ISeason } from "./season.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
 
@@ -309,7 +309,8 @@ AnimeSchema.pre('findOne', async function () {
 });
 
 
-export const Anime = model<IAnime>('Anime', AnimeSchema);
+const Anime = model<IAnime>('Anime', AnimeSchema);
+export default Anime;
 
 
 JsonApiSerializer.register('anime', Anime, {

@@ -83,7 +83,8 @@ PeopleSchema.pre<EnforceDocument<IPeople, {}, {}>>('save', async function () {
 });
 
 
-export const People = model<IPeople>('People', PeopleSchema);
+const People = model<IPeople>('People', PeopleSchema);
+export default People;
 
 
 JsonApiSerializer.register('peoples', People, {

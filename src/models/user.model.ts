@@ -2,9 +2,9 @@ import { Schema, model, Types, EnforceDocument } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import { AnimeEntry, IAnimeEntry } from "./anime-entry.model";
-import { Follow, IFollow } from "./follow.model";
-import { IMangaEntry, MangaEntry } from "./manga-entry.model";
+import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
+import Follow, { IFollow } from "./follow.model";
+import MangaEntry, { IMangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
 export interface IUser {
@@ -320,7 +320,8 @@ UserSchema.pre('findOne', async function () {
 });
 
 
-export const User = model<IUser>('User', UserSchema);
+const User = model<IUser>('User', UserSchema);
+export default User;
 
 
 JsonApiSerializer.register('users', User, {

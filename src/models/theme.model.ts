@@ -1,60 +1,7 @@
-import db from "../db";
-import { JsonApiType, JsonApiId, JsonApiAttribute, JsonApiRelationship } from "../utils/json-api/json-api-annotations";
-import MySqlModel from "../utils/mysql/mysql-model";
-import { Entity, PrimaryKey, Column, ManyToMany } from "../utils/mysql/mysql-annotations";
-import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime, { IAnime } from "./anime.model";
-import Manga, { IManga } from "./manga.model";
-import ThemeRelationships from "./theme-relationships.model";
 import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-
-@Entity({
-  database: db,
-  table: "theme"
-})
-@JsonApiType("themes")
-export default class Theme extends MySqlModel {
-
-  @PrimaryKey("theme_id")
-  @JsonApiId()
-  id?: string;
-
-
-  @Column("theme_title_fr")
-  @JsonApiAttribute()
-  title?: string;
-
-  @Column("theme_description")
-  @JsonApiAttribute()
-  description?: string;
-
-  @Column("theme_createdat", {
-    type: MySqlColumn.DateTime,
-    skipOnCreate: true,
-    skipOnUpdate: true,
-  })
-  @JsonApiAttribute()
-  createdAt?: Date;
-
-  @Column("theme_updatedat", {
-    type: MySqlColumn.DateTime,
-    skipOnCreate: true,
-    skipOnUpdate: true,
-  })
-  @JsonApiAttribute()
-  updatedAt?: Date;
-
-
-  @ManyToMany("id", ThemeRelationships, "ThemeRelationships", "themeId", "mangaId", Manga, "Manga", "id")
-  @JsonApiRelationship()
-  manga?: Manga[];
-
-  @ManyToMany("id", ThemeRelationships, "ThemeRelationships", "themeId", "animeId", Anime, "Anime", "id")
-  @JsonApiRelationship()
-  anime?: Anime[];
-}
-
+import { IAnime } from "./anime.model";
+import { IManga } from "./manga.model";
 
 export interface ITheme {
   _id: Types.ObjectId;

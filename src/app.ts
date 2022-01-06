@@ -1,4 +1,4 @@
-import console from 'console';
+import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import JsonApi from './utils/json-api/json-api';
@@ -25,6 +25,8 @@ import { MangaSchema } from './models/manga.model';
 import { UserModel } from './models/user.model';
 import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
 import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
+
+dotenv.config();
 
 const app = express();
 

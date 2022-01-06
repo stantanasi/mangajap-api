@@ -51,7 +51,9 @@ export default class MongooseAdapter {
   }
 
   static async update<T>(model: Model<T>, id: any, body: T) {
-    return model.findByIdAndUpdate(id, body, { new: true });
+    return model.findById(id)
+      .then((doc) => Object.assign(doc!, body))
+      .then(async (doc) => await doc.save());
   }
 
   static async delete<T>(model: Model<T>, id: any) {

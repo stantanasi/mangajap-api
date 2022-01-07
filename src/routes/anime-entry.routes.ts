@@ -1,7 +1,7 @@
 import express from "express";
 import AnimeEntry from "../models/anime-entry.model";
 import Anime from "../models/anime.model";
-import User from "../models/user.model";
+import User, { IUser } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
@@ -61,16 +61,9 @@ animeEntryRoutes.get('/:id', async (req, res, next) => {
 
 animeEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
-    let bearerToken = req.headers.authorization;
-    if (bearerToken?.startsWith('Bearer ')) {
-      bearerToken = bearerToken.substring(7);
-    }
-
-    const user = await User.findOne({
-      uid: bearerToken,
-    });
+    const user: IUser = res.locals.user;
     const old = await AnimeEntry.findById(req.params.id);
-    if (!user?._id?.equals(old?.user)) {
+    if (!user?._id?.equals(old?.user!)) {
       throw new PermissionDenied();
     }
 
@@ -88,16 +81,9 @@ animeEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
 
 animeEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
-    let bearerToken = req.headers.authorization;
-    if (bearerToken?.startsWith('Bearer ')) {
-      bearerToken = bearerToken.substring(7);
-    }
-
-    const user = await User.findOne({
-      uid: bearerToken,
-    });
+    const user: IUser = res.locals.user;
     const old = await AnimeEntry.findById(req.params.id);
-    if (!user?._id?.equals(old?.user)) {
+    if (!user?._id?.equals(old?.user!)) {
       throw new PermissionDenied();
     }
 

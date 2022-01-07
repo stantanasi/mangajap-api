@@ -57,44 +57,53 @@ app.use((req, res, next) => {
 });
 
 app.use(async (req, res, next) => {
-  await connect(process.env.MONGO_DB_URI!)
-  next();
+  try {
+    await connect(process.env.MONGO_DB_URI!)
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.use(async (req, res, next) => {
-  // TODO: create static function User.fromAccessToken()
-  // TODO: use firebase instead
-  let bearerToken = req.headers.authorization;
-  if (bearerToken?.startsWith('Bearer ')) {
-    bearerToken = bearerToken.substring(7);
-  }
+  try {
+    // TODO: use firebase instead
+    let bearerToken = req.headers.authorization;
+    if (bearerToken?.startsWith('Bearer ')) {
+      bearerToken = bearerToken.substring(7);
+    }
 
-  const user = await User.findOne({
-    uid: bearerToken,
-  });
-  if (user) {
-    AnimeSchema.virtual('anime-entry', {
-      ref: 'AnimeEntry',
-      localField: '_id',
-      foreignField: 'anime',
-      justOne: true,
-      match: {
-        user: user._id,
-      },
+    const user = await User.findOne({
+      uid: bearerToken,
     });
+    if (user) {
+      AnimeSchema.virtual('anime-entry', {
+        ref: 'AnimeEntry',
+        localField: '_id',
+        foreignField: 'anime',
+        justOne: true,
+        match: {
+          user: user._id,
+        },
+      });
 
-    MangaSchema.virtual('manga-entry', {
-      ref: 'MangaEntry',
-      localField: '_id',
-      foreignField: 'manga',
-      justOne: true,
-      match: {
-        user: user._id,
-      },
-    });
+      MangaSchema.virtual('manga-entry', {
+        ref: 'MangaEntry',
+        localField: '_id',
+        foreignField: 'manga',
+        justOne: true,
+        match: {
+          user: user._id,
+        },
+      });
+    }
+
+    res.locals.user = user;
+
+    next();
+  } catch (err) {
+    next(err);
   }
-
-  next();
 });
 
 app.use('/anime', animeRoutes);

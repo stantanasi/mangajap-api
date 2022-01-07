@@ -1,6 +1,6 @@
 import express from "express";
 import Follow from "../models/follow.model";
-import User from "../models/user.model";
+import User, { IUser } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
 import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
@@ -60,16 +60,9 @@ followRoutes.get('/:id', async (req, res, next) => {
 
 followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
-    let bearerToken = req.headers.authorization;
-    if (bearerToken?.startsWith('Bearer ')) {
-      bearerToken = bearerToken.substring(7);
-    }
-
-    const user = await User.findOne({
-      uid: bearerToken,
-    });
+    const user: IUser = res.locals.user;
     const old = await Follow.findById(req.params.id);
-    if (!user?._id?.equals(old?.follower) && !user?._id?.equals(old?.followed)) {
+    if (!user?._id?.equals(old?.follower!) && !user?._id?.equals(old?.followed!)) {
       throw new PermissionDenied();
     }
 
@@ -87,16 +80,9 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
 
 followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
-    let bearerToken = req.headers.authorization;
-    if (bearerToken?.startsWith('Bearer ')) {
-      bearerToken = bearerToken.substring(7);
-    }
-
-    const user = await User.findOne({
-      uid: bearerToken,
-    });
+    const user: IUser = res.locals.user;
     const old = await Follow.findById(req.params.id);
-    if (!user?._id?.equals(old?.follower) && !user?._id?.equals(old?.followed)) {
+    if (!user?._id?.equals(old?.follower!) && !user?._id?.equals(old?.followed!)) {
       throw new PermissionDenied();
     }
 

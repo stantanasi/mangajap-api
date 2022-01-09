@@ -189,8 +189,10 @@ export default abstract class JsonApiSerializer {
 
 
   static paginate(url: string, count: number, query: JsonApiQuery) {
-    const limit = query.page?.limit ?? 10;
-    const offset = query.page?.offset ?? 0;
+    const limit = +(query.page?.limit ?? 10);
+    const offset = +(query.page?.offset ?? 0);
+
+    url = url.split("?").shift() ?? '/';
 
     const firstLink = `${url}?${UrlQuery.encode(Object.assign(query, {
       page: {

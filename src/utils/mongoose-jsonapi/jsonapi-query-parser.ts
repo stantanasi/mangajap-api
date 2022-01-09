@@ -110,9 +110,9 @@ export default class JsonApiQueryParser {
         });
     }
 
-    mongooseQuery.limit = query.page?.limit ?? this.options.defaultPagination?.limit;
+    mongooseQuery.limit = +(query.page?.limit ?? this.options.defaultPagination?.limit ?? 100);
     
-    mongooseQuery.skip = query.page?.offset ?? this.options.defaultPagination?.offset;
+    mongooseQuery.skip = +(query.page?.offset ?? this.options.defaultPagination?.offset ?? 0);
 
     return mongooseQuery;
   }

@@ -64,7 +64,7 @@ reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await Review.findById(req.params.id);
-    if (!user?._id?.equals(old?.user!)) {
+    if (user?._id !== old?.user) {
       throw new PermissionDenied();
     }
 
@@ -84,7 +84,7 @@ reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await Review.findById(req.params.id);
-    if (!user?._id?.equals(old?.user!)) {
+    if (user?._id !== old?.user) {
       throw new PermissionDenied();
     }
 

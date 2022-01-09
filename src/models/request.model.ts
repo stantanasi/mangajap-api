@@ -10,7 +10,7 @@ export interface IRequest {
   isDone: boolean;
   userHasRead: boolean;
 
-  user: Types.ObjectId & IUser;
+  user: string & IUser;
 
   createdAt: Date;
   updatedAt: Date;
@@ -39,7 +39,7 @@ export const RequestSchema = new Schema<IRequest>({
 
 
   user: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },

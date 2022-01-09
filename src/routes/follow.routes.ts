@@ -62,7 +62,7 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await Follow.findById(req.params.id);
-    if (!user?._id?.equals(old?.follower!) && !user?._id?.equals(old?.followed!)) {
+    if (user?._id !== old?.follower && user?._id !== old?.followed) {
       throw new PermissionDenied();
     }
 
@@ -82,7 +82,7 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await Follow.findById(req.params.id);
-    if (!user?._id?.equals(old?.follower!) && !user?._id?.equals(old?.followed!)) {
+    if (user?._id !== old?.follower && user?._id !== old?.followed) {
       throw new PermissionDenied();
     }
 

@@ -15,7 +15,7 @@ export interface IMangaEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: Types.ObjectId & IUser;
+  user: string & IUser;
   manga: Types.ObjectId & IManga;
 
   createdAt: Date;
@@ -66,7 +66,7 @@ export const MangaEntrySchema = new Schema<IMangaEntry>({
 
 
   user: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },

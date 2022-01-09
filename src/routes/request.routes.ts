@@ -62,7 +62,7 @@ requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await Request.findById(req.params.id);
-    if (!user?._id?.equals(old?.user!)) {
+    if (user?._id !== old?.user) {
       throw new PermissionDenied();
     }
 
@@ -82,7 +82,7 @@ requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await Request.findById(req.params.id);
-    if (!user?._id?.equals(old?.user!)) {
+    if (user?._id !== old?.user) {
       throw new PermissionDenied();
     }
 

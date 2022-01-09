@@ -9,7 +9,7 @@ export interface IReview {
 
   content: string;
 
-  user: Types.ObjectId & IUser;
+  user: string & IUser;
   anime?: Types.ObjectId & IAnime;
   manga?: Types.ObjectId & IManga;
 
@@ -25,7 +25,7 @@ export const ReviewSchema = new Schema<IReview>({
 
 
   user: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },

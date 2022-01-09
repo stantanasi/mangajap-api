@@ -16,13 +16,10 @@ userRoutes.get('/', async (req, res, next) => {
   // TODO: filter self
   const filter = req.query.filter as any;
   if (filter?.self) {
-    let bearerToken = req.headers.authorization;
-    if (bearerToken?.startsWith('Bearer ')) {
-      bearerToken = bearerToken.substring(7);
-    }
+    const user: IUser = res.locals.user;
 
     delete filter.self
-    filter.uid = bearerToken
+    filter._id = user._id;
   }
 
   try {
@@ -77,7 +74,7 @@ userRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await User.findById(req.params.id);
-    if (!user?._id?.equals(old?._id)) {
+    if (user?._id !== old?._id) {
       throw new PermissionDenied();
     }
 
@@ -97,7 +94,7 @@ userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     const user: IUser = res.locals.user;
     const old = await User.findById(req.params.id);
-    if (!user?._id?.equals(old?._id)) {
+    if (user?._id !== old?._id) {
       throw new PermissionDenied();
     }
 

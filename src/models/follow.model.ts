@@ -5,8 +5,8 @@ import { IUser } from "./user.model";
 export interface IFollow {
   _id: Types.ObjectId;
 
-  follower: Types.ObjectId & IUser;
-  followed: Types.ObjectId & IUser;
+  follower: string & IUser;
+  followed: string & IUser;
 
   createdAt: Date;
   updatedAt: Date;
@@ -14,13 +14,13 @@ export interface IFollow {
 
 export const FollowSchema = new Schema<IFollow>({
   follower: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },
 
   followed: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },

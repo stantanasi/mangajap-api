@@ -8,9 +8,9 @@ import MangaEntry, { IMangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
 export interface IUser {
-  _id: Types.ObjectId;
+  _id: string;
 
-  uid: string;
+  uid?: string; // TODO: DEPRECATED
   isAdmin: boolean;
   isPremium: boolean;
 
@@ -45,9 +45,14 @@ export interface IUser {
 }
 
 export const UserSchema = new Schema<IUser>({
-  uid: {
+  _id: {
     type: String,
-    required: true
+    required: true,
+  },
+
+
+  uid: { // TODO: DEPRECATED
+    type: String,
   },
 
   isAdmin: {
@@ -235,9 +240,15 @@ UserSchema.virtual('reviews', {
 });
 
 
+UserSchema.pre<EnforceDocument<IUser, {}, {}>>('validate', async function () {
+  if (!this._id && this.uid) {
+    this._id = this.uid;
+    this.uid = undefined;
+  }
+});
+
 UserSchema.pre<EnforceDocument<IUser, {}, {}>>('save', async function () {
   if (this.isModified('avatar')) {
-    // TODO: faire ça pour toute les images
     this.avatar = await uploadFile(
       ref(storage, `users/${this._id}/images/profile.jpg`),
       this.avatar,

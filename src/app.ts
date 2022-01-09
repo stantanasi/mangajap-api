@@ -73,9 +73,7 @@ app.use(async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await User.findOne({
-      uid: bearerToken,
-    });
+    const user = await User.findById(bearerToken);
     if (user) {
       AnimeSchema.virtual('anime-entry', {
         ref: 'AnimeEntry',
@@ -106,6 +104,9 @@ app.use(async (req, res, next) => {
   }
 });
 
+// TODO: supprimer
+app.use('/people', peopleRoutes);
+
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);
 app.use('/episodes', episodeRoutes);
@@ -114,7 +115,7 @@ app.use('/franchises', franchiseRoutes);
 app.use('/genres', genreRoutes);
 app.use('/manga', mangaRoutes);
 app.use('/manga-entries', mangaEntryRoutes);
-app.use('/people', peopleRoutes);
+app.use('/peoples', peopleRoutes);
 app.use('/requests', requestRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/seasons', seasonRoutes);

@@ -14,7 +14,7 @@ export interface IAnimeEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: Types.ObjectId & IUser;
+  user: string & IUser;
   anime: Types.ObjectId & IAnime;
 
   createdAt: Date;
@@ -60,7 +60,7 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry>({
 
 
   user: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },

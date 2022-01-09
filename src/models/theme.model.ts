@@ -37,13 +37,13 @@ export const ThemeSchema = new Schema<ITheme>({
 ThemeSchema.virtual('animes', {
   ref: 'Anime',
   localField: '_id',
-  foreignField: 'genres'
+  foreignField: 'themes',
 });
 
 ThemeSchema.virtual('mangas', {
   ref: 'Manga',
   localField: '_id',
-  foreignField: 'genres'
+  foreignField: 'themes',
 });
 
 

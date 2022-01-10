@@ -10,9 +10,22 @@ const peopleRoutes = express.Router();
 
 peopleRoutes.get('/', async (req, res, next) => {
   try {
+    const query = JsonApiQueryParser.parse(req.query, People);
+
+    if (query.sort?.['random']) {
+      query.filter = query.filter || {};
+      query.filter._id = {
+        $in: (await People.aggregate([
+          { $sample: { size: +(query?.limit ?? 10) } }
+        ])).map((people) => people._id),
+      };
+
+      delete query.sort?.['random'];
+    }
+
     const { data, count } = await MongooseAdapter.find(
       People,
-      JsonApiQueryParser.parse(req.query, People)
+      query,
     );
 
     res.json(JsonApiSerializer.serialize(data, {

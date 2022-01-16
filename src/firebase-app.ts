@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getStorage } from "firebase/storage";
+import { deleteObject, getDownloadURL, getStorage, StorageReference, uploadString } from "firebase/storage";
 
 const firebaseApp = initializeApp({
   apiKey: "AIzaSyBERviz4ObXOcBPCHiY8weoU_zdA8UNcIk",
@@ -14,3 +14,29 @@ const firebaseApp = initializeApp({
 export default firebaseApp
 
 export const storage = getStorage(firebaseApp);
+
+export const uploadFile = async (storageRef: StorageReference, file: string | null) => {
+  if (file === null) {
+    return deleteObject(storageRef)
+      .then(() => null)
+      .catch(() => null);
+  } else {
+    file = file.replace(/(\r\n|\n|\r)/gm, '');
+
+    if (file.startsWith('data')) {
+      return uploadString(
+        storageRef,
+        file,
+        'data_url',
+        { contentType: 'image/jpeg' },
+      ).then((result) => getDownloadURL(result.ref));
+    } else {
+      return uploadString(
+        storageRef,
+        file,
+        'base64',
+        { contentType: 'image/jpeg' },
+      ).then((result) => getDownloadURL(result.ref));
+    }
+  }
+}

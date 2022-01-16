@@ -1,8 +1,14 @@
-import console from 'console';
+import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
+import { connect } from 'mongoose';
 import cors from 'cors';
 import JsonApi from './utils/json-api/json-api';
 import JsonApiError, { NotFoundError } from './utils/json-api/json-api.error';
+import { AnimeSchema } from './models/anime.model';
+import { MangaSchema } from './models/manga.model';
+import User from './models/user.model';
+import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
+import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
 import animeEntryRoutes from './routes/anime-entry.routes';
 import animeRoutes from './routes/anime.routes';
 import episodeRoutes from './routes/episode.routes';
@@ -19,7 +25,8 @@ import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
-import { connect } from 'mongoose';
+
+dotenv.config();
 
 const app = express();
 
@@ -37,21 +44,68 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  JsonApi.initialize(req, res);
-  next();
-});
-
-app.use((req, res, next) => {
-  if (req.body && Object.keys(req.body).length) {
-    req.body = JsonApi.decode(req.body.data);
-  }
+  JsonApiSerializer.initialize({
+    baseUrl: `${req.protocol}://${req.get('host')}`,
+  });
+  JsonApiQueryParser.initialize({
+    defaultPagination: {
+      limit: 10,
+      offset: 0,
+    },
+  });
   next();
 });
 
 app.use(async (req, res, next) => {
-  await connect(process.env.MONGO_DB_URI!)
-  next();
+  try {
+    await connect(process.env.MONGO_DB_URI!)
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
+
+app.use(async (req, res, next) => {
+  try {
+    // TODO: use firebase instead
+    let bearerToken = req.headers.authorization;
+    if (bearerToken?.startsWith('Bearer ')) {
+      bearerToken = bearerToken.substring(7);
+    }
+
+    const user = await User.findById(bearerToken);
+    if (user) {
+      AnimeSchema.virtual('anime-entry', {
+        ref: 'AnimeEntry',
+        localField: '_id',
+        foreignField: 'anime',
+        justOne: true,
+        match: {
+          user: user._id,
+        },
+      });
+
+      MangaSchema.virtual('manga-entry', {
+        ref: 'MangaEntry',
+        localField: '_id',
+        foreignField: 'manga',
+        justOne: true,
+        match: {
+          user: user._id,
+        },
+      });
+    }
+
+    res.locals.user = user;
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// TODO: supprimer
+app.use('/people', peopleRoutes);
 
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);
@@ -61,7 +115,7 @@ app.use('/franchises', franchiseRoutes);
 app.use('/genres', genreRoutes);
 app.use('/manga', mangaRoutes);
 app.use('/manga-entries', mangaEntryRoutes);
-app.use('/people', peopleRoutes);
+app.use('/peoples', peopleRoutes);
 app.use('/requests', requestRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/seasons', seasonRoutes);
@@ -76,6 +130,7 @@ app.all('*', (req, res) => {
 
 // Error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.log(err);
   if (err instanceof JsonApiError) {
     res.status(+(err.data.status || 500)).json(JsonApi.encodeError(err));
   } else {

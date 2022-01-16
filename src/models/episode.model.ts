@@ -1,137 +1,10 @@
-import db from "../db";
-import { JsonApiType, JsonApiId, JsonApiAttribute, JsonApiRelationship } from "../utils/json-api/json-api-annotations";
-import MySqlModel from "../utils/mysql/mysql-model";
-import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
-import { MySqlColumn } from "../utils/mysql/mysql-column";
-import Anime from "./anime.model";
-import Season from "./season.model";
-import { model, Schema } from 'mongoose';
-
-@Entity({
-  database: db,
-  table: "episode"
-})
-@JsonApiType("episodes")
-export default class Episode extends MySqlModel {
-
-  @PrimaryKey("episode_id")
-  @JsonApiId()
-  id?: number;
-
-  @Column("episode_animeid")
-  animeId?: number;
-
-  @Column("episode_seasonid")
-  seasonId?: number;
-
-
-  @Column("episode_title_fr")
-  @JsonApiAttribute("titles.fr")
-  title_fr?: string;
-
-  @Column("episode_title_en")
-  @JsonApiAttribute("titles.en")
-  title_en?: string;
-
-  @Column("episode_title_en_jp")
-  @JsonApiAttribute("titles.en_jp")
-  title_en_jp?: string;
-
-  @Column("episode_title_ja_jp")
-  @JsonApiAttribute("titles.ja_jp")
-  title_ja_jp?: string;
-
-  @Column("episode_relativenumber")
-  @JsonApiAttribute()
-  relativeNumber?: number;
-
-  @Column("episode_number")
-  @JsonApiAttribute()
-  number?: number;
-
-  @Column("episode_airdate", {
-    type: MySqlColumn.Date
-  })
-  @JsonApiAttribute()
-  airDate?: Date;
-
-  @Column("episode_type")
-  @JsonApiAttribute()
-  episodeType?: string;
-
-  @Column("episode_createdat", {
-    type: MySqlColumn.DateTime,
-    skipOnCreate: true,
-    skipOnUpdate: true,
-  })
-  @JsonApiAttribute()
-  createdAt?: Date;
-
-  @Column("episode_updatedat", {
-    type: MySqlColumn.DateTime,
-    skipOnCreate: true,
-    skipOnUpdate: true,
-  })
-  @JsonApiAttribute()
-  updatedAt?: Date;
-
-
-  @BelongsTo("animeId", Anime, "Anime", "id")
-  @JsonApiRelationship()
-  anime?: Anime;
-
-  @BelongsTo("seasonId", Season, "Season", "id")
-  @JsonApiRelationship()
-  season?: Season;
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await EpisodeModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await EpisodeModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await EpisodeModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IEpisode {
-    return {
-      _id: this.id!.toString(),
-
-      titles: {
-        fr: this.title_fr!,
-        en: this.title_en!,
-        en_jp: this.title_en_jp!,
-        ja_jp: this.title_ja_jp!,
-      },
-      relativeNumber: this.relativeNumber!,
-      number: this.number!,
-      airDate: this.airDate!,
-      episodeType: this.episodeType! as any,
-
-      anime: this.animeId!.toString(),
-      season: this.seasonId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
-}
-
+import { model, Schema, Types } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { IAnime } from "./anime.model";
+import { ISeason } from "./season.model";
 
 export interface IEpisode {
-  _id: string;
+  _id: Types.ObjectId;
 
   titles: {
     [language: string]: string;
@@ -141,20 +14,14 @@ export interface IEpisode {
   airDate: Date | null;
   episodeType: '' | 'oav';
 
-  anime: string;
-  season: string;
+  anime: Types.ObjectId & IAnime;
+  season: Types.ObjectId & ISeason;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-const EpisodeSchema = new Schema<IEpisode>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-  
+export const EpisodeSchema = new Schema<IEpisode>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -183,31 +50,27 @@ const EpisodeSchema = new Schema<IEpisode>({
 
   
   anime: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Anime',
     required: true
   },
   
   season: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'Season',
     required: true
   },
-
-  
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-  
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
-export const EpisodeModel = model<IEpisode>('Episode', EpisodeSchema);
+
+const Episode = model<IEpisode>('Episode', EpisodeSchema);
+export default Episode;
+
+
+JsonApiSerializer.register('episodes', Episode);

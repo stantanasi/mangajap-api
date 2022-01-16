@@ -3,82 +3,132 @@ import Anime from "../models/anime.model";
 import Manga from "../models/manga.model";
 import People from "../models/people.model";
 import Staff from "../models/staff.model";
-import User from "../models/user.model";
-import JsonApi from "../utils/json-api/json-api";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { isAdmin } from "../utils/middlewares/middlewares";
+import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const staffRoutes = express.Router();
 
-staffRoutes.get('/', async (req, res) => {
-  const [staffs, count] = await Staff.findAll(JsonApi.parameters(req, Staff));
-  res.json(await JsonApi.encode(req, staffs, count))
-});
+staffRoutes.get('/', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.find(
+      Staff,
+      JsonApiQueryParser.parse(req.query, Staff)
+    );
 
-staffRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const staff: Staff = req.body;
-  const newStaff = await staff.create();
-  res.json(await JsonApi.encode(req, newStaff));
-});
-
-staffRoutes.get('/:id(\\d+)', async (req, res) => {
-  const id: string = (req.params as any).id
-  const staff = await Staff.findById(id, JsonApi.parameters(req, Staff))
-  res.json(await JsonApi.encode(req, staff));
-});
-
-staffRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const staff: Staff = req.body;
-  const newStaff = await staff.update();
-  res.json(await JsonApi.encode(req, newStaff));
-});
-
-staffRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const staff = new Staff(); 
-  staff.id = (req.params as any).id;
-  await staff.delete();
-  res.status(204).send();
-});
-
-
-staffRoutes.get('/:id(\\d+)/people', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const staff = await Staff.findById(id);
-  const response = await staff?.getRelated("people", JsonApi.parameters(req, People));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 
-staffRoutes.get('/:id(\\d+)/manga', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const staff = await Staff.findById(id);
-  const response = await staff?.getRelated("manga", JsonApi.parameters(req, Manga));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+staffRoutes.post('/', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.create(
+      Staff,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 
-staffRoutes.get('/:id(\\d+)/anime', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const staff = await Staff.findById(id);
-  const response = await staff?.getRelated("anime", JsonApi.parameters(req, Anime));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+staffRoutes.get('/:id', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.findById(
+      Staff,
+      req.params.id,
+      JsonApiQueryParser.parse(req.query, Staff)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.update(
+      Staff,
+      req.params.id,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    await MongooseAdapter.delete(
+      Staff,
+      req.params.id,
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+staffRoutes.get('/:id/people', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      Staff,
+      req.params.id,
+      'people',
+      JsonApiQueryParser.parse(req.query, People),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+staffRoutes.get('/:id/anime', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      Staff,
+      req.params.id,
+      'anime',
+      JsonApiQueryParser.parse(req.query, Anime),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+staffRoutes.get('/:id/manga', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      Staff,
+      req.params.id,
+      'manga',
+      JsonApiQueryParser.parse(req.query, Manga),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 

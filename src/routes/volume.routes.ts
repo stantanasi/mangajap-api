@@ -1,64 +1,102 @@
 import express from "express";
 import Manga from "../models/manga.model";
-import User from "../models/user.model";
 import Volume from "../models/volume.model";
-import JsonApi from "../utils/json-api/json-api";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { isAdmin } from "../utils/middlewares/middlewares";
+import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const volumeRoutes = express.Router();
 
-volumeRoutes.get('/', async (req, res) => {
-  const [volumes, count] = await Volume.findAll(JsonApi.parameters(req, Volume));
-  res.json(await JsonApi.encode(req, volumes, count))
-});
+volumeRoutes.get('/', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.find(
+      Volume,
+      JsonApiQueryParser.parse(req.query, Volume)
+    );
 
-volumeRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
-
-  const volume: Volume = req.body;
-  const newVolume = await volume.create();
-  res.json(await JsonApi.encode(req, newVolume));
 });
 
-volumeRoutes.get('/:id(\\d+)', async (req, res) => {
-  const id: string = (req.params as any).id
-  const volume = await Volume.findById(id, JsonApi.parameters(req, Volume))
-  res.json(await JsonApi.encode(req, volume));
-});
+volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.create(
+      Volume,
+      JsonApiSerializer.deserialize(req.body)
+    );
 
-volumeRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
-
-  const volume: Volume = req.body;
-  const newVolume = await volume.update();
-  res.json(await JsonApi.encode(req, newVolume));
 });
 
-volumeRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
+volumeRoutes.get('/:id', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.findById(
+      Volume,
+      req.params.id,
+      JsonApiQueryParser.parse(req.query, Volume)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
+});
 
-  const volume = new Volume();
-  volume.id = (req.params as any).id;
-  await volume.delete();
-  res.status(204).send();
+volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.update(
+      Volume,
+      req.params.id,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    await MongooseAdapter.delete(
+      Volume,
+      req.params.id,
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
 });
 
 
-volumeRoutes.get('/:id(\\d+)/manga', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const volume = await Volume.findById(id);
-  const response = await volume?.getRelated("manga", JsonApi.parameters(req, Manga));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+volumeRoutes.get('/:id/manga', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      Volume,
+      req.params.id,
+      'manga',
+      JsonApiQueryParser.parse(req.query, Manga),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 

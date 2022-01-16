@@ -1,128 +1,18 @@
-import db from "../db";
-import { JsonApiAttribute, JsonApiFilter, JsonApiId, JsonApiRelationship, JsonApiType } from "../utils/json-api/json-api-annotations";
-import MySqlModel from "../utils/mysql/mysql-model";
-import { Entity, PrimaryKey, Column, BelongsTo } from "../utils/mysql/mysql-annotations";
-import { MySqlColumn } from "../utils/mysql/mysql-column";
-import User from "./user.model";
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { IUser } from "./user.model";
 
-@Entity({
-  database: db,
-  table: "follow"
-})
-@JsonApiType("follows")
-@JsonApiFilter({
-  followerId: (followerId: string) => {
-    return {
-      where: {
-        followerId: followerId,
-      }
-    }
-  },
-  followedId: (followedId: string) => {
-    return {
-      where: {
-        followedId: followedId,
-      }
-    }
-  },
-})
-export default class Follow extends MySqlModel {
+export interface IFollow {
+  _id: Types.ObjectId;
 
-  @PrimaryKey("follow_id")
-  @JsonApiId()
-  id?: number;
-
-
-  @Column("follow_followerid", {
-    skipOnUpdate: true,
-  })
-  followerId?: number;
-
-  @Column("follow_followedid", {
-    skipOnUpdate: true,
-  })
-  followedId?: number;
-
-
-  @Column("follow_createdat", {
-    type: MySqlColumn.DateTime,
-    skipOnCreate: true,
-    skipOnUpdate: true,
-  })
-  @JsonApiAttribute()
-  createdAt?: Date;
-
-  @Column("follow_updatedat", {
-    type: MySqlColumn.DateTime,
-    skipOnCreate: true,
-    skipOnUpdate: true,
-  })
-  @JsonApiAttribute()
-  updatedAt?: Date;
-
-
-
-  @BelongsTo("followerId", User, "User", "id")
-  @JsonApiRelationship()
-  follower?: User;
-
-  @BelongsTo("followedId", User, "User", "id")
-  @JsonApiRelationship()
-  followed?: User;
-
-
-  async create(): Promise<this> {
-    const model = await super.create()
-    await FollowModel.create(model.toMongoModel());
-    return model;
-  }
-
-  async update(): Promise<this> {
-    const model = await super.update()
-    await FollowModel.findByIdAndUpdate(model.id, {
-      $set: model.toMongoModel(),
-    });
-    return model;
-  }
-
-  async delete(): Promise<number> {
-    const result = await super.delete();
-    await FollowModel.findByIdAndDelete(this.id);
-    return result;
-  }
-
-  toMongoModel(): IFollow {
-    return {
-      _id: this.id!.toString(),
-
-      follower: this.followerId!.toString(),
-      followed: this.followedId!.toString(),
-
-      createdAt: this.createdAt!,
-      updatedAt: this.updatedAt!,
-    }
-  }
-}
-
-
-interface IFollow {
-  _id: string;
-
-  follower: string;
-  followed: string;
+  follower: string & IUser;
+  followed: string & IUser;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-const FollowSchema = new Schema<IFollow>({
-  _id: {
-    type: String,
-    required: true
-  },
-
-
+export const FollowSchema = new Schema<IFollow>({
   follower: {
     type: String,
     ref: 'User',
@@ -134,21 +24,12 @@ const FollowSchema = new Schema<IFollow>({
     ref: 'User',
     required: true
   },
-
-
-  createdAt: {
-    type: Date,
-    default: new Date()
-  },
-
-  updatedAt: {
-    type: Date,
-    default: new Date()
-  },
 }, {
   id: false,
+  versionKey: false,
+  timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 FollowSchema.index({
@@ -156,4 +37,20 @@ FollowSchema.index({
   followed: 1
 }, { unique: true });
 
-export const FollowModel = model<IFollow>('Follow', FollowSchema);
+
+const Follow = model<IFollow>('Follow', FollowSchema);
+export default Follow;
+
+
+JsonApiSerializer.register('follows', Follow, {
+  followerId: (followerId: string) => {
+    return {
+      follower: followerId,
+    };
+  },
+  followedId: (followedId: string) => {
+    return {
+      followed: followedId,
+    };
+  },
+});

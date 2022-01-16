@@ -2,75 +2,135 @@ import express from "express";
 import Anime from "../models/anime.model";
 import Genre from "../models/genre.model";
 import Manga from "../models/manga.model";
-import User from "../models/user.model";
-import JsonApi from "../utils/json-api/json-api";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { isAdmin } from "../utils/middlewares/middlewares";
+import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const genreRoutes = express.Router();
 
-genreRoutes.get('/', async (req, res) => {
-  const [genres, count] = await Genre.findAll(JsonApi.parameters(req, Genre));
-  res.json(await JsonApi.encode(req, genres, count))
-});
+genreRoutes.get('/', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.find(
+      Genre,
+      JsonApiQueryParser.parse(req.query, Genre)
+    );
 
-genreRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const genre: Genre = req.body;
-  const newGenre = await genre.create();
-  res.json(await JsonApi.encode(req, newGenre));
-});
-
-genreRoutes.get('/:id(\\d+)', async (req, res) => {
-  const id: string = (req.params as any).id
-  const genre = await Genre.findById(id, JsonApi.parameters(req, Genre))
-  res.json(await JsonApi.encode(req, genre));
-});
-
-genreRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const genre: Genre = req.body;
-  const newGenre = await genre.update();
-  res.json(await JsonApi.encode(req, newGenre));
-});
-
-genreRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || !user?.isAdmin) {
-    throw new PermissionDenied();
-  }
-
-  const genre = new Genre(); 
-  genre.id = (req.params as any).id;
-  await genre.delete();
-  res.status(204).send();
-});
-
-
-genreRoutes.get('/:id(\\d+)/manga', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const genre = await Genre.findById(id);
-  const response = await genre?.getRelated("manga", JsonApi.parameters(req, Manga));
-  if (Array.isArray(response)) {
-    const [mangas, count] = response;
-    res.json(await JsonApi.encode(req, mangas, count));
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 
-genreRoutes.get('/:id(\\d+)/anime', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const genre = await Genre.findById(id);
-  const response = await genre?.getRelated("anime", JsonApi.parameters(req, Anime));
-  if (Array.isArray(response)) {
-    const [animes, count] = response;
-    res.json(await JsonApi.encode(req, animes, count));
+genreRoutes.post('/', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.create(
+      Genre,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+genreRoutes.get('/:id', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.findById(
+      Genre,
+      req.params.id,
+      JsonApiQueryParser.parse(req.query, Genre)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+genreRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.update(
+      Genre,
+      req.params.id,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+genreRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+  try {
+    await MongooseAdapter.delete(
+      Genre,
+      req.params.id,
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+genreRoutes.get('/:id/manga', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      Genre,
+      req.params.id,
+      'manga',
+      JsonApiQueryParser.parse(req.query, Manga),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+genreRoutes.get('/:id/anime', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      Genre,
+      req.params.id,
+      'anime',
+      JsonApiQueryParser.parse(req.query, Anime),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 

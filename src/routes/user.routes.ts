@@ -3,118 +3,278 @@ import AnimeEntry from "../models/anime-entry.model";
 import Follow from "../models/follow.model";
 import MangaEntry from "../models/manga-entry.model";
 import Review from "../models/review.model";
-import User from "../models/user.model";
-import JsonApi from "../utils/json-api/json-api";
+import User, { IUser } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { isLogin } from "../utils/middlewares/middlewares";
+import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const userRoutes = express.Router();
 
-userRoutes.get('/', async (req, res) => {
-  const [users, count] = await User.findAll(JsonApi.parameters(req, User));
-  res.json(await JsonApi.encode(req, users, count))
-});
+userRoutes.get('/', async (req, res, next) => {
+  // TODO: filter self
+  const filter = req.query.filter as any;
+  if (filter?.self) {
+    const user: IUser = res.locals.user;
 
-userRoutes.post('/', async (req, res) => {
-  const user: User = req.body;
-  const newUser = await user.create();
-  res.json(await JsonApi.encode(req, newUser));
-});
-
-userRoutes.get('/:id(\\d+)', async (req, res) => {
-  const id: string = (req.params as any).id
-  const user = await User.findById(id, JsonApi.parameters(req, User));
-  res.json(await JsonApi.encode(req, user));
-});
-
-userRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null || user.id !== (req.body as User).id) {
-    throw new PermissionDenied();
+    delete filter.self
+    filter._id = user._id;
   }
 
-  const newAnime = await (req.body as User).update();
-  res.json(await JsonApi.encode(req, newAnime));
-});
+  try {
+    const { data, count } = await MongooseAdapter.find(
+      User,
+      JsonApiQueryParser.parse(req.query, User)
+    );
 
-userRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  const userToDelete = await User.findById((req.params as any).id);
-  if (user === null || userToDelete === null || user.id !== userToDelete.id) {
-    throw new PermissionDenied();
-  }
-
-  await userToDelete.delete();
-  res.status(204).send();
-});
-
-
-userRoutes.get('/:id(\\d+)/followers', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const user = await User.findById(id);
-  const response = await user?.getRelated("followers", JsonApi.parameters(req, Follow));
-  if (Array.isArray(response)) {
-    const [followers, count] = response;
-    res.json(await JsonApi.encode(req, followers, count));
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 
-userRoutes.get('/:id(\\d+)/following', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const user = await User.findById(id);
-  const response = await user?.getRelated("following", JsonApi.parameters(req, Follow));
-  if (Array.isArray(response)) {
-    const [following, count] = response;
-    res.json(await JsonApi.encode(req, following, count));
+userRoutes.post('/', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.create(
+      User,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 
-userRoutes.get('/:id(\\d+)/manga-library', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const user = await User.findById(id);
-  const response = await user?.getRelated("mangaLibrary", JsonApi.parameters(req, MangaEntry));
-  if (Array.isArray(response)) {
-    const [mangaLibrary, count] = response;
-    res.json(await JsonApi.encode(req, mangaLibrary, count));
+userRoutes.get('/:id', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.findById(
+      User,
+      req.params.id,
+      JsonApiQueryParser.parse(req.query, User)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 
-userRoutes.get('/:id(\\d+)/anime-library', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const user = await User.findById(id);
-  const response = await user?.getRelated("animeLibrary", JsonApi.parameters(req, AnimeEntry));
-  if (Array.isArray(response)) {
-    const [animeLibrary, count] = response;
-    res.json(await JsonApi.encode(req, animeLibrary, count));
+userRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+  try {
+    const user: IUser = res.locals.user;
+    const old = await User.findById(req.params.id);
+    if (user?._id !== old?._id) {
+      throw new PermissionDenied();
+    }
+
+    const data = await MongooseAdapter.update(
+      User,
+      req.params.id,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 
-userRoutes.get('/:id(\\d+)/manga-favorites', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const user = await User.findById(id);
-  const response = await user?.getRelated("mangaFavorites", JsonApi.parameters(req, MangaEntry));
-  if (Array.isArray(response)) {
-    const [mangaFavorites, count] = response;
-    res.json(await JsonApi.encode(req, mangaFavorites, count));
+userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+  try {
+    const user: IUser = res.locals.user;
+    const old = await User.findById(req.params.id);
+    if (user?._id !== old?._id) {
+      throw new PermissionDenied();
+    }
+
+    await MongooseAdapter.delete(
+      User,
+      req.params.id,
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
   }
 });
 
-userRoutes.get('/:id(\\d+)/anime-favorites', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const user = await User.findById(id);
-  const response = await user?.getRelated("animeFavorites", JsonApi.parameters(req, AnimeEntry));
-  if (Array.isArray(response)) {
-    const [animeFavorites, count] = response;
-    res.json(await JsonApi.encode(req, animeFavorites, count));
+
+userRoutes.get('/:id/followers', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      User,
+      req.params.id,
+      'followers',
+      JsonApiQueryParser.parse(req.query, Follow),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 
-userRoutes.get('/:id(\\d+)/reviews', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const user = await User.findById(id);
-  const response = await user?.getRelated("reviews", JsonApi.parameters(req, Review));
-  if (Array.isArray(response)) {
-    const [reviews, count] = response;
-    res.json(await JsonApi.encode(req, reviews, count));
+userRoutes.get('/:id/following', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      User,
+      req.params.id,
+      'following',
+      JsonApiQueryParser.parse(req.query, Follow),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+userRoutes.get('/:id/anime-library', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      User,
+      req.params.id,
+      'anime-library',
+      JsonApiQueryParser.parse(req.query, AnimeEntry),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+userRoutes.get('/:id/manga-library', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      User,
+      req.params.id,
+      'manga-library',
+      JsonApiQueryParser.parse(req.query, MangaEntry),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+userRoutes.get('/:id/anime-favorites', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      User,
+      req.params.id,
+      'anime-favorites',
+      JsonApiQueryParser.parse(req.query, AnimeEntry),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+userRoutes.get('/:id/manga-favorites', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      User,
+      req.params.id,
+      'manga-favorites',
+      JsonApiQueryParser.parse(req.query, MangaEntry),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+userRoutes.get('/:id/reviews', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      User,
+      req.params.id,
+      'reviews',
+      JsonApiQueryParser.parse(req.query, Review),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 

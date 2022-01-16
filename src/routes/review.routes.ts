@@ -2,83 +2,146 @@ import express from "express";
 import Anime from "../models/anime.model";
 import Manga from "../models/manga.model";
 import Review from "../models/review.model";
-import User from "../models/user.model";
-import JsonApi from "../utils/json-api/json-api";
+import User, { IUser } from "../models/user.model";
 import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { isLogin } from "../utils/middlewares/middlewares";
+import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
+import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const reviewRoutes = express.Router();
 
-reviewRoutes.get('/', async (req, res) => {
-  const [reviews, count] = await Review.findAll(JsonApi.parameters(req, Review));
-  res.json(await JsonApi.encode(req, reviews, count));
-});
+reviewRoutes.get('/', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.find(
+      Review,
+      JsonApiQueryParser.parse(req.query, Review)
+    );
 
-reviewRoutes.post('/', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  if (user === null) {
-    throw new PermissionDenied();
-  }
-
-  const review: Review = req.body;
-  review.user = user;
-  const newReview = await review.create();
-  res.json(await JsonApi.encode(req, newReview));
-});
-
-reviewRoutes.get('/:id(\\d+)', async (req, res) => {
-  const id: string = (req.params as any).id
-  const review = await Review.findById(id, JsonApi.parameters(req, Review));
-  res.json(await JsonApi.encode(req, review));
-});
-
-reviewRoutes.patch('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  const oldReview = await Review.findById((req.params as any).id)
-  if (user === null || oldReview === null || user.id !== oldReview.userId) {
-    throw new PermissionDenied();
-  }
-
-  const review: Review = req.body;
-  const newReview = await review.update();
-  res.json(await JsonApi.encode(req, newReview));
-});
-
-reviewRoutes.delete('/:id(\\d+)', async (req, res) => {
-  const user = await User.fromAccessToken(req);
-  const review = await Review.findById((req.params as any).id);
-  if (user === null || review === null || user.id !== review.userId) {
-    throw new PermissionDenied();
-  }
-
-  await review.delete();
-  res.status(204).send();
-});
-
-
-reviewRoutes.get('/:id(\\d+)/user', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const review = await Review.findById(id);
-  const response = await review?.getRelated("user", JsonApi.parameters(req, User));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
   }
 });
 
-reviewRoutes.get('/:id(\\d+)/manga', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const review = await Review.findById(id);
-  const response = await review?.getRelated("manga", JsonApi.parameters(req, Manga));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+reviewRoutes.post('/', isLogin(), async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.create(
+      Review,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 
-reviewRoutes.get('/:id(\\d+)/anime', async (req, res) => {
-  const id: string = (req.params as any).id;
-  const review = await Review.findById(id);
-  const response = await review?.getRelated("anime", JsonApi.parameters(req, Anime));
-  if (response && !Array.isArray(response)) {
-    res.json(await JsonApi.encode(req, response));
+reviewRoutes.get('/:id', async (req, res, next) => {
+  try {
+    const data = await MongooseAdapter.findById(
+      Review,
+      req.params.id,
+      JsonApiQueryParser.parse(req.query, Review)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+  try {
+    const user: IUser = res.locals.user;
+    const old = await Review.findById(req.params.id);
+    if (user?._id !== old?.user) {
+      throw new PermissionDenied();
+    }
+
+    const data = await MongooseAdapter.update(
+      Review,
+      req.params.id,
+      JsonApiSerializer.deserialize(req.body)
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+  try {
+    const user: IUser = res.locals.user;
+    const old = await Review.findById(req.params.id);
+    if (user?._id !== old?.user) {
+      throw new PermissionDenied();
+    }
+
+    await MongooseAdapter.delete(
+      Review,
+      req.params.id,
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+reviewRoutes.get('/:id/user', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      Review,
+      req.params.id,
+      'user',
+      JsonApiQueryParser.parse(req.query, User),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+reviewRoutes.get('/:id/manga', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      Review,
+      req.params.id,
+      'manga',
+      JsonApiQueryParser.parse(req.query, Manga),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+reviewRoutes.get('/:id/anime', async (req, res, next) => {
+  try {
+    const { data } = await MongooseAdapter.findRelationship(
+      Review,
+      req.params.id,
+      'anime',
+      JsonApiQueryParser.parse(req.query, Anime),
+    );
+
+    res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
   }
 });
 

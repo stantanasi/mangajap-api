@@ -169,6 +169,10 @@ export default abstract class JsonApiSerializer {
   static deserialize(body: any): any {
     const data: any = {};
 
+    if (body.data?.id) {
+      data._id = body.data.id;
+    }
+
     if (body.data?.attributes) {
       Object.assign(data, body.data.attributes);
     }

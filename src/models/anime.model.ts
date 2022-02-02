@@ -233,12 +233,13 @@ AnimeSchema.virtual('franchises', {
 AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<EnforceDocument<IAnime, {}, {}>>('save', async function () {
-  // TODO: _id sera nul lors du create
+AnimeSchema.pre<EnforceDocument<IAnime, {}, {}>>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
+});
 
+AnimeSchema.pre<EnforceDocument<IAnime, {}, {}>>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `anime/${this._id}/images/cover.jpg`),

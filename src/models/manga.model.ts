@@ -210,11 +210,13 @@ MangaSchema.virtual('franchises', {
 MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('save', async function () {
+MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
+});
 
+MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this._id}/images/cover.jpg`),

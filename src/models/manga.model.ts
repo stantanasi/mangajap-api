@@ -242,7 +242,7 @@ MangaSchema.pre('findOne', async function () {
     }),
 
     averageRating: (await MangaEntry.aggregate([
-      { $match: { manga: _id } },
+      { $match: { manga: new Types.ObjectId(_id) } },
       {
         $group: {
           _id: null,

@@ -269,7 +269,7 @@ AnimeSchema.pre('findOne', async function () {
     }),
 
     averageRating: (await AnimeEntry.aggregate([
-      { $match: { anime: _id } },
+      { $match: { anime: new Types.ObjectId(_id) } },
       {
         $group: {
           _id: null,

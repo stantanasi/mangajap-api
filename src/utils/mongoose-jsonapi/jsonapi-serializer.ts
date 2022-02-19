@@ -119,7 +119,8 @@ export default abstract class JsonApiSerializer {
           return !isId(type) && !isRelationship(type);
         }
         const isRelationship = (type: SchemaType | VirtualType): boolean => {
-          return !!(type as any).options?.ref || !!(type as any).options.type?.[0]?.ref;
+          return !!(type as any).options?.ref || !!(type as any).options.type?.[0]?.ref ||
+            !!(type as any).options?.refPath || !!(type as any).options.type?.[0]?.refPath;
         }
 
         if (isAttribute(type)) {

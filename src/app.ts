@@ -67,7 +67,7 @@ app.use(async (req, res, next) => {
 
 app.use(async (req, res, next) => {
   try {
-    // TODO: use firebase instead
+    // TODO: use firebase token instead
     let bearerToken = req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {
       bearerToken = bearerToken.substring(7);

@@ -15,10 +15,11 @@ export class PermissionDenied extends JsonApiError {
 }
 
 export class NotFoundError extends JsonApiError {
-  constructor() {
+  constructor(path: string) {
     super({
       status: '404',
       title: 'Route Not Found',
+      detail: `The path '${path}' does not exist.`,
     })
   }
 }

@@ -125,7 +125,7 @@ app.use('/users', userRoutes);
 app.use('/volumes', volumeRoutes);
 
 app.all('*', (req, res) => {
-  throw new NotFoundError();
+  throw new NotFoundError(req.path);
 });
 
 // Error handling

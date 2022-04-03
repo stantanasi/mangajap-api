@@ -71,6 +71,16 @@ export const EpisodeSchema = new Schema<IEpisode>({
   toObject: { virtuals: true },
 });
 
+EpisodeSchema.index({
+  relativeNumber: 1,
+  season: 1
+}, { unique: true });
+
+EpisodeSchema.index({
+  number: 1,
+  anime: 1
+}, { unique: true });
+
 
 const Episode = model<IEpisode>('Episode', EpisodeSchema);
 export default Episode;

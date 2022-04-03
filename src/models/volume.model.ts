@@ -70,6 +70,11 @@ export const VolumeSchema = new Schema<IVolume>({
   toObject: { virtuals: true },
 });
 
+VolumeSchema.index({
+  number: 1,
+  manga: 1
+}, { unique: true });
+
 
 VolumeSchema.pre<EnforceDocument<IVolume, {}, {}>>('save', async function () {
   if (this.isModified('coverImage')) {

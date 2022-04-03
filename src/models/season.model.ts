@@ -58,6 +58,11 @@ SeasonSchema.virtual('episodes', {
   },
 });
 
+SeasonSchema.index({
+  number: 1,
+  anime: 1
+}, { unique: true });
+
 
 const Season = model<ISeason>('Season', SeasonSchema);
 export default Season;

@@ -57,7 +57,7 @@ mangaRoutes.get('/:id', async (req, res, next) => {
       JsonApiQueryParser.parse(req.query, Manga)
     );
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
   } catch (err) {
     next(err);
   }

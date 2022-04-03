@@ -1,7 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from '../utils/mongoose-jsonapi/jsonapi-serializer';
 import { IAnime } from "./anime.model";
-import { IEpisode } from "./episode.model";
+import Episode, { IEpisode } from "./episode.model";
 
 export interface ISeason {
   _id: Types.ObjectId;
@@ -62,6 +62,18 @@ SeasonSchema.index({
   number: 1,
   anime: 1
 }, { unique: true });
+
+
+SeasonSchema.pre('findOne', async function () {
+  const _id = this.getQuery()._id;
+  if (!_id) return;
+
+  await Season.findOneAndUpdate(this.getQuery(), {
+    episodeCount: await Episode.count({
+      season: _id,
+    }),
+  });
+});
 
 
 const Season = model<ISeason>('Season', SeasonSchema);

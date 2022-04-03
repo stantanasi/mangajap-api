@@ -39,7 +39,10 @@ export const EpisodeSchema = new Schema<IEpisode>({
   
   airDate: {
     type: Date,
-    default: null
+    default: null,
+    transform: function (this, val) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
   },
   
   episodeType: {

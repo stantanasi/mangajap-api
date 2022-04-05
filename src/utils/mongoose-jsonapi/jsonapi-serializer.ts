@@ -84,7 +84,7 @@ export default abstract class JsonApiSerializer {
   }
 
   static serializeDocument(doc: Document) {
-    const docJson = JSON.parse(JSON.stringify(doc));
+    const docJson: any = doc.toObject();
 
     const [type, modelName] = Object.entries(this.models)
       .find(([_, modelName]) => doc instanceof (models[modelName]))

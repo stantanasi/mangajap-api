@@ -10,6 +10,10 @@
   },
   "author": "Lory-Stan TANASI",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mangajap/mangajap-api.git"
+  },
   "dependencies": {
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.12",

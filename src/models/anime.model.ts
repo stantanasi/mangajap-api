@@ -187,6 +187,7 @@ export const AnimeSchema = new Schema<IAnime>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

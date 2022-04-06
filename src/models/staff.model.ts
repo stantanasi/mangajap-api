@@ -46,6 +46,7 @@ export const StaffSchema = new Schema<IStaff>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

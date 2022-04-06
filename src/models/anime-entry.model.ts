@@ -74,6 +74,7 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

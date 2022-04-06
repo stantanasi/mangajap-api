@@ -47,6 +47,7 @@ export const RequestSchema = new Schema<IRequest>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

@@ -54,6 +54,7 @@ export const FranchiseSchema = new Schema<IFranchise>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

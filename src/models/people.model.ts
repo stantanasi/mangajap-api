@@ -44,6 +44,7 @@ export const PeopleSchema = new Schema<IPeople>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

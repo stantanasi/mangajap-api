@@ -173,6 +173,7 @@ export const MangaSchema = new Schema<IManga>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

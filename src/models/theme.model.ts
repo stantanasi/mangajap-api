@@ -30,6 +30,7 @@ export const ThemeSchema = new Schema<ITheme>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

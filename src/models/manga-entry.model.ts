@@ -80,6 +80,7 @@ export const MangaEntrySchema = new Schema<IMangaEntry>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

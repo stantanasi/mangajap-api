@@ -45,6 +45,7 @@ export const ReviewSchema = new Schema<IReview>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

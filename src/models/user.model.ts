@@ -163,6 +163,7 @@ export const UserSchema = new Schema<IUser>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

@@ -67,18 +67,19 @@ export const EpisodeSchema = new Schema<IEpisode>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
 
 EpisodeSchema.index({
-  relativeNumber: 1,
-  season: 1
+  number: 1,
+  anime: 1
 }, { unique: true });
 
 EpisodeSchema.index({
-  number: 1,
-  anime: 1
+  relativeNumber: 1,
+  season: 1
 }, { unique: true });
 
 

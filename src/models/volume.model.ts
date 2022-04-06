@@ -66,6 +66,7 @@ export const VolumeSchema = new Schema<IVolume>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

@@ -74,44 +74,6 @@ mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     );
 
     res.json(JsonApiSerializer.serialize(data));
-
-    // TODO
-    // if (user.isAdmin) {
-    //   newMangaEntry.getRelated('manga')
-    //     .then(response => {
-    //       if (response && !Array.isArray(response)) {
-    //         const manga = response as Manga;
-    //         const newManga = new Manga();
-    //         newManga.id = manga.id;
-  
-    //         if (
-    //           (newMangaEntry.volumesRead || 0) > (manga.volumeCount || 0) ||
-    //           (newMangaEntry.chaptersRead || 0) > (manga.chapterCount || 0)
-    //         ) {
-    //           if ((newMangaEntry.volumesRead || 0) > (manga.volumeCount || 0)) {
-    //             for (let number = (manga.volumeCount || 0) + 1; number <= (newMangaEntry.volumesRead || 0); number++) {
-    //               const volume = new Volume();
-    //               volume.mangaId = manga.id;
-    //               volume.number = number;
-    //               volume.create()
-    //                 .then(() => { })
-    //                 .catch(() => { });
-    //             }
-    //             newManga.volumeCount = newMangaEntry.volumesRead;
-    //           }
-  
-    //           if ((newMangaEntry.chaptersRead || 0) > (manga.chapterCount || 0)) {
-    //             newManga.chapterCount = newMangaEntry.chaptersRead;
-    //           }
-  
-    //           newManga.update()
-    //             .then(() => { })
-    //             .catch(() => { });
-    //         }
-    //       }
-    //     })
-    //     .catch(err => console.log(err));
-    // }
   } catch (err) {
     next(err);
   }

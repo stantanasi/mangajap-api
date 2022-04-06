@@ -1,4 +1,5 @@
 import express from "express";
+import Chapter from "../models/chapter.model";
 import Franchise from "../models/franchise.model";
 import Genre from "../models/genre.model";
 import MangaEntry from "../models/manga-entry.model";
@@ -98,6 +99,30 @@ mangaRoutes.get('/:id/volumes', async (req, res, next) => {
       req.params.id,
       'volumes',
       JsonApiQueryParser.parse(req.query, Volume),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+mangaRoutes.get('/:id/chapters', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      Manga,
+      req.params.id,
+      'chapters',
+      JsonApiQueryParser.parse(req.query, Chapter),
     );
 
     res.json(JsonApiSerializer.serialize(data, {

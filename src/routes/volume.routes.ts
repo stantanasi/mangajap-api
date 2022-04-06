@@ -1,4 +1,5 @@
 import express from "express";
+import Chapter from "../models/chapter.model";
 import Manga from "../models/manga.model";
 import Volume from "../models/volume.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
@@ -95,6 +96,30 @@ volumeRoutes.get('/:id/manga', async (req, res, next) => {
     );
 
     res.json(JsonApiSerializer.serialize(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+volumeRoutes.get('/:id/chapters', async (req, res, next) => {
+  try {
+    const { data, count } = await MongooseAdapter.findRelationship(
+      Volume,
+      req.params.id,
+      'chapters',
+      JsonApiQueryParser.parse(req.query, Chapter),
+    );
+
+    res.json(JsonApiSerializer.serialize(data, {
+      meta: {
+        count: count,
+      },
+      pagination: {
+        url: req.originalUrl,
+        count: count!,
+        query: req.query,
+      },
+    }));
   } catch (err) {
     next(err);
   }

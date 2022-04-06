@@ -25,6 +25,7 @@ import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
+import chapterRoutes from './routes/chapter.routes';
 
 dotenv.config();
 
@@ -109,6 +110,7 @@ app.use('/people', peopleRoutes);
 
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);
+app.use('/chapters', chapterRoutes);
 app.use('/episodes', episodeRoutes);
 app.use('/follows', followRoutes);
 app.use('/franchises', franchiseRoutes);

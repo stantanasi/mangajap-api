@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -96,7 +96,7 @@ VolumeSchema.index({
 }, { unique: true });
 
 
-VolumeSchema.pre<EnforceDocument<IVolume, {}, {}>>('save', async function () {
+VolumeSchema.pre<Document & IVolume>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`),

@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
@@ -60,7 +60,7 @@ export const FranchiseSchema = new Schema<IFranchise>({
 });
 
 
-FranchiseSchema.pre<EnforceDocument<IFranchise, {}, {}>>('validate', async function () {
+FranchiseSchema.pre<Document & IFranchise>('validate', async function () {
   if (!this.sourceModel && this.source) {
     if (await Anime.exists({ _id: this.source }))
       this.sourceModel = 'Anime';

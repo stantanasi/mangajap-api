@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -74,7 +74,7 @@ PeopleSchema.virtual('manga-staff', {
 });
 
 
-PeopleSchema.pre<EnforceDocument<IPeople, {}, {}>>('save', async function () {
+PeopleSchema.pre<Document & IPeople>('save', async function () {
   if (this.isModified('image')) {
     this.image = await uploadFile(
       ref(storage, `peoples/${this._id}/images/profile.jpg`),

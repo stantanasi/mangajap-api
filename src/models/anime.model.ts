@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
@@ -234,13 +234,13 @@ AnimeSchema.virtual('franchises', {
 AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<EnforceDocument<IAnime, {}, {}>>('validate', async function () {
+AnimeSchema.pre<Document & IAnime>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-AnimeSchema.pre<EnforceDocument<IAnime, {}, {}>>('save', async function () {
+AnimeSchema.pre<Document & IAnime>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `anime/${this._id}/images/cover.jpg`),

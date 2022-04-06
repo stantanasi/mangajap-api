@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
@@ -222,13 +222,13 @@ MangaSchema.virtual('franchises', {
 MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('validate', async function () {
+MangaSchema.pre<Document & IManga>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('save', async function () {
+MangaSchema.pre<Document & IManga>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this._id}/images/cover.jpg`),

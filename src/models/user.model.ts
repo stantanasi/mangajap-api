@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -241,14 +241,14 @@ UserSchema.virtual('reviews', {
 });
 
 
-UserSchema.pre<EnforceDocument<IUser, {}, {}>>('validate', async function () {
+UserSchema.pre<Document & IUser>('validate', async function () {
   if (!this._id && this.uid) {
     this._id = this.uid;
     this.uid = undefined;
   }
 });
 
-UserSchema.pre<EnforceDocument<IUser, {}, {}>>('save', async function () {
+UserSchema.pre<Document & IUser>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
       ref(storage, `users/${this._id}/images/profile.jpg`),

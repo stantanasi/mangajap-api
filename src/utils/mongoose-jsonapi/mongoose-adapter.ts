@@ -7,7 +7,7 @@ export default class MongooseAdapter {
     const data = await model.find(query.filter)
       .limit(query.limit ?? 10)
       .skip(query.skip ?? 0)
-      .populate(query.populate)
+      .populate(query.populate!)
       .sort(query.sort);
     const count = await model.count(query.filter);
 
@@ -19,7 +19,7 @@ export default class MongooseAdapter {
 
   static async findById<T>(model: Model<T>, id: any, query: MongooseQuery) {
     return model.findById(id)
-      .populate(query.populate);
+      .populate(query.populate!);
   }
 
   static async findByIds<T>(model: Model<T>, ids: any[], query: MongooseQuery) {
@@ -31,7 +31,7 @@ export default class MongooseAdapter {
     })
       .limit(query.limit ?? 10)
       .skip(query.skip ?? 0)
-      .populate(query.populate)
+      .populate(query.populate!)
       .sort(query.sort);
     const count = await model.count({
       _id: {
@@ -62,7 +62,7 @@ export default class MongooseAdapter {
 
 
   static async findRelationship<T>(model: Model<T>, id: any, relationship: string, query: MongooseQuery) {
-    const data: Document | Document[] = (await model.findById(id)
+    const data: Document | Document[] | null = (await model.findById(id)
       .populate<any>({
         path: relationship,
         match: query.filter,
@@ -73,16 +73,16 @@ export default class MongooseAdapter {
           sort: query.sort,
         },
       }))
-      ?.[relationship];
+      ?.[relationship] ?? null;
 
     if (Array.isArray(data)) {
-      const count = (await model.findById(id)
+      const count = ((await model.findById(id)
         .populate<any>({
           path: relationship,
           match: query.filter,
-        }))
+        })) as any)
         ?.[relationship]
-        .length ?? 0;
+        ?.length ?? 0;
 
       return {
         data: data,

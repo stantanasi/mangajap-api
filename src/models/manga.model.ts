@@ -10,6 +10,7 @@ import Review, { IReview } from "./review.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
 import Volume, { IVolume } from "./volume.model";
+import Chapter, { IChapter } from './chapter.model';
 
 export interface IManga {
   _id: Types.ObjectId;
@@ -41,6 +42,7 @@ export interface IManga {
   genres: Types.ObjectId[] & IGenre[];
   themes: Types.ObjectId[] & ITheme[];
   volumes?: IVolume[];
+  chapters?: IChapter[];
   staff?: IStaff[];
   reviews?: IReview[];
   franchises?: IFranchise[];
@@ -187,6 +189,15 @@ MangaSchema.virtual('volumes', {
   },
 });
 
+MangaSchema.virtual('chapters', {
+  ref: 'Chapter',
+  localField: '_id',
+  foreignField: 'manga',
+  options: {
+    sort: { number: 1 },
+  },
+});
+
 MangaSchema.virtual('staff', {
   ref: 'Staff',
   localField: '_id',
@@ -239,6 +250,10 @@ MangaSchema.pre('findOne', async function () {
 
   await Manga.findOneAndUpdate(this.getQuery(), {
     volumeCount: await Volume.count({
+      manga: _id,
+    }),
+
+    chapterCount: await Chapter.count({
       manga: _id,
     }),
 

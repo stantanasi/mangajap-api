@@ -7,7 +7,7 @@ import Follow, { IFollow } from "./follow.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
-export interface IUser extends Document {
+export interface IUser extends Document<String> {
   _id: string;
 
   uid?: string; // TODO: DEPRECATED

@@ -20,7 +20,7 @@ export default abstract class JsonApiSerializer {
   }
 
 
-  static register(type: string, model: Model<any>, filter: any = {}) {
+  static register<T>(type: string, model: Model<T>, filter: any = {}) {
     this.types[model.modelName] = type;
     this.models[type] = model.modelName;
     this.filters[model.modelName] = filter;

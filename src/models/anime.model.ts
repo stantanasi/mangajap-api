@@ -12,9 +12,7 @@ import Season, { ISeason } from "./season.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
 
-export interface IAnime {
-  _id: Types.ObjectId;
-
+export interface IAnime extends Document {
   title: string;
   titles: {
     [language: string]: string

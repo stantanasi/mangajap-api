@@ -1,11 +1,9 @@
-import { model, Schema, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IManga } from './manga.model';
 import { IVolume } from './volume.model';
 
-export interface IChapter {
-  _id: Types.ObjectId;
-
+export interface IChapter extends Document {
   titles: {
     [language: string]: string;
   };
@@ -24,12 +22,12 @@ export const ChapterSchema = new Schema<IChapter>({
     type: Schema.Types.Mixed,
     default: {},
   },
-  
+
   number: {
     type: Number,
     required: true
   },
-  
+
   publishedAt: {
     type: Date,
     default: null,
@@ -38,13 +36,13 @@ export const ChapterSchema = new Schema<IChapter>({
     },
   },
 
-  
+
   manga: {
     type: Schema.Types.ObjectId,
     ref: 'Manga',
     required: true
   },
-  
+
   volume: {
     type: Schema.Types.ObjectId,
     ref: 'Volume',

@@ -3,9 +3,7 @@ import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
 
-export interface IFranchise {
-  _id: Types.ObjectId;
-
+export interface IFranchise extends Document {
   role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
 
   source: Types.ObjectId & (IAnime | IManga);
@@ -60,7 +58,7 @@ export const FranchiseSchema = new Schema<IFranchise>({
 });
 
 
-FranchiseSchema.pre<Document & IFranchise>('validate', async function () {
+FranchiseSchema.pre<IFranchise>('validate', async function () {
   if (!this.sourceModel && this.source) {
     if (await Anime.exists({ _id: this.source }))
       this.sourceModel = 'Anime';

@@ -7,7 +7,7 @@ import Follow, { IFollow } from "./follow.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
-export interface IUser {
+export interface IUser extends Document {
   _id: string;
 
   uid?: string; // TODO: DEPRECATED
@@ -241,14 +241,14 @@ UserSchema.virtual('reviews', {
 });
 
 
-UserSchema.pre<Document & IUser>('validate', async function () {
+UserSchema.pre<IUser>('validate', async function () {
   if (!this._id && this.uid) {
     this._id = this.uid;
     this.uid = undefined;
   }
 });
 
-UserSchema.pre<Document & IUser>('save', async function () {
+UserSchema.pre<IUser>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
       ref(storage, `users/${this._id}/images/profile.jpg`),

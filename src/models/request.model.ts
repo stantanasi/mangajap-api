@@ -1,10 +1,8 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IUser } from "./user.model";
 
-export interface IRequest {
-  _id: Types.ObjectId;
-
+export interface IRequest extends Document {
   requestType: string;
   data: string;
   isDone: boolean;

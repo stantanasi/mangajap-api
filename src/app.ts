@@ -25,6 +25,7 @@ import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
+import chapterRoutes from './routes/chapter.routes';
 
 dotenv.config();
 
@@ -32,16 +33,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-
-app.use((req, res, next) => {
-  if (req.method === 'POST') {
-    if (req.body?.REQUEST_METHOD) {
-      req.method = req.body.REQUEST_METHOD;
-      req.body = req.body.data;
-    }
-  }
-  next();
-});
+app.get('/favicon.ico', (_req, res) => res.status(204).send());
 
 app.use((req, res, next) => {
   JsonApiSerializer.initialize({
@@ -104,11 +96,9 @@ app.use(async (req, res, next) => {
   }
 });
 
-// TODO: supprimer
-app.use('/people', peopleRoutes);
-
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);
+app.use('/chapters', chapterRoutes);
 app.use('/episodes', episodeRoutes);
 app.use('/follows', followRoutes);
 app.use('/franchises', franchiseRoutes);

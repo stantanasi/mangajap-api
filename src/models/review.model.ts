@@ -1,12 +1,10 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
 
-export interface IReview {
-  _id: Types.ObjectId;
-
+export interface IReview extends Document {
   content: string;
 
   user: string & IUser;
@@ -45,6 +43,7 @@ export const ReviewSchema = new Schema<IReview>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

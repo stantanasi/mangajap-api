@@ -1,10 +1,8 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IUser } from "./user.model";
 
-export interface IFollow {
-  _id: Types.ObjectId;
-
+export interface IFollow extends Document {
   follower: string & IUser;
   followed: string & IUser;
 
@@ -28,6 +26,7 @@ export const FollowSchema = new Schema<IFollow>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

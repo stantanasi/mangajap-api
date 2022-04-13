@@ -13,7 +13,6 @@ import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 const userRoutes = express.Router();
 
 userRoutes.get('/', async (req, res, next) => {
-  // TODO: filter self
   const filter = req.query.filter as any;
   if (filter?.self) {
     const user: IUser = res.locals.user;

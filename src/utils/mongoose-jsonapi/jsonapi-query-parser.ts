@@ -50,7 +50,7 @@ export default class JsonApiQueryParser {
     this.options = options;
   }
 
-  static parse(query: JsonApiQuery, model: Model<any>): MongooseQuery {
+  static parse<T>(query: JsonApiQuery, model: Model<T>): MongooseQuery {
     const mongooseQuery: MongooseQuery = {};
 
     if (query.include) {

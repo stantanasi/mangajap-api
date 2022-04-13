@@ -1,11 +1,9 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 
-export interface IGenre {
-  _id: Types.ObjectId;
-
+export interface IGenre extends Document {
   title: string;
   description: string;
 
@@ -30,6 +28,7 @@ export const GenreSchema = new Schema<IGenre>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

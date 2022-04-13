@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
@@ -7,10 +7,9 @@ import Follow, { IFollow } from "./follow.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
-export interface IUser {
+export interface IUser extends Document<String> {
   _id: string;
 
-  uid?: string; // TODO: DEPRECATED
   isAdmin: boolean;
   isPremium: boolean;
 
@@ -50,10 +49,6 @@ export const UserSchema = new Schema<IUser>({
     required: true,
   },
 
-
-  uid: { // TODO: DEPRECATED
-    type: String,
-  },
 
   isAdmin: {
     type: Boolean,
@@ -163,6 +158,7 @@ export const UserSchema = new Schema<IUser>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
@@ -240,14 +236,7 @@ UserSchema.virtual('reviews', {
 });
 
 
-UserSchema.pre<EnforceDocument<IUser, {}, {}>>('validate', async function () {
-  if (!this._id && this.uid) {
-    this._id = this.uid;
-    this.uid = undefined;
-  }
-});
-
-UserSchema.pre<EnforceDocument<IUser, {}, {}>>('save', async function () {
+UserSchema.pre<IUser>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
       ref(storage, `users/${this._id}/images/profile.jpg`),

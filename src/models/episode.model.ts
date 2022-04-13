@@ -1,11 +1,9 @@
-import { model, Schema, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { ISeason } from "./season.model";
 
-export interface IEpisode {
-  _id: Types.ObjectId;
-
+export interface IEpisode extends Document {
   titles: {
     [language: string]: string;
   };
@@ -26,17 +24,17 @@ export const EpisodeSchema = new Schema<IEpisode>({
     type: Schema.Types.Mixed,
     default: {},
   },
-  
+
   relativeNumber: {
     type: Number,
     required: true
   },
-  
+
   number: {
     type: Number,
     required: true
   },
-  
+
   airDate: {
     type: Date,
     default: null,
@@ -44,20 +42,20 @@ export const EpisodeSchema = new Schema<IEpisode>({
       return val?.toISOString().slice(0, 10) ?? null;
     },
   },
-  
+
   episodeType: {
     type: String,
     default: '',
     enum: ['', 'oav']
   },
 
-  
+
   anime: {
     type: Schema.Types.ObjectId,
     ref: 'Anime',
     required: true
   },
-  
+
   season: {
     type: Schema.Types.ObjectId,
     ref: 'Season',
@@ -67,18 +65,19 @@ export const EpisodeSchema = new Schema<IEpisode>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
 
 EpisodeSchema.index({
-  relativeNumber: 1,
-  season: 1
+  number: 1,
+  anime: 1
 }, { unique: true });
 
 EpisodeSchema.index({
-  number: 1,
-  anime: 1
+  relativeNumber: 1,
+  season: 1
 }, { unique: true });
 
 

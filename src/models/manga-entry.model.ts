@@ -1,11 +1,9 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
 
-export interface IMangaEntry {
-  _id: Types.ObjectId;
-
+export interface IMangaEntry extends Document {
   isAdd: boolean;
   isFavorites: boolean;
   status: 'reading' | 'completed' | 'planned' | 'on_hold' | 'dropped';
@@ -80,6 +78,7 @@ export const MangaEntrySchema = new Schema<IMangaEntry>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

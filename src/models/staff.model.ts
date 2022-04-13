@@ -1,12 +1,10 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 import { IPeople } from "./people.model";
 
-export interface IStaff {
-  _id: Types.ObjectId;
-
+export interface IStaff extends Document {
   role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
 
   people: Types.ObjectId & IPeople;
@@ -46,6 +44,7 @@ export const StaffSchema = new Schema<IStaff>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

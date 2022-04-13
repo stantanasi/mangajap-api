@@ -1,4 +1,4 @@
-import { Schema, model, Types, EnforceDocument } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
@@ -10,10 +10,9 @@ import Review, { IReview } from "./review.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
 import Volume, { IVolume } from "./volume.model";
+import Chapter, { IChapter } from './chapter.model';
 
-export interface IManga {
-  _id: Types.ObjectId;
-
+export interface IManga extends Document {
   title: string;
   titles: {
     [language: string]: string
@@ -41,6 +40,7 @@ export interface IManga {
   genres: Types.ObjectId[] & IGenre[];
   themes: Types.ObjectId[] & ITheme[];
   volumes?: IVolume[];
+  chapters?: IChapter[];
   staff?: IStaff[];
   reviews?: IReview[];
   franchises?: IFranchise[];
@@ -173,12 +173,22 @@ export const MangaSchema = new Schema<IManga>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
 
 MangaSchema.virtual('volumes', {
   ref: 'Volume',
+  localField: '_id',
+  foreignField: 'manga',
+  options: {
+    sort: { number: 1 },
+  },
+});
+
+MangaSchema.virtual('chapters', {
+  ref: 'Chapter',
   localField: '_id',
   foreignField: 'manga',
   options: {
@@ -210,13 +220,13 @@ MangaSchema.virtual('franchises', {
 MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('validate', async function () {
+MangaSchema.pre<IManga>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-MangaSchema.pre<EnforceDocument<IManga, {}, {}>>('save', async function () {
+MangaSchema.pre<IManga>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this._id}/images/cover.jpg`),
@@ -238,6 +248,10 @@ MangaSchema.pre('findOne', async function () {
 
   await Manga.findOneAndUpdate(this.getQuery(), {
     volumeCount: await Volume.count({
+      manga: _id,
+    }),
+
+    chapterCount: await Chapter.count({
       manga: _id,
     }),
 

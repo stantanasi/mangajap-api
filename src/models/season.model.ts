@@ -1,11 +1,9 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
 import JsonApiSerializer from '../utils/mongoose-jsonapi/jsonapi-serializer';
 import { IAnime } from "./anime.model";
 import Episode, { IEpisode } from "./episode.model";
 
-export interface ISeason {
-  _id: Types.ObjectId;
-
+export interface ISeason extends Document {
   titles: {
     [language: string]: string;
   };
@@ -45,6 +43,7 @@ export const SeasonSchema = new Schema<ISeason>({
   id: false,
   versionKey: false,
   timestamps: true,
+  minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });

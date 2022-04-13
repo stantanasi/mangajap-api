@@ -106,9 +106,6 @@ app.use(async (req, res, next) => {
   }
 });
 
-// TODO: DEPRECATED
-app.use('/people', peopleRoutes);
-
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);
 app.use('/chapters', chapterRoutes);

@@ -232,13 +232,13 @@ AnimeSchema.virtual('franchises', {
 AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<Document & IAnime>('validate', async function () {
+AnimeSchema.pre<IAnime>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-AnimeSchema.pre<Document & IAnime>('save', async function () {
+AnimeSchema.pre<IAnime>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `anime/${this._id}/images/cover.jpg`),

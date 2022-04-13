@@ -10,7 +10,6 @@ import { IReview } from "./review.model";
 export interface IUser extends Document<String> {
   _id: string;
 
-  uid?: string; // TODO: DEPRECATED
   isAdmin: boolean;
   isPremium: boolean;
 
@@ -50,10 +49,6 @@ export const UserSchema = new Schema<IUser>({
     required: true,
   },
 
-
-  uid: { // TODO: DEPRECATED
-    type: String,
-  },
 
   isAdmin: {
     type: Boolean,
@@ -240,13 +235,6 @@ UserSchema.virtual('reviews', {
   foreignField: 'user'
 });
 
-
-UserSchema.pre<IUser>('validate', async function () {
-  if (!this._id && this.uid) {
-    this._id = this.uid;
-    this.uid = undefined;
-  }
-});
 
 UserSchema.pre<IUser>('save', async function () {
   if (this.isModified('avatar')) {

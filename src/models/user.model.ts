@@ -2,6 +2,7 @@ import { Schema, model, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Follow, { IFollow } from "./follow.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
@@ -43,7 +44,10 @@ export interface IUser {
   updatedAt: Date;
 }
 
-export const UserSchema = new Schema<IUser>({
+export interface IUserModel extends JsonApiModel<IUser> {
+}
+
+export const UserSchema = new Schema<IUser, IUserModel>({
   _id: {
     type: String,
     required: true,
@@ -320,7 +324,26 @@ UserSchema.pre('findOne', async function () {
 });
 
 
-const User = model<IUser>('User', UserSchema);
+UserSchema.plugin(MongooseJsonApi, {
+  type: 'users',
+  filter: {
+    query: (query: string) => {
+      return {
+        $or: [
+          {
+            pseudo: {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+        ]
+      };
+    }
+  },
+});
+
+
+const User = model<IUser, IUserModel>('User', UserSchema);
 export default User;
 
 

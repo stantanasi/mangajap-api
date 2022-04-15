@@ -2,8 +2,9 @@ import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import { IManga } from "./manga.model";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Chapter, { IChapter } from './chapter.model';
+import { IManga } from "./manga.model";
 
 export interface IVolume {
   _id: Types.ObjectId;
@@ -26,7 +27,10 @@ export interface IVolume {
   updatedAt: Date;
 }
 
-export const VolumeSchema = new Schema<IVolume>({
+export interface IVolumeModel extends JsonApiModel<IVolume> {
+}
+
+export const VolumeSchema = new Schema<IVolume, IVolumeModel>({
   titles: {
     type: Schema.Types.Mixed,
     default: {}
@@ -125,7 +129,12 @@ VolumeSchema.pre('findOne', async function () {
 });
 
 
-const Volume = model<IVolume>('Volume', VolumeSchema);
+VolumeSchema.plugin(MongooseJsonApi, {
+  type: 'volumes',
+});
+
+
+const Volume = model<IVolume, IVolumeModel>('Volume', VolumeSchema);
 export default Volume;
 
 

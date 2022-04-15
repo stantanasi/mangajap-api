@@ -2,6 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IStaff } from "./staff.model";
 
 export interface IPeople {
@@ -20,7 +21,10 @@ export interface IPeople {
   updatedAt: Date;
 }
 
-export const PeopleSchema = new Schema<IPeople>({
+export interface IPeopleModel extends JsonApiModel<IPeople> {
+}
+
+export const PeopleSchema = new Schema<IPeople, IPeopleModel>({
   firstName: {
     type: String,
     default: ''
@@ -84,7 +88,38 @@ PeopleSchema.pre<IPeople & Document>('save', async function () {
 });
 
 
-const People = model<IPeople>('People', PeopleSchema);
+PeopleSchema.plugin(MongooseJsonApi, {
+  type: 'peoples',
+  filter: {
+    query: (query: string) => {
+      return {
+        $or: [
+          {
+            firstName: {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+          {
+            lastName: {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+          {
+            pseudo: {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+        ]
+      };
+    }
+  },
+});
+
+
+const People = model<IPeople, IPeopleModel>('People', PeopleSchema);
 export default People;
 
 

@@ -1,5 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 
@@ -16,7 +17,10 @@ export interface IGenre {
   updatedAt: Date;
 }
 
-export const GenreSchema = new Schema<IGenre>({
+export interface IGenreModel extends JsonApiModel<IGenre> {
+}
+
+export const GenreSchema = new Schema<IGenre, IGenreModel>({
   title: {
     type: String,
     required: true
@@ -48,7 +52,12 @@ GenreSchema.virtual('mangas', {
 });
 
 
-const Genre = model<IGenre>('Genre', GenreSchema);
+GenreSchema.plugin(MongooseJsonApi, {
+  type: 'genres',
+});
+
+
+const Genre = model<IGenre, IGenreModel>('Genre', GenreSchema);
 export default Genre;
 
 

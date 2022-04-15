@@ -1,5 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 
@@ -16,7 +17,10 @@ export interface ITheme {
   updatedAt: Date;
 }
 
-export const ThemeSchema = new Schema<ITheme>({
+export interface IThemeModel extends JsonApiModel<ITheme> {
+}
+
+export const ThemeSchema = new Schema<ITheme, IThemeModel>({
   title: {
     type: String,
     required: true
@@ -48,7 +52,12 @@ ThemeSchema.virtual('mangas', {
 });
 
 
-const Theme = model<ITheme>('Theme', ThemeSchema);
+ThemeSchema.plugin(MongooseJsonApi, {
+  type: 'themes',
+});
+
+
+const Theme = model<ITheme, IThemeModel>('Theme', ThemeSchema);
 export default Theme;
 
 

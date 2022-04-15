@@ -1,5 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IUser } from "./user.model";
 
 export interface IRequest {
@@ -16,7 +17,10 @@ export interface IRequest {
   updatedAt: Date;
 }
 
-export const RequestSchema = new Schema<IRequest>({
+export interface IRequestModel extends JsonApiModel<IRequest> {
+}
+
+export const RequestSchema = new Schema<IRequest, IRequestModel>({
   requestType: {
     type: String,
     required: true
@@ -53,7 +57,12 @@ export const RequestSchema = new Schema<IRequest>({
 });
 
 
-const Request = model<IRequest>('Request', RequestSchema);
+RequestSchema.plugin(MongooseJsonApi, {
+  type: 'requests',
+});
+
+
+const Request = model<IRequest, IRequestModel>('Request', RequestSchema);
 export default Request;
 
 

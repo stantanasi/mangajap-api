@@ -1,5 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
 
@@ -18,7 +19,10 @@ export interface IFranchise {
   updatedAt: Date;
 }
 
-export const FranchiseSchema = new Schema<IFranchise>({
+export interface IFranchiseModel extends JsonApiModel<IFranchise> {
+}
+
+export const FranchiseSchema = new Schema<IFranchise, IFranchiseModel>({
   role: {
     type: String,
     required: true,
@@ -77,7 +81,12 @@ FranchiseSchema.pre<IFranchise & Document>('validate', async function () {
 });
 
 
-const Franchise = model<IFranchise>('Franchise', FranchiseSchema);
+FranchiseSchema.plugin(MongooseJsonApi, {
+  type: 'franchises',
+});
+
+
+const Franchise = model<IFranchise, IFranchiseModel>('Franchise', FranchiseSchema);
 export default Franchise;
 
 

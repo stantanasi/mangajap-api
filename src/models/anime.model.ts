@@ -3,6 +3,7 @@ import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Episode, { IEpisode } from "./episode.model";
 import { IFranchise } from "./franchise.model";
@@ -54,7 +55,10 @@ export interface IAnime {
   updatedAt: Date;
 }
 
-export const AnimeSchema = new Schema<IAnime>({
+export interface IAnimeModel extends JsonApiModel<IAnime> {
+}
+
+export const AnimeSchema = new Schema<IAnime, IAnimeModel>({
   title: {
     type: String,
     required: true,
@@ -311,7 +315,50 @@ AnimeSchema.pre('findOne', async function () {
 });
 
 
-const Anime = model<IAnime>('Anime', AnimeSchema);
+AnimeSchema.plugin(MongooseJsonApi, {
+  type: 'anime',
+  filter: {
+    query: (query: string) => {
+      return {
+        $or: [
+          {
+            title: {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+          {
+            'titles.fr': {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+          {
+            'titles.en': {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+          {
+            'titles.en_jp': {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+          {
+            'titles.ja_jp': {
+              $regex: query,
+              $options: 'i',
+            },
+          },
+        ]
+      };
+    }
+  },
+});
+
+
+const Anime = model<IAnime, IAnimeModel>('Anime', AnimeSchema);
 export default Anime;
 
 

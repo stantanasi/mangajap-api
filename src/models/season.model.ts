@@ -1,5 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from '../utils/mongoose-jsonapi/jsonapi-serializer';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import Episode, { IEpisode } from "./episode.model";
 
@@ -19,7 +20,10 @@ export interface ISeason {
   updatedAt: Date;
 }
 
-export const SeasonSchema = new Schema<ISeason>({
+export interface ISeasonModel extends JsonApiModel<ISeason> {
+}
+
+export const SeasonSchema = new Schema<ISeason, ISeasonModel>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -77,7 +81,12 @@ SeasonSchema.pre('findOne', async function () {
 });
 
 
-const Season = model<ISeason>('Season', SeasonSchema);
+SeasonSchema.plugin(MongooseJsonApi, {
+  type: 'seasons',
+});
+
+
+const Season = model<ISeason, ISeasonModel>('Season', SeasonSchema);
 export default Season;
 
 

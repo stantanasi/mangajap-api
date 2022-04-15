@@ -7,7 +7,7 @@ import Follow, { IFollow } from "./follow.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
-export interface IUser extends Document<String> {
+export interface IUser {
   _id: string;
 
   isAdmin: boolean;
@@ -236,7 +236,7 @@ UserSchema.virtual('reviews', {
 });
 
 
-UserSchema.pre<IUser>('save', async function () {
+UserSchema.pre<IUser & Document>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
       ref(storage, `users/${this._id}/images/profile.jpg`),

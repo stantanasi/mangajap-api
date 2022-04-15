@@ -12,7 +12,9 @@ import { ITheme } from "./theme.model";
 import Volume, { IVolume } from "./volume.model";
 import Chapter, { IChapter } from './chapter.model';
 
-export interface IManga extends Document {
+export interface IManga {
+  _id: Types.ObjectId;
+
   title: string;
   titles: {
     [language: string]: string
@@ -220,13 +222,13 @@ MangaSchema.virtual('franchises', {
 MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<IManga>('validate', async function () {
+MangaSchema.pre<IManga & Document>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-MangaSchema.pre<IManga>('save', async function () {
+MangaSchema.pre<IManga & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this._id}/images/cover.jpg`),

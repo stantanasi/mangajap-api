@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { IUser } from "./user.model";
 
-export interface IAnimeEntry extends Document {
+export interface IAnimeEntry {
+  _id: Types.ObjectId;
+
   isAdd: boolean;
   isFavorites: boolean;
   status: 'watching' | 'completed' | 'planned' | 'on_hold' | 'dropped';

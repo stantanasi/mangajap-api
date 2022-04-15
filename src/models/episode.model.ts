@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { ISeason } from "./season.model";
 
-export interface IEpisode extends Document {
+export interface IEpisode {
+  _id: Types.ObjectId;
+
   titles: {
     [language: string]: string;
   };

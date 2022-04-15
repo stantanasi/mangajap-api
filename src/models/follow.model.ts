@@ -1,8 +1,10 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IUser } from "./user.model";
 
-export interface IFollow extends Document {
+export interface IFollow {
+  _id: Types.ObjectId;
+
   follower: string & IUser;
   followed: string & IUser;
 

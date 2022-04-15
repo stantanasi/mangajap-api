@@ -1,10 +1,12 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
 
-export interface IReview extends Document {
+export interface IReview {
+  _id: Types.ObjectId;
+
   content: string;
 
   user: string & IUser;

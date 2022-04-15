@@ -5,7 +5,9 @@ import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IManga } from "./manga.model";
 import Chapter, { IChapter } from './chapter.model';
 
-export interface IVolume extends Document {
+export interface IVolume {
+  _id: Types.ObjectId;
+
   titles: {
     [language: string]: string;
   };
@@ -94,7 +96,7 @@ VolumeSchema.index({
 }, { unique: true });
 
 
-VolumeSchema.pre<IVolume>('save', async function () {
+VolumeSchema.pre<IVolume & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`),

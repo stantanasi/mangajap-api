@@ -1,10 +1,12 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 import { IPeople } from "./people.model";
 
-export interface IStaff extends Document {
+export interface IStaff {
+  _id: Types.ObjectId;
+
   role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
 
   people: Types.ObjectId & IPeople;

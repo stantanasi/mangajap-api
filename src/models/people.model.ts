@@ -1,10 +1,12 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IStaff } from "./staff.model";
 
-export interface IPeople extends Document {
+export interface IPeople {
+  _id: Types.ObjectId;
+
   firstName: string;
   lastName: string;
   pseudo: string;
@@ -72,7 +74,7 @@ PeopleSchema.virtual('manga-staff', {
 });
 
 
-PeopleSchema.pre<IPeople>('save', async function () {
+PeopleSchema.pre<IPeople & Document>('save', async function () {
   if (this.isModified('image')) {
     this.image = await uploadFile(
       ref(storage, `peoples/${this._id}/images/profile.jpg`),

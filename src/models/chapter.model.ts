@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IManga } from './manga.model';
 import { IVolume } from './volume.model';
 
-export interface IChapter extends Document {
+export interface IChapter {
+  _id: Types.ObjectId;
+
   titles: {
     [language: string]: string;
   };

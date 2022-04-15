@@ -12,7 +12,9 @@ import Season, { ISeason } from "./season.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
 
-export interface IAnime extends Document {
+export interface IAnime {
+  _id: Types.ObjectId;
+
   title: string;
   titles: {
     [language: string]: string
@@ -232,13 +234,13 @@ AnimeSchema.virtual('franchises', {
 AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<IAnime>('validate', async function () {
+AnimeSchema.pre<IAnime & Document>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-AnimeSchema.pre<IAnime>('save', async function () {
+AnimeSchema.pre<IAnime & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `anime/${this._id}/images/cover.jpg`),

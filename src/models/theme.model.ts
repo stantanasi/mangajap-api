@@ -1,9 +1,11 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 
-export interface ITheme extends Document {
+export interface ITheme {
+  _id: Types.ObjectId;
+
   title: string;
   description: string;
 

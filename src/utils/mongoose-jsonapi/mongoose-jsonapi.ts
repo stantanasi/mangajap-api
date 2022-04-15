@@ -1,3 +1,18 @@
+import { Document } from 'mongoose';
+
+export interface JsonApiInstanceMethods extends Document {
+  toJsonApi: (
+    opts: {
+      baseUrl: string;
+      meta?: any;
+    },
+  ) => {
+    data: JsonApiResource;
+    included: JsonApiResource[];
+  }
+}
+
+
 export interface JsonApiQueryParams {
   include?: string;
   fields?: {

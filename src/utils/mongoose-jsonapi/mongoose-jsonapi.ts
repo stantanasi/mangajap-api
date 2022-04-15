@@ -1,4 +1,8 @@
-import { QueryWithHelpers, Document } from 'mongoose';
+import { Model, QueryWithHelpers, HydratedDocument, Document } from 'mongoose';
+
+export interface JsonApiModel<T> extends Model<T, JsonApiQueryHelper, JsonApiInstanceMethods> {
+  fromJsonApi(body: any): HydratedDocument<T, JsonApiInstanceMethods>;
+}
 
 export interface JsonApiInstanceMethods extends Document {
   toJsonApi: (

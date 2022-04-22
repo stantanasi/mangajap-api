@@ -26,6 +26,9 @@ export interface IManga extends Document {
   status: 'publishing' | 'finished' | 'unreleased' | 'upcoming';
   coverImage: string | null;
   bannerImage: string | null;
+  links: {
+    [site: string]: string;
+  };
 
   volumeCount: number;
   chapterCount: number;
@@ -113,6 +116,11 @@ export const MangaSchema = new Schema<IManga>({
   bannerImage: {
     type: String,
     default: null,
+  },
+
+  links: {
+    type: Schema.Types.Mixed,
+    default: {},
   },
 
 

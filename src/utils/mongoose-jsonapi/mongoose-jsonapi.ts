@@ -54,7 +54,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
           }, acc);
 
           return acc;
-        }, [] as PopulateOptions[]))
+        }, [] as PopulateOptions[]));
     }
 
     // Sparse Fieldsets
@@ -212,12 +212,6 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
 
   schema.methods.toJsonApi = function (opts) {
-    const body: JsonApiBody = {
-      jsonapi: {
-        version: '1.0',
-      }
-    };
-
     const obj: any = this.toObject();
 
     const type = options?.type;
@@ -310,7 +304,7 @@ export interface JsonApiPluginOptions {
 }
 
 export interface JsonApiModel<T> extends Model<T, JsonApiQueryHelper, JsonApiInstanceMethods> {
-  fromJsonApi(body: any): HydratedDocument<T, JsonApiInstanceMethods>;
+  fromJsonApi: (body: any) => HydratedDocument<T, JsonApiInstanceMethods>;
 }
 
 export interface JsonApiInstanceMethods extends Document {
@@ -326,13 +320,13 @@ export interface JsonApiInstanceMethods extends Document {
 }
 
 export interface JsonApiQueryHelper {
-  withJsonApi: <ResultType extends DocType | DocType[] | null, DocType extends JsonApiInstanceMethods>(
-    this: QueryWithHelpers<ResultType, DocType, JsonApiQueryHelper>,
+  withJsonApi: <DocType extends JsonApiInstanceMethods>(
+    this: QueryWithHelpers<DocType | DocType[] | null, DocType, JsonApiQueryHelper>,
     query: JsonApiQueryParams,
   ) => this;
 
-  toJsonApi: <ResultType extends DocType | DocType[] | null, DocType extends JsonApiInstanceMethods & Document>(
-    this: QueryWithHelpers<ResultType, DocType, JsonApiQueryHelper>,
+  toJsonApi: <DocType extends JsonApiInstanceMethods & Document>(
+    this: QueryWithHelpers<DocType | DocType[] | null, DocType, JsonApiQueryHelper>,
     opts: {
       baseUrl: string;
       meta?: any;

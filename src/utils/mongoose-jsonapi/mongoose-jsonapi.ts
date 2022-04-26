@@ -198,12 +198,15 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
       const body: JsonApiBody = {
         jsonapi: {
           version: '1.0',
-        }
+        },
       };
 
       if (Array.isArray(doc)) {
         const { data, included } = doc
-          .map((model) => model.toJsonApi(opts))
+          .map((model) => model.toJsonApi(opts) as {
+            data: JsonApiResource;
+            included: JsonApiResource[];
+          })
           .reduce((acc, cur) => {
             acc.data = acc.data.concat(cur.data);
             acc.included = acc.included.concat(cur.included).filter((resource1, index, arr) => {
@@ -309,6 +312,12 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
 
   schema.methods.toJsonApi = function (opts) {
+    const body: JsonApiBody = {
+      jsonapi: {
+        version: '1.0',
+      },
+    };
+
     const obj: any = this.toObject();
 
     const type = options?.type;
@@ -363,7 +372,10 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
             if (Array.isArray(value)) {
               data.relationships![path].data = value
                 .map((relationship) => {
-                  const { data: relationshipData, included: relationshipIncluded } = relationship.toJsonApi(opts);
+                  const { data: relationshipData, included: relationshipIncluded } = relationship.toJsonApi(opts) as {
+                    data: JsonApiResource;
+                    included: JsonApiResource[];
+                  };
                   included = included.concat(relationshipData, relationshipIncluded);
 
                   return {
@@ -372,7 +384,10 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
                   };
                 });
             } else {
-              const { data: relationshipData, included: relationshipIncluded } = value.toJsonApi(opts);
+              const { data: relationshipData, included: relationshipIncluded } = value.toJsonApi(opts) as {
+                data: JsonApiResource;
+                included: JsonApiResource[];
+              };
               included = included.concat(relationshipData, relationshipIncluded);
 
               data.relationships![path].data = {
@@ -384,12 +399,13 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
         }
       });
 
-    return {
-      data: data,
-      included: included.filter((resource1, index) => {
-        return included.findIndex(resource2 => resource1.type === resource2.type && resource1.id === resource2.id) === index;
-      }),
-    };
+    body.data = data;
+    body.included = included.filter((resource1, index) => {
+      return included.findIndex(resource2 => resource1.type === resource2.type && resource1.id === resource2.id) === index;
+    });
+    body.meta = opts.meta;
+
+    return body;
   };
 }
 
@@ -410,10 +426,7 @@ export interface JsonApiInstanceMethods extends Document {
       baseUrl: string;
       meta?: any;
     },
-  ) => {
-    data: JsonApiResource;
-    included: JsonApiResource[];
-  }
+  ) => JsonApiBody;
 }
 
 export interface JsonApiQueryHelper {

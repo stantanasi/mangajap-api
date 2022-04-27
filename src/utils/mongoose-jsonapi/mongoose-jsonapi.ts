@@ -194,6 +194,11 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
   };
 
   schema.query.toJsonApi = function (opts) {
+    // Throw an error if no document has been found
+    if ((this as any).op === 'findOne') {
+      this.orFail();
+    }
+
     return this.transform((doc) => {
       const body: JsonApiBody = {
         jsonapi: {
@@ -559,7 +564,7 @@ export class JsonApiError extends Error implements IJsonApiError {
   };
   meta?: any;
 
-  constructor(public obj: IJsonApiError) {
+  constructor(obj: IJsonApiError) {
     super();
     Object.assign(this, obj);
   }
@@ -587,11 +592,22 @@ export class JsonApiError extends Error implements IJsonApiError {
   }
 
   toJSON(): JsonApiBody {
-    return {
-      errors: [
-        this.obj,
-      ],
+    const body: JsonApiBody = {
+      errors: [],
     };
+
+    body.errors?.push({
+      id: this.id,
+      links: this.links,
+      status: this.status,
+      code: this.code,
+      title: this.title,
+      detail: this.detail,
+      source: this.source,
+      meta: this.meta,
+    });
+
+    return body;
   }
 
 

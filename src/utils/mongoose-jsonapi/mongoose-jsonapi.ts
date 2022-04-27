@@ -1,4 +1,4 @@
-import { Model, Schema, QueryWithHelpers, HydratedDocument, Document, PopulateOptions, SchemaType, VirtualType } from 'mongoose';
+import { Model, Schema, QueryWithHelpers, HydratedDocument, Document, PopulateOptions, SchemaType, VirtualType, Error as MongooseError } from 'mongoose';
 import UrlQuery from '../url-query/url-query';
 
 export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>>(
@@ -565,12 +565,25 @@ export class JsonApiError extends Error implements IJsonApiError {
   }
 
   static from(err: Error): JsonApiError {
-    return new JsonApiError({
-      status: '500',
-      title: err.name,
-      detail: err.message,
-      meta: err.stack,
-    });
+    if (err instanceof MongooseError.DocumentNotFoundError) {
+      return new JsonApiError({
+        status: '404',
+        title: 'Resource not Found',
+        detail: err.message,
+        meta: {
+          stack: err.stack,
+        },
+      });
+    } else {
+      return new JsonApiError({
+        status: '500',
+        title: err.name,
+        detail: err.message,
+        meta: {
+          stack: err.stack,
+        },
+      });
+    }
   }
 
   toJSON(): JsonApiBody {

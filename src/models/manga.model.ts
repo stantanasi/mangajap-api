@@ -284,20 +284,34 @@ MangaSchema.pre('findOne', async function () {
       manga: _id,
     }),
 
-    // TODO: popularity
-    // manga_popularity = (
-    //   SELECT
-    //       COALESCE(
-    //           (manga_usercount + manga_favoritescount) +
-    //           manga_usercount * COALESCE(manga_rating, 0) +
-    //           2 * COUNT(mangaentry_id) * COALESCE(manga_rating, 0) *(manga_usercount + manga_favoritescount),
-    //           0
-    //       )
-    //   FROM
-    //       mangaentry
-    //   WHERE
-    //       mangaentry_mangaid = manga_id AND mangaentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
-    // )
+    popularity: (await Manga.aggregate()
+      .match({ _id: new Types.ObjectId(_id) })
+      .lookup({
+        from: 'mangaentries',
+        localField: '_id',
+        foreignField: 'manga',
+        as: 'entriesCount',
+        pipeline: [
+          {
+            $match: {
+              updatedAt: {
+                $gte: new Date(new Date().setDate(new Date().getDate() - 7)),
+              },
+            },
+          },
+        ],
+      })
+      .addFields({ entriesCount: { $size: '$entriesCount' } })
+      .addFields({
+        popularity: {
+          $add: [
+            '$userCount', '$favoritesCount',
+            { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
+            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
+          ],
+        },
+      }))[0]
+      ?.popularity | 0 ?? 0,
   });
 });
 

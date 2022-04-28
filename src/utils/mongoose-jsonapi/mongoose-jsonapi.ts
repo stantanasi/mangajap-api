@@ -373,7 +373,8 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
           };
 
           if (this.populated(path)) {
-            const value = this.get(path) as JsonApiInstanceMethods | JsonApiInstanceMethods[];
+            const value = this.get(path) as JsonApiInstanceMethods | JsonApiInstanceMethods[] | null;
+
             if (Array.isArray(value)) {
               data.relationships![path].data = value
                 .map((relationship) => {
@@ -388,7 +389,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
                     id: relationshipData.id!,
                   };
                 });
-            } else {
+            } else if (value) {
               const { data: relationshipData, included: relationshipIncluded } = value.toJsonApi(opts) as {
                 data: JsonApiResource;
                 included: JsonApiResource[];
@@ -399,6 +400,8 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
                 type: relationshipData.type,
                 id: relationshipData.id!,
               };
+            } else {
+              data.relationships![path].data = null;
             }
           }
         }
@@ -540,7 +543,7 @@ export interface JsonApiResource {
         self?: string;
         related?: string;
       };
-      data?: JsonApiIdentifier | JsonApiIdentifier[];
+      data?: JsonApiIdentifier | JsonApiIdentifier[] | null;
       meta?: any;
     }
   };

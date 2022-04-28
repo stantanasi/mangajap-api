@@ -1,31 +1,24 @@
 import express from "express";
 import Follow from "../models/follow.model";
-import User, { IUser } from "../models/user.model";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
+import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const followRoutes = express.Router();
 
 followRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      Follow,
-      JsonApiQueryParser.parse(req.query, Follow)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await Follow.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -33,12 +26,17 @@ followRoutes.get('/', async (req, res, next) => {
 
 followRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      Follow,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await Follow.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Follow.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -46,13 +44,13 @@ followRoutes.post('/', isLogin(), async (req, res, next) => {
 
 followRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      Follow,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, Follow)
-    );
+    const body = await Follow.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -60,19 +58,26 @@ followRoutes.get('/:id', async (req, res, next) => {
 
 followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await Follow.findById(req.params.id);
-    if (user?._id !== old?.follower && user?._id !== old?.followed) {
-      throw new PermissionDenied();
-    }
+    await Follow.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.follower === user._id || doc.followed === user._id)) {
+          return doc
+            .merge(Follow.fromJsonApi(req.body))
+            .save();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
-    const data = await MongooseAdapter.update(
-      Follow,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const body = await Follow.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -80,16 +85,17 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
 
 followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await Follow.findById(req.params.id);
-    if (user?._id !== old?.follower && user?._id !== old?.followed) {
-      throw new PermissionDenied();
-    }
-
-    await MongooseAdapter.delete(
-      Follow,
-      req.params.id,
-    );
+    await Follow.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.follower === user._id || doc.followed === user._id)) {
+          return doc
+            .delete();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -100,14 +106,14 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 followRoutes.get('/:id/follower', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Follow,
-      req.params.id,
-      'follower',
-      JsonApiQueryParser.parse(req.query, User),
-    );
+    const body = await Follow.findById(req.params.id)
+      .getRelationship('follower')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -115,14 +121,14 @@ followRoutes.get('/:id/follower', async (req, res, next) => {
 
 followRoutes.get('/:id/followed', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Follow,
-      req.params.id,
-      'followed',
-      JsonApiQueryParser.parse(req.query, User),
-    );
+    const body = await Follow.findById(req.params.id)
+      .getRelationship('followed')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

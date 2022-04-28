@@ -1,32 +1,24 @@
 import express from "express";
 import MangaEntry from "../models/manga-entry.model";
-import Manga from "../models/manga.model";
-import User, { IUser } from "../models/user.model";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
+import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const mangaEntryRoutes = express.Router();
 
 mangaEntryRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      MangaEntry,
-      JsonApiQueryParser.parse(req.query, MangaEntry)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await MangaEntry.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -34,12 +26,17 @@ mangaEntryRoutes.get('/', async (req, res, next) => {
 
 mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      MangaEntry,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await MangaEntry.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await MangaEntry.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -47,13 +44,13 @@ mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
 
 mangaEntryRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      MangaEntry,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, MangaEntry)
-    );
+    const body = await MangaEntry.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -61,19 +58,26 @@ mangaEntryRoutes.get('/:id', async (req, res, next) => {
 
 mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await MangaEntry.findById(req.params.id);
-    if (user?._id !== old?.user) {
-      throw new PermissionDenied();
-    }
+    await MangaEntry.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.user === user._id)) {
+          return doc
+            .merge(MangaEntry.fromJsonApi(req.body))
+            .save();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
-    const data = await MongooseAdapter.update(
-      MangaEntry,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const body = await MangaEntry.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -81,16 +85,17 @@ mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
 
 mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await MangaEntry.findById(req.params.id);
-    if (user?._id !== old?.user) {
-      throw new PermissionDenied();
-    }
-
-    await MongooseAdapter.delete(
-      MangaEntry,
-      req.params.id,
-    );
+    await MangaEntry.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.user === user._id)) {
+          return doc
+            .delete();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -101,14 +106,14 @@ mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 mangaEntryRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      MangaEntry,
-      req.params.id,
-      'manga',
-      JsonApiQueryParser.parse(req.query, Manga),
-    );
+    const body = await MangaEntry.findById(req.params.id)
+      .getRelationship('manga')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -116,14 +121,14 @@ mangaEntryRoutes.get('/:id/manga', async (req, res, next) => {
 
 mangaEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      MangaEntry,
-      req.params.id,
-      'user',
-      JsonApiQueryParser.parse(req.query, User),
-    );
+    const body = await MangaEntry.findById(req.params.id)
+      .getRelationship('user')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

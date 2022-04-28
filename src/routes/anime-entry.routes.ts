@@ -1,32 +1,24 @@
 import express from "express";
 import AnimeEntry from "../models/anime-entry.model";
-import Anime from "../models/anime.model";
-import User, { IUser } from "../models/user.model";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
+import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const animeEntryRoutes = express.Router();
 
 animeEntryRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      AnimeEntry,
-      JsonApiQueryParser.parse(req.query, AnimeEntry)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await AnimeEntry.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -34,12 +26,17 @@ animeEntryRoutes.get('/', async (req, res, next) => {
 
 animeEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      AnimeEntry,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await AnimeEntry.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await AnimeEntry.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -47,50 +44,58 @@ animeEntryRoutes.post('/', isLogin(), async (req, res, next) => {
 
 animeEntryRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      AnimeEntry,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, AnimeEntry)
-    );
+    const body = await AnimeEntry.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
 });
 
-animeEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+animeEntryRoutes.patch('/:id', async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await AnimeEntry.findById(req.params.id);
-    if (user?._id !== old?.user) {
-      throw new PermissionDenied();
-    }
+    await AnimeEntry.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.user === user._id)) {
+          return doc
+            .merge(AnimeEntry.fromJsonApi(req.body))
+            .save();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
-    const data = await MongooseAdapter.update(
-      AnimeEntry,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const body = await AnimeEntry.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
 });
 
-animeEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+animeEntryRoutes.delete('/:id', async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await AnimeEntry.findById(req.params.id);
-    if (user?._id !== old?.user) {
-      throw new PermissionDenied();
-    }
-
-    await MongooseAdapter.delete(
-      AnimeEntry,
-      req.params.id,
-    );
+    await AnimeEntry.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.user === user._id)) {
+          return doc
+            .delete();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -101,14 +106,14 @@ animeEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 animeEntryRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      AnimeEntry,
-      req.params.id,
-      'anime',
-      JsonApiQueryParser.parse(req.query, Anime),
-    );
+    const body = await AnimeEntry.findById(req.params.id)
+      .getRelationship('anime')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -116,14 +121,14 @@ animeEntryRoutes.get('/:id/anime', async (req, res, next) => {
 
 animeEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      AnimeEntry,
-      req.params.id,
-      'user',
-      JsonApiQueryParser.parse(req.query, User),
-    );
+    const body = await AnimeEntry.findById(req.params.id)
+      .getRelationship('user')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

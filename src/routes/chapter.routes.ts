@@ -1,31 +1,22 @@
 import express from "express";
 import Chapter from "../models/chapter.model";
-import Manga from "../models/manga.model";
-import Volume from "../models/volume.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const chapterRoutes = express.Router();
 
 chapterRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      Chapter,
-      JsonApiQueryParser.parse(req.query, Chapter)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await Chapter.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -33,12 +24,17 @@ chapterRoutes.get('/', async (req, res, next) => {
 
 chapterRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      Chapter,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await Chapter.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Chapter.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -46,13 +42,13 @@ chapterRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 chapterRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      Chapter,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, Chapter)
-    );
+    const body = await Chapter.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -60,13 +56,21 @@ chapterRoutes.get('/:id', async (req, res, next) => {
 
 chapterRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.update(
-      Chapter,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    await Chapter.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .merge(Chapter.fromJsonApi(req.body))
+          .save();
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Chapter.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -74,10 +78,12 @@ chapterRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 
 chapterRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
-    await MongooseAdapter.delete(
-      Chapter,
-      req.params.id,
-    );
+    await Chapter.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .delete();
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -88,14 +94,14 @@ chapterRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 chapterRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Chapter,
-      req.params.id,
-      'manga',
-      JsonApiQueryParser.parse(req.query, Manga),
-    );
+    const body = await Chapter.findById(req.params.id)
+      .getRelationship('manga')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -103,14 +109,14 @@ chapterRoutes.get('/:id/manga', async (req, res, next) => {
 
 chapterRoutes.get('/:id/volume', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Chapter,
-      req.params.id,
-      'volume',
-      JsonApiQueryParser.parse(req.query, Volume),
-    );
+    const body = await Chapter.findById(req.params.id)
+      .getRelationship('volume')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

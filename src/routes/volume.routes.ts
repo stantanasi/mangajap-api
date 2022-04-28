@@ -1,31 +1,22 @@
 import express from "express";
-import Chapter from "../models/chapter.model";
-import Manga from "../models/manga.model";
 import Volume from "../models/volume.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const volumeRoutes = express.Router();
 
 volumeRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      Volume,
-      JsonApiQueryParser.parse(req.query, Volume)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await Volume.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -33,12 +24,17 @@ volumeRoutes.get('/', async (req, res, next) => {
 
 volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      Volume,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await Volume.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Volume.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -46,13 +42,13 @@ volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 volumeRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      Volume,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, Volume)
-    );
+    const body = await Volume.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -60,13 +56,21 @@ volumeRoutes.get('/:id', async (req, res, next) => {
 
 volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.update(
-      Volume,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    await Volume.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .merge(Volume.fromJsonApi(req.body))
+          .save();
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Volume.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -74,10 +78,12 @@ volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 
 volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
-    await MongooseAdapter.delete(
-      Volume,
-      req.params.id,
-    );
+    await Volume.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .delete();
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -88,14 +94,14 @@ volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 volumeRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Volume,
-      req.params.id,
-      'manga',
-      JsonApiQueryParser.parse(req.query, Manga),
-    );
+    const body = await Volume.findById(req.params.id)
+      .getRelationship('manga')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -103,23 +109,18 @@ volumeRoutes.get('/:id/manga', async (req, res, next) => {
 
 volumeRoutes.get('/:id/chapters', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Volume,
-      req.params.id,
-      'chapters',
-      JsonApiQueryParser.parse(req.query, Chapter),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Volume.findById(req.params.id)
+      .getRelationship('franchises')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }

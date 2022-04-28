@@ -1,30 +1,22 @@
 import express from "express";
-import Anime from "../models/anime.model";
 import Franchise from "../models/franchise.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const franchiseRoutes = express.Router();
 
 franchiseRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      Franchise,
-      JsonApiQueryParser.parse(req.query, Franchise)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await Franchise.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -32,12 +24,17 @@ franchiseRoutes.get('/', async (req, res, next) => {
 
 franchiseRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      Franchise,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await Franchise.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Franchise.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -45,13 +42,13 @@ franchiseRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 franchiseRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      Franchise,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, Franchise)
-    );
+    const body = await Franchise.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -59,13 +56,21 @@ franchiseRoutes.get('/:id', async (req, res, next) => {
 
 franchiseRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.update(
-      Franchise,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    await Franchise.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .merge(Franchise.fromJsonApi(req.body))
+          .save();
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Franchise.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -73,10 +78,12 @@ franchiseRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 
 franchiseRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
-    await MongooseAdapter.delete(
-      Franchise,
-      req.params.id,
-    );
+    await Franchise.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .delete();
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -87,14 +94,14 @@ franchiseRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 franchiseRoutes.get('/:id/source', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Franchise,
-      req.params.id,
-      'source',
-      JsonApiQueryParser.parse(req.query, Anime), // TODO: JsonApi.parameters(req, Anime | Manga)
-    );
+    const body = await Franchise.findById(req.params.id)
+      .getRelationship('source')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -102,14 +109,14 @@ franchiseRoutes.get('/:id/source', async (req, res, next) => {
 
 franchiseRoutes.get('/:id/destination', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Franchise,
-      req.params.id,
-      'destination',
-      JsonApiQueryParser.parse(req.query, Anime), // TODO: JsonApi.parameters(req, Anime | Manga)
-    );
+    const body = await Franchise.findById(req.params.id)
+      .getRelationship('destination')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

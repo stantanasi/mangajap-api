@@ -1,32 +1,22 @@
 import express from "express";
-import Anime from "../models/anime.model";
-import Manga from "../models/manga.model";
-import People from "../models/people.model";
 import Staff from "../models/staff.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const staffRoutes = express.Router();
 
 staffRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      Staff,
-      JsonApiQueryParser.parse(req.query, Staff)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await Staff.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -34,12 +24,17 @@ staffRoutes.get('/', async (req, res, next) => {
 
 staffRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      Staff,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await Staff.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Staff.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -47,13 +42,13 @@ staffRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 staffRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      Staff,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, Staff)
-    );
+    const body = await Staff.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -61,13 +56,21 @@ staffRoutes.get('/:id', async (req, res, next) => {
 
 staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.update(
-      Staff,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    await Staff.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .merge(Staff.fromJsonApi(req.body))
+          .save();
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Staff.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -75,10 +78,12 @@ staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 
 staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
-    await MongooseAdapter.delete(
-      Staff,
-      req.params.id,
-    );
+    await Staff.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .delete();
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -89,14 +94,14 @@ staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 staffRoutes.get('/:id/people', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Staff,
-      req.params.id,
-      'people',
-      JsonApiQueryParser.parse(req.query, People),
-    );
+    const body = await Staff.findById(req.params.id)
+      .getRelationship('people')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -104,14 +109,14 @@ staffRoutes.get('/:id/people', async (req, res, next) => {
 
 staffRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Staff,
-      req.params.id,
-      'anime',
-      JsonApiQueryParser.parse(req.query, Anime),
-    );
+    const body = await Staff.findById(req.params.id)
+      .getRelationship('anime')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -119,14 +124,14 @@ staffRoutes.get('/:id/anime', async (req, res, next) => {
 
 staffRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Staff,
-      req.params.id,
-      'manga',
-      JsonApiQueryParser.parse(req.query, Manga),
-    );
+    const body = await Staff.findById(req.params.id)
+      .getRelationship('manga')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

@@ -417,8 +417,26 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
   };
 
   schema.methods.merge = function (...sources) {
+    sources = sources.map((source) => {
+      if (source instanceof Document) {
+        return source.directModifiedPaths().reduce((acc, cur) => {
+          cur.split('.').reduce((obj, path, i, arr) => {
+            if (i !== arr.length - 1) {
+              return obj[path] = {};
+            } else {
+              return obj[path] = source.get(cur);
+            }
+          }, acc);
+          return acc;
+        }, {} as any);
+
+      } else {
+        return source;
+      }
+    });
+
     return Object.assign(this, ...sources);
-  }
+  };
 }
 
 export interface JsonApiPluginOptions {

@@ -260,15 +260,13 @@ MangaSchema.pre('findOne', async function () {
       manga: _id,
     }),
 
-    averageRating: (await MangaEntry.aggregate([
-      { $match: { manga: new Types.ObjectId(_id) } },
-      {
-        $group: {
-          _id: null,
-          averageRating: { $avg: '$rating' }
-        }
-      }
-    ]))[0]?.averageRating,
+    averageRating: (await MangaEntry.aggregate()
+      .match({ manga: new Types.ObjectId(_id) })
+      .group({
+        _id: null,
+        averageRating: { $avg: '$rating' },
+      }))[0]
+      ?.averageRating ?? null,
 
     userCount: await MangaEntry.count({
       manga: _id,

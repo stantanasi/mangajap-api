@@ -10,9 +10,10 @@ peopleRoutes.get('/', async (req, res, next) => {
     const query: JsonApiQueryParams = Object.assign({}, req.query);
     if (query.sort?.split(',').includes('random')) {
       query.filter = query.filter || {};
-      query.filter._id = (await People.aggregate([
-        { $sample: { size: +(query.page?.limit ?? 10) } }
-      ])).map((people) => people._id).join(',');
+      query.filter._id = (await People.aggregate()
+        .sample(+(query.page?.limit ?? 10)))
+        .map((people) => people._id)
+        .join(',');
 
       query.sort = query.sort?.split(',').filter((sort) => sort !== 'random').join(',');
     }

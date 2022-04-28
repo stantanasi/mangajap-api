@@ -272,15 +272,13 @@ AnimeSchema.pre('findOne', async function () {
       anime: _id,
     }),
 
-    averageRating: (await AnimeEntry.aggregate([
-      { $match: { anime: new Types.ObjectId(_id) } },
-      {
-        $group: {
-          _id: null,
-          averageRating: { $avg: '$rating' }
-        }
-      }
-    ]))[0]?.averageRating,
+    averageRating: (await AnimeEntry.aggregate()
+      .match({ anime: new Types.ObjectId(_id) })
+      .group({
+        _id: null,
+        averageRating: { $avg: '$rating' },
+      }))[0]
+      ?.averageRating ?? null,
 
     userCount: await AnimeEntry.count({
       anime: _id,

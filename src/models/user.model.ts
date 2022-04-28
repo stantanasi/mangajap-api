@@ -266,59 +266,49 @@ UserSchema.pre('findOne', async function () {
       isAdd: true,
     }),
 
-    volumesRead: (await MangaEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$volumesRead" }
-        }
-      }
-    ]))[0]?.total,
+    volumesRead: (await MangaEntry.aggregate()
+      .match({ user: _id })
+      .group({
+        _id: null,
+        total: { $sum: "$volumesRead" },
+      }))[0]
+      ?.total,
 
-    chaptersRead: (await MangaEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$chaptersRead" }
-        }
-      }
-    ]))[0]?.total,
+    chaptersRead: (await MangaEntry.aggregate()
+      .match({ user: _id })
+      .group({
+        _id: null,
+        total: { $sum: "$chaptersRead" },
+      }))[0]
+      ?.total,
 
     followedAnimeCount: await AnimeEntry.count({
       user: _id,
       isAdd: true,
     }),
 
-    episodesWatch: (await AnimeEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$episodesWatch" }
-        }
-      }
-    ]))[0]?.total,
+    episodesWatch: (await AnimeEntry.aggregate()
+      .match({ user: _id })
+      .group({
+        _id: null,
+        total: { $sum: "$episodesWatch" }
+      }))[0]
+      ?.total,
 
-    timeSpentOnAnime: (await AnimeEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $lookup: {
-          from: 'animes',
-          localField: 'anime',
-          foreignField: '_id',
-          as: 'anime'
-        }
-      },
-      { $unwind: '$anime' },
-      {
-        $group: {
-          _id: null,
-          timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } }
-        }
-      }
-    ]))[0]?.timeSpentOnAnime,
+    timeSpentOnAnime: (await AnimeEntry.aggregate()
+      .match({ user: _id })
+      .lookup({
+        from: 'animes',
+        localField: 'anime',
+        foreignField: '_id',
+        as: 'anime',
+      })
+      .unwind('anime')
+      .group({
+        _id: null,
+        timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } },
+      }))[0]
+      ?.timeSpentOnAnime,
   });
 });
 

@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
@@ -88,6 +87,3 @@ FranchiseSchema.plugin(MongooseJsonApi, {
 
 const Franchise = model<IFranchise, IFranchiseModel>('Franchise', FranchiseSchema);
 export default Franchise;
-
-
-JsonApiSerializer.register('franchises', Franchise);

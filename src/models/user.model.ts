@@ -1,7 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Follow, { IFollow } from "./follow.model";
@@ -345,23 +344,3 @@ UserSchema.plugin(MongooseJsonApi, {
 
 const User = model<IUser, IUserModel>('User', UserSchema);
 export default User;
-
-
-JsonApiSerializer.register('users', User, {
-  self: (self: string) => {
-    return {}
-  },
-  query: (query: string) => {
-    return {
-      $or: [
-        {
-          pseudo: {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-      ]
-    };
-  }
-});
-// TODO: order by query

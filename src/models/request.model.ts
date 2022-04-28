@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IUser } from "./user.model";
 
@@ -64,6 +63,3 @@ RequestSchema.plugin(MongooseJsonApi, {
 
 const Request = model<IRequest, IRequestModel>('Request', RequestSchema);
 export default Request;
-
-
-JsonApiSerializer.register('requests', Request);

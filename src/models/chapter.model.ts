@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IManga } from './manga.model';
 import { IVolume } from './volume.model';
@@ -76,6 +75,3 @@ ChapterSchema.plugin(MongooseJsonApi, {
 
 const Chapter = model<IChapter, IChapterModel>('Chapter', ChapterSchema);
 export default Chapter;
-
-
-JsonApiSerializer.register('chapters', Chapter);

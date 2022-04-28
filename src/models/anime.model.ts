@@ -2,7 +2,6 @@ import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Episode, { IEpisode } from "./episode.model";
@@ -360,47 +359,6 @@ AnimeSchema.plugin(MongooseJsonApi, {
 
 const Anime = model<IAnime, IAnimeModel>('Anime', AnimeSchema);
 export default Anime;
-
-
-JsonApiSerializer.register('anime', Anime, {
-  query: (query: string) => {
-    return {
-      $or: [
-        {
-          title: {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.fr': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.en': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.en_jp': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.ja_jp': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-      ]
-    };
-  }
-});
-
 
 // TODO: cronjobs
 // $animes = Anime::getInstance()->getWriteConnection()->query("

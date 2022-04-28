@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
@@ -62,6 +61,3 @@ ReviewSchema.plugin(MongooseJsonApi, {
 
 const Review = model<IReview, IReviewModel>('Review', ReviewSchema);
 export default Review;
-
-
-JsonApiSerializer.register('reviews', Review);

@@ -2,7 +2,6 @@ import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
@@ -348,47 +347,6 @@ MangaSchema.plugin(MongooseJsonApi, {
 
 const Manga = model<IManga, IMangaModel>('Manga', MangaSchema);
 export default Manga;
-
-
-JsonApiSerializer.register('manga', Manga, {
-  query: (query: string) => {
-    return {
-      $or: [
-        {
-          title: {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.fr': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.en': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.en_jp': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-        {
-          'titles.ja_jp': {
-            $regex: query,
-            $options: 'i',
-          },
-        },
-      ]
-    };
-  }
-});
-// TODO: order by query
 
 
 // TODO: cronjobs

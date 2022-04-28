@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
@@ -59,6 +58,3 @@ ThemeSchema.plugin(MongooseJsonApi, {
 
 const Theme = model<ITheme, IThemeModel>('Theme', ThemeSchema);
 export default Theme;
-
-
-JsonApiSerializer.register('themes', Theme);

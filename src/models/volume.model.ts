@@ -1,7 +1,6 @@
 import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Chapter, { IChapter } from './chapter.model';
 import { IManga } from "./manga.model";
@@ -136,6 +135,3 @@ VolumeSchema.plugin(MongooseJsonApi, {
 
 const Volume = model<IVolume, IVolumeModel>('Volume', VolumeSchema);
 export default Volume;
-
-
-JsonApiSerializer.register('volumes', Volume);

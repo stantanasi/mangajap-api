@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
@@ -102,6 +101,3 @@ MangaEntrySchema.plugin(MongooseJsonApi, {
 
 const MangaEntry = model<IMangaEntry, IMangaEntryModel>('MangaEntry', MangaEntrySchema);
 export default MangaEntry;
-
-
-JsonApiSerializer.register('manga-entries', MangaEntry);

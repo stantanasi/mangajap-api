@@ -6,8 +6,6 @@ import { JsonApiError } from './utils/mongoose-jsonapi/mongoose-jsonapi';
 import { AnimeSchema } from './models/anime.model';
 import { MangaSchema } from './models/manga.model';
 import User from './models/user.model';
-import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
-import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
 import animeEntryRoutes from './routes/anime-entry.routes';
 import animeRoutes from './routes/anime.routes';
 import chapterRoutes from './routes/chapter.routes';
@@ -34,19 +32,6 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.get('/favicon.ico', (_req, res) => res.status(204).send());
 
-app.use((req, res, next) => {
-  JsonApiSerializer.initialize({
-    baseUrl: `${req.protocol}://${req.get('host')}`,
-  });
-  JsonApiQueryParser.initialize({
-    defaultPagination: {
-      limit: 10,
-      offset: 0,
-    },
-  });
-  next();
-});
-
 app.use(async (req, res, next) => {
   try {
     await connect(process.env.MONGO_DB_URI!)
@@ -58,7 +43,7 @@ app.use(async (req, res, next) => {
 
 app.use(async (req, res, next) => {
   try {
-    // TODO: use firebase token instead
+    // TODO: Use firebase token instead
     let bearerToken = req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {
       bearerToken = bearerToken.substring(7);

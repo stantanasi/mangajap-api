@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IUser } from "./user.model";
@@ -96,6 +95,3 @@ AnimeEntrySchema.plugin(MongooseJsonApi, {
 
 const AnimeEntry = model<IAnimeEntry, IAnimeEntryModel>('AnimeEntry', AnimeEntrySchema);
 export default AnimeEntry;
-
-
-JsonApiSerializer.register('anime-entries', AnimeEntry);

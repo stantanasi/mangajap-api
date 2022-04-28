@@ -1,5 +1,4 @@
 import { Schema, model, Types } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IUser } from "./user.model";
 
@@ -62,17 +61,3 @@ FollowSchema.plugin(MongooseJsonApi, {
 
 const Follow = model<IFollow, IFollowModel>('Follow', FollowSchema);
 export default Follow;
-
-
-JsonApiSerializer.register('follows', Follow, {
-  followerId: (followerId: string) => {
-    return {
-      follower: followerId,
-    };
-  },
-  followedId: (followedId: string) => {
-    return {
-      followed: followedId,
-    };
-  },
-});

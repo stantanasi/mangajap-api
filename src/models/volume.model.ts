@@ -1,11 +1,13 @@
 import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import { IManga } from "./manga.model";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Chapter, { IChapter } from './chapter.model';
+import { IManga } from "./manga.model";
 
-export interface IVolume extends Document {
+export interface IVolume {
+  _id: Types.ObjectId;
+
   titles: {
     [language: string]: string;
   };
@@ -24,7 +26,10 @@ export interface IVolume extends Document {
   updatedAt: Date;
 }
 
-export const VolumeSchema = new Schema<IVolume>({
+export interface IVolumeModel extends JsonApiModel<IVolume> {
+}
+
+export const VolumeSchema = new Schema<IVolume, IVolumeModel>({
   titles: {
     type: Schema.Types.Mixed,
     default: {}
@@ -94,7 +99,7 @@ VolumeSchema.index({
 }, { unique: true });
 
 
-VolumeSchema.pre<IVolume>('save', async function () {
+VolumeSchema.pre<IVolume & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`),
@@ -123,8 +128,10 @@ VolumeSchema.pre('findOne', async function () {
 });
 
 
-const Volume = model<IVolume>('Volume', VolumeSchema);
+VolumeSchema.plugin(MongooseJsonApi, {
+  type: 'volumes',
+});
+
+
+const Volume = model<IVolume, IVolumeModel>('Volume', VolumeSchema);
 export default Volume;
-
-
-JsonApiSerializer.register('volumes', Volume);

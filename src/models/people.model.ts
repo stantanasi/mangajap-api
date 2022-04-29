@@ -1,10 +1,12 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IStaff } from "./staff.model";
 
-export interface IPeople extends Document {
+export interface IPeople {
+  _id: Types.ObjectId;
+
   firstName: string;
   lastName: string;
   pseudo: string;
@@ -18,7 +20,10 @@ export interface IPeople extends Document {
   updatedAt: Date;
 }
 
-export const PeopleSchema = new Schema<IPeople>({
+export interface IPeopleModel extends JsonApiModel<IPeople> {
+}
+
+export const PeopleSchema = new Schema<IPeople, IPeopleModel>({
   firstName: {
     type: String,
     default: ''
@@ -72,7 +77,7 @@ PeopleSchema.virtual('manga-staff', {
 });
 
 
-PeopleSchema.pre<IPeople>('save', async function () {
+PeopleSchema.pre<IPeople & Document>('save', async function () {
   if (this.isModified('image')) {
     this.image = await uploadFile(
       ref(storage, `peoples/${this._id}/images/profile.jpg`),
@@ -82,34 +87,36 @@ PeopleSchema.pre<IPeople>('save', async function () {
 });
 
 
-const People = model<IPeople>('People', PeopleSchema);
-export default People;
-
-
-JsonApiSerializer.register('peoples', People, {
-  query: (query: string) => {
-    return {
-      $or: [
-        {
-          firstName: {
-            $regex: query,
-            $options: 'i',
+PeopleSchema.plugin(MongooseJsonApi, {
+  type: 'peoples',
+  filter: {
+    query: (query: string) => {
+      return {
+        $or: [
+          {
+            firstName: {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          lastName: {
-            $regex: query,
-            $options: 'i',
+          {
+            lastName: {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          pseudo: {
-            $regex: query,
-            $options: 'i',
+          {
+            pseudo: {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-      ]
-    };
-  }
+        ]
+      };
+    }
+  },
 });
-// TODO: order by query
+
+
+const People = model<IPeople, IPeopleModel>('People', PeopleSchema);
+export default People;

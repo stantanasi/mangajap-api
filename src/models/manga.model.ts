@@ -2,7 +2,7 @@ import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
@@ -12,7 +12,9 @@ import { ITheme } from "./theme.model";
 import Volume, { IVolume } from "./volume.model";
 import Chapter, { IChapter } from './chapter.model';
 
-export interface IManga extends Document {
+export interface IManga {
+  _id: Types.ObjectId;
+
   title: string;
   titles: {
     [language: string]: string
@@ -53,7 +55,10 @@ export interface IManga extends Document {
   updatedAt: Date;
 }
 
-export const MangaSchema = new Schema<IManga>({
+export interface IMangaModel extends JsonApiModel<IManga> {
+}
+
+export const MangaSchema = new Schema<IManga, IMangaModel>({
   title: {
     type: String,
     required: true,
@@ -228,13 +233,13 @@ MangaSchema.virtual('franchises', {
 MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<IManga>('validate', async function () {
+MangaSchema.pre<IManga & Document>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-MangaSchema.pre<IManga>('save', async function () {
+MangaSchema.pre<IManga & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `manga/${this._id}/images/cover.jpg`),
@@ -263,15 +268,13 @@ MangaSchema.pre('findOne', async function () {
       manga: _id,
     }),
 
-    averageRating: (await MangaEntry.aggregate([
-      { $match: { manga: new Types.ObjectId(_id) } },
-      {
-        $group: {
-          _id: null,
-          averageRating: { $avg: '$rating' }
-        }
-      }
-    ]))[0]?.averageRating,
+    averageRating: (await MangaEntry.aggregate()
+      .match({ manga: new Types.ObjectId(_id) })
+      .group({
+        _id: null,
+        averageRating: { $avg: '$rating' },
+      }))[0]
+      ?.averageRating ?? null,
 
     userCount: await MangaEntry.count({
       manga: _id,
@@ -287,67 +290,83 @@ MangaSchema.pre('findOne', async function () {
       manga: _id,
     }),
 
-    // TODO: popularity
-    // manga_popularity = (
-    //   SELECT
-    //       COALESCE(
-    //           (manga_usercount + manga_favoritescount) +
-    //           manga_usercount * COALESCE(manga_rating, 0) +
-    //           2 * COUNT(mangaentry_id) * COALESCE(manga_rating, 0) *(manga_usercount + manga_favoritescount),
-    //           0
-    //       )
-    //   FROM
-    //       mangaentry
-    //   WHERE
-    //       mangaentry_mangaid = manga_id AND mangaentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
-    // )
+    popularity: (await Manga.aggregate()
+      .match({ _id: new Types.ObjectId(_id) })
+      .lookup({
+        from: 'mangaentries',
+        localField: '_id',
+        foreignField: 'manga',
+        as: 'entriesCount',
+        pipeline: [
+          {
+            $match: {
+              updatedAt: {
+                $gte: new Date(new Date().setDate(new Date().getDate() - 7)),
+              },
+            },
+          },
+        ],
+      })
+      .addFields({ entriesCount: { $size: '$entriesCount' } })
+      .addFields({
+        popularity: {
+          $add: [
+            '$userCount', '$favoritesCount',
+            { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
+            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
+          ],
+        },
+      }))[0]
+      ?.popularity | 0 ?? 0,
   });
 });
 
 
-const Manga = model<IManga>('Manga', MangaSchema);
-export default Manga;
-
-
-JsonApiSerializer.register('manga', Manga, {
-  query: (query: string) => {
-    return {
-      $or: [
-        {
-          title: {
-            $regex: query,
-            $options: 'i',
+MangaSchema.plugin(MongooseJsonApi, {
+  type: 'manga',
+  filter: {
+    query: (query: string) => {
+      return {
+        $or: [
+          {
+            title: {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.fr': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.fr': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.en': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.en': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.en_jp': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.en_jp': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.ja_jp': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.ja_jp': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-      ]
-    };
-  }
+        ]
+      };
+    }
+  },
 });
-// TODO: order by query
+
+
+const Manga = model<IManga, IMangaModel>('Manga', MangaSchema);
+export default Manga;
 
 
 // TODO: cronjobs

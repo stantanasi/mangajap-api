@@ -1,10 +1,12 @@
-import { Schema, model, Types, Document } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { Schema, model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
 
-export interface IReview extends Document {
+export interface IReview {
+  _id: Types.ObjectId;
+
   content: string;
 
   user: string & IUser;
@@ -15,7 +17,10 @@ export interface IReview extends Document {
   updatedAt: Date;
 }
 
-export const ReviewSchema = new Schema<IReview>({
+export interface IReviewModel extends JsonApiModel<IReview> {
+}
+
+export const ReviewSchema = new Schema<IReview, IReviewModel>({
   content: {
     type: String,
     required: true
@@ -49,8 +54,10 @@ export const ReviewSchema = new Schema<IReview>({
 });
 
 
-const Review = model<IReview>('Review', ReviewSchema);
+ReviewSchema.plugin(MongooseJsonApi, {
+  type: 'reviews',
+});
+
+
+const Review = model<IReview, IReviewModel>('Review', ReviewSchema);
 export default Review;
-
-
-JsonApiSerializer.register('reviews', Review);

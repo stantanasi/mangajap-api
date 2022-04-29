@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { Schema, model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { ISeason } from "./season.model";
 
-export interface IEpisode extends Document {
+export interface IEpisode {
+  _id: Types.ObjectId;
+
   titles: {
     [language: string]: string;
   };
@@ -19,7 +21,10 @@ export interface IEpisode extends Document {
   updatedAt: Date;
 }
 
-export const EpisodeSchema = new Schema<IEpisode>({
+export interface IEpisodeModel extends JsonApiModel<IEpisode> {
+}
+
+export const EpisodeSchema = new Schema<IEpisode, IEpisodeModel>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -81,8 +86,10 @@ EpisodeSchema.index({
 }, { unique: true });
 
 
-const Episode = model<IEpisode>('Episode', EpisodeSchema);
+EpisodeSchema.plugin(MongooseJsonApi, {
+  type: 'episodes',
+});
+
+
+const Episode = model<IEpisode, IEpisodeModel>('Episode', EpisodeSchema);
 export default Episode;
-
-
-JsonApiSerializer.register('episodes', Episode);

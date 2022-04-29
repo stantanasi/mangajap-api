@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { Schema, model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
 
-export interface IFranchise extends Document {
+export interface IFranchise {
+  _id: Types.ObjectId;
+
   role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
 
   source: Types.ObjectId & (IAnime | IManga);
@@ -16,7 +18,10 @@ export interface IFranchise extends Document {
   updatedAt: Date;
 }
 
-export const FranchiseSchema = new Schema<IFranchise>({
+export interface IFranchiseModel extends JsonApiModel<IFranchise> {
+}
+
+export const FranchiseSchema = new Schema<IFranchise, IFranchiseModel>({
   role: {
     type: String,
     required: true,
@@ -58,7 +63,7 @@ export const FranchiseSchema = new Schema<IFranchise>({
 });
 
 
-FranchiseSchema.pre<IFranchise>('validate', async function () {
+FranchiseSchema.pre<IFranchise & Document>('validate', async function () {
   if (!this.sourceModel && this.source) {
     if (await Anime.exists({ _id: this.source }))
       this.sourceModel = 'Anime';
@@ -75,8 +80,10 @@ FranchiseSchema.pre<IFranchise>('validate', async function () {
 });
 
 
-const Franchise = model<IFranchise>('Franchise', FranchiseSchema);
+FranchiseSchema.plugin(MongooseJsonApi, {
+  type: 'franchises',
+});
+
+
+const Franchise = model<IFranchise, IFranchiseModel>('Franchise', FranchiseSchema);
 export default Franchise;
-
-
-JsonApiSerializer.register('franchises', Franchise);

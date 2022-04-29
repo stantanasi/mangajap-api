@@ -2,7 +2,7 @@ import { Schema, model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Episode, { IEpisode } from "./episode.model";
 import { IFranchise } from "./franchise.model";
@@ -12,7 +12,9 @@ import Season, { ISeason } from "./season.model";
 import { IStaff } from "./staff.model";
 import { ITheme } from "./theme.model";
 
-export interface IAnime extends Document {
+export interface IAnime {
+  _id: Types.ObjectId;
+
   title: string;
   titles: {
     [language: string]: string
@@ -52,7 +54,10 @@ export interface IAnime extends Document {
   updatedAt: Date;
 }
 
-export const AnimeSchema = new Schema<IAnime>({
+export interface IAnimeModel extends JsonApiModel<IAnime> {
+}
+
+export const AnimeSchema = new Schema<IAnime, IAnimeModel>({
   title: {
     type: String,
     required: true,
@@ -232,13 +237,13 @@ AnimeSchema.virtual('franchises', {
 AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<IAnime>('validate', async function () {
+AnimeSchema.pre<IAnime & Document>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-AnimeSchema.pre<IAnime>('save', async function () {
+AnimeSchema.pre<IAnime & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       ref(storage, `anime/${this._id}/images/cover.jpg`),
@@ -267,15 +272,13 @@ AnimeSchema.pre('findOne', async function () {
       anime: _id,
     }),
 
-    averageRating: (await AnimeEntry.aggregate([
-      { $match: { anime: new Types.ObjectId(_id) } },
-      {
-        $group: {
-          _id: null,
-          averageRating: { $avg: '$rating' }
-        }
-      }
-    ]))[0]?.averageRating,
+    averageRating: (await AnimeEntry.aggregate()
+      .match({ anime: new Types.ObjectId(_id) })
+      .group({
+        _id: null,
+        averageRating: { $avg: '$rating' },
+      }))[0]
+      ?.averageRating ?? null,
 
     userCount: await AnimeEntry.count({
       anime: _id,
@@ -291,67 +294,83 @@ AnimeSchema.pre('findOne', async function () {
       anime: _id,
     }),
 
-    // TODO: popularity
-    // result.popularity = (
-    //         SELECT
-    //         COALESCE(
-    //             (anime_usercount + anime_favoritescount) +
-    //             anime_usercount * COALESCE(anime_rating, 0) +
-    //             2 * COUNT(animeentry_id) * COALESCE(anime_rating, 0) *(anime_usercount + anime_favoritescount),
-    //             0
-    //         )
-    //     FROM
-    //         animeentry
-    //     WHERE
-    //         animeentry_animeid = anime_id AND animeentry_updatedat BETWEEN(NOW() - INTERVAL 7 DAY) AND NOW()
-    // )
+    popularity: (await Anime.aggregate()
+      .match({ _id: new Types.ObjectId(_id) })
+      .lookup({
+        from: 'animeentries',
+        localField: '_id',
+        foreignField: 'anime',
+        as: 'entriesCount',
+        pipeline: [
+          {
+            $match: {
+              updatedAt: {
+                $gte: new Date(new Date().setDate(new Date().getDate() - 7)),
+              },
+            },
+          },
+        ],
+      })
+      .addFields({ entriesCount: { $size: '$entriesCount' } })
+      .addFields({
+        popularity: {
+          $add: [
+            '$userCount', '$favoritesCount',
+            { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
+            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
+          ],
+        },
+      }))[0]
+      ?.popularity | 0 ?? 0,
   });
 });
 
 
-const Anime = model<IAnime>('Anime', AnimeSchema);
-export default Anime;
-
-
-JsonApiSerializer.register('anime', Anime, {
-  query: (query: string) => {
-    return {
-      $or: [
-        {
-          title: {
-            $regex: query,
-            $options: 'i',
+AnimeSchema.plugin(MongooseJsonApi, {
+  type: 'anime',
+  filter: {
+    query: (query: string) => {
+      return {
+        $or: [
+          {
+            title: {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.fr': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.fr': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.en': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.en': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.en_jp': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.en_jp': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-        {
-          'titles.ja_jp': {
-            $regex: query,
-            $options: 'i',
+          {
+            'titles.ja_jp': {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-      ]
-    };
-  }
+        ]
+      };
+    }
+  },
 });
 
+
+const Anime = model<IAnime, IAnimeModel>('Anime', AnimeSchema);
+export default Anime;
 
 // TODO: cronjobs
 // $animes = Anime::getInstance()->getWriteConnection()->query("

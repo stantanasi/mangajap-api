@@ -2,15 +2,13 @@ import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import { connect } from 'mongoose';
 import cors from 'cors';
-import JsonApi from './utils/json-api/json-api';
-import JsonApiError, { NotFoundError } from './utils/json-api/json-api.error';
+import { JsonApiError } from './utils/mongoose-jsonapi/mongoose-jsonapi';
 import { AnimeSchema } from './models/anime.model';
 import { MangaSchema } from './models/manga.model';
 import User from './models/user.model';
-import JsonApiSerializer from './utils/mongoose-jsonapi/jsonapi-serializer';
-import JsonApiQueryParser from './utils/mongoose-jsonapi/jsonapi-query-parser';
 import animeEntryRoutes from './routes/anime-entry.routes';
 import animeRoutes from './routes/anime.routes';
+import chapterRoutes from './routes/chapter.routes';
 import episodeRoutes from './routes/episode.routes';
 import followRoutes from './routes/follow.routes';
 import franchiseRoutes from './routes/franchise.routes';
@@ -25,7 +23,6 @@ import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
-import chapterRoutes from './routes/chapter.routes';
 
 dotenv.config();
 
@@ -34,19 +31,6 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.get('/favicon.ico', (_req, res) => res.status(204).send());
-
-app.use((req, res, next) => {
-  JsonApiSerializer.initialize({
-    baseUrl: `${req.protocol}://${req.get('host')}`,
-  });
-  JsonApiQueryParser.initialize({
-    defaultPagination: {
-      limit: 10,
-      offset: 0,
-    },
-  });
-  next();
-});
 
 app.use(async (req, res, next) => {
   try {
@@ -59,7 +43,7 @@ app.use(async (req, res, next) => {
 
 app.use(async (req, res, next) => {
   try {
-    // TODO: use firebase token instead
+    // TODO: Use firebase token instead
     let bearerToken = req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {
       bearerToken = bearerToken.substring(7);
@@ -115,16 +99,17 @@ app.use('/users', userRoutes);
 app.use('/volumes', volumeRoutes);
 
 app.all('*', (req, res) => {
-  throw new NotFoundError(req.path);
+  throw new JsonApiError.RouteNotFoundError(req.path);
 });
 
 // Error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.log(err);
   if (err instanceof JsonApiError) {
-    res.status(+(err.data.status || 500)).json(JsonApi.encodeError(err));
+    res.status(+(err.status || 500)).json(err);
   } else {
-    res.status(500).json(JsonApi.encodeError(err));
+    const error = JsonApiError.from(err);
+    res.status(+(error.status || 500)).json(error);
   }
 });
 

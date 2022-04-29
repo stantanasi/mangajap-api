@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { Schema, model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IUser } from "./user.model";
 
-export interface IAnimeEntry extends Document {
+export interface IAnimeEntry {
+  _id: Types.ObjectId;
+
   isAdd: boolean;
   isFavorites: boolean;
   status: 'watching' | 'completed' | 'planned' | 'on_hold' | 'dropped';
@@ -19,7 +21,10 @@ export interface IAnimeEntry extends Document {
   updatedAt: Date;
 }
 
-export const AnimeEntrySchema = new Schema<IAnimeEntry>({
+export interface IAnimeEntryModel extends JsonApiModel<IAnimeEntry> {
+}
+
+export const AnimeEntrySchema = new Schema<IAnimeEntry, IAnimeEntryModel>({
   isAdd: {
     type: Boolean,
     default: true
@@ -83,8 +88,10 @@ AnimeEntrySchema.index({
 }, { unique: true });
 
 
-const AnimeEntry = model<IAnimeEntry>('AnimeEntry', AnimeEntrySchema);
+AnimeEntrySchema.plugin(MongooseJsonApi, {
+  type: 'anime-entries',
+});
+
+
+const AnimeEntry = model<IAnimeEntry, IAnimeEntryModel>('AnimeEntry', AnimeEntrySchema);
 export default AnimeEntry;
-
-
-JsonApiSerializer.register('anime-entries', AnimeEntry);

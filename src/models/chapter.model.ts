@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { Schema, model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IManga } from './manga.model';
 import { IVolume } from './volume.model';
 
-export interface IChapter extends Document {
+export interface IChapter {
+  _id: Types.ObjectId;
+
   titles: {
     [language: string]: string;
   };
@@ -17,7 +19,10 @@ export interface IChapter extends Document {
   updatedAt: Date;
 }
 
-export const ChapterSchema = new Schema<IChapter>({
+export interface IChapterModel extends JsonApiModel<IChapter> {
+}
+
+export const ChapterSchema = new Schema<IChapter, IChapterModel>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -63,8 +68,10 @@ ChapterSchema.index({
 }, { unique: true });
 
 
-const Chapter = model<IChapter>('Chapter', ChapterSchema);
+ChapterSchema.plugin(MongooseJsonApi, {
+  type: 'chapters',
+});
+
+
+const Chapter = model<IChapter, IChapterModel>('Chapter', ChapterSchema);
 export default Chapter;
-
-
-JsonApiSerializer.register('chapters', Chapter);

@@ -1,13 +1,13 @@
 import { Schema, model, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Follow, { IFollow } from "./follow.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
 import { IReview } from "./review.model";
 
-export interface IUser extends Document<String> {
+export interface IUser {
   _id: string;
 
   isAdmin: boolean;
@@ -43,7 +43,10 @@ export interface IUser extends Document<String> {
   updatedAt: Date;
 }
 
-export const UserSchema = new Schema<IUser>({
+export interface IUserModel extends JsonApiModel<IUser> {
+}
+
+export const UserSchema = new Schema<IUser, IUserModel>({
   _id: {
     type: String,
     required: true,
@@ -236,7 +239,7 @@ UserSchema.virtual('reviews', {
 });
 
 
-UserSchema.pre<IUser>('save', async function () {
+UserSchema.pre<IUser & Document>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
       ref(storage, `users/${this._id}/images/profile.jpg`),
@@ -263,82 +266,71 @@ UserSchema.pre('findOne', async function () {
       isAdd: true,
     }),
 
-    volumesRead: (await MangaEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$volumesRead" }
-        }
-      }
-    ]))[0]?.total,
+    volumesRead: (await MangaEntry.aggregate()
+      .match({ user: _id })
+      .group({
+        _id: null,
+        total: { $sum: "$volumesRead" },
+      }))[0]
+      ?.total,
 
-    chaptersRead: (await MangaEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$chaptersRead" }
-        }
-      }
-    ]))[0]?.total,
+    chaptersRead: (await MangaEntry.aggregate()
+      .match({ user: _id })
+      .group({
+        _id: null,
+        total: { $sum: "$chaptersRead" },
+      }))[0]
+      ?.total,
 
     followedAnimeCount: await AnimeEntry.count({
       user: _id,
       isAdd: true,
     }),
 
-    episodesWatch: (await AnimeEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$episodesWatch" }
-        }
-      }
-    ]))[0]?.total,
+    episodesWatch: (await AnimeEntry.aggregate()
+      .match({ user: _id })
+      .group({
+        _id: null,
+        total: { $sum: "$episodesWatch" }
+      }))[0]
+      ?.total,
 
-    timeSpentOnAnime: (await AnimeEntry.aggregate([
-      { $match: { user: _id } },
-      {
-        $lookup: {
-          from: 'animes',
-          localField: 'anime',
-          foreignField: '_id',
-          as: 'anime'
-        }
-      },
-      { $unwind: '$anime' },
-      {
-        $group: {
-          _id: null,
-          timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } }
-        }
-      }
-    ]))[0]?.timeSpentOnAnime,
+    timeSpentOnAnime: (await AnimeEntry.aggregate()
+      .match({ user: _id })
+      .lookup({
+        from: 'animes',
+        localField: 'anime',
+        foreignField: '_id',
+        as: 'anime',
+      })
+      .unwind('anime')
+      .group({
+        _id: null,
+        timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } },
+      }))[0]
+      ?.timeSpentOnAnime,
   });
 });
 
 
-const User = model<IUser>('User', UserSchema);
-export default User;
-
-
-JsonApiSerializer.register('users', User, {
-  self: (self: string) => {
-    return {}
-  },
-  query: (query: string) => {
-    return {
-      $or: [
-        {
-          pseudo: {
-            $regex: query,
-            $options: 'i',
+UserSchema.plugin(MongooseJsonApi, {
+  type: 'users',
+  filter: {
+    query: (query: string) => {
+      return {
+        $or: [
+          {
+            pseudo: {
+              $regex: query,
+              $options: 'i',
+            },
           },
-        },
-      ]
-    };
-  }
+        ]
+      };
+    }
+  },
 });
-// TODO: order by query
+
+
+const User = model<IUser, IUserModel>('User', UserSchema);
+export default User;

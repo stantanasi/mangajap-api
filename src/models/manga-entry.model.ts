@@ -1,9 +1,11 @@
-import { Schema, model, Types, Document } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { Schema, model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
 
-export interface IMangaEntry extends Document {
+export interface IMangaEntry {
+  _id: Types.ObjectId;
+
   isAdd: boolean;
   isFavorites: boolean;
   status: 'reading' | 'completed' | 'planned' | 'on_hold' | 'dropped';
@@ -20,7 +22,10 @@ export interface IMangaEntry extends Document {
   updatedAt: Date;
 }
 
-export const MangaEntrySchema = new Schema<IMangaEntry>({
+export interface IMangaEntryModel extends JsonApiModel<IMangaEntry> {
+}
+
+export const MangaEntrySchema = new Schema<IMangaEntry, IMangaEntryModel>({
   isAdd: {
     type: Boolean,
     default: false
@@ -89,8 +94,10 @@ MangaEntrySchema.index({
 }, { unique: true });
 
 
-const MangaEntry = model<IMangaEntry>('MangaEntry', MangaEntrySchema);
+MangaEntrySchema.plugin(MongooseJsonApi, {
+  type: 'manga-entries',
+});
+
+
+const MangaEntry = model<IMangaEntry, IMangaEntryModel>('MangaEntry', MangaEntrySchema);
 export default MangaEntry;
-
-
-JsonApiSerializer.register('manga-entries', MangaEntry);

@@ -1,31 +1,24 @@
 import express from "express";
 import Request from "../models/request.model";
-import User, { IUser } from "../models/user.model";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
+import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
+import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const requestRoutes = express.Router();
 
 requestRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      Request,
-      JsonApiQueryParser.parse(req.query, Request)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await Request.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -33,12 +26,17 @@ requestRoutes.get('/', async (req, res, next) => {
 
 requestRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      Request,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await Request.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Request.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -46,13 +44,13 @@ requestRoutes.post('/', isLogin(), async (req, res, next) => {
 
 requestRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      Request,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, Request)
-    );
+    const body = await Request.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -60,19 +58,26 @@ requestRoutes.get('/:id', async (req, res, next) => {
 
 requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await Request.findById(req.params.id);
-    if (user?._id !== old?.user) {
-      throw new PermissionDenied();
-    }
+    await Request.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.user === user._id)) {
+          return doc
+            .merge(Request.fromJsonApi(req.body))
+            .save();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
-    const data = await MongooseAdapter.update(
-      Request,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const body = await Request.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -80,16 +85,17 @@ requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
 
 requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await Request.findById(req.params.id);
-    if (user?._id !== old?.user) {
-      throw new PermissionDenied();
-    }
-
-    await MongooseAdapter.delete(
-      Request,
-      req.params.id,
-    );
+    await Request.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc.user === user._id)) {
+          return doc
+            .delete();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -100,14 +106,14 @@ requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 requestRoutes.get('/:id/user', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Request,
-      req.params.id,
-      'user',
-      JsonApiQueryParser.parse(req.query, User),
-    );
+    const body = await Request.findById(req.params.id)
+      .getRelationship('user')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

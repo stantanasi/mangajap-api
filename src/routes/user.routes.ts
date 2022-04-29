@@ -1,42 +1,23 @@
 import express from "express";
-import AnimeEntry from "../models/anime-entry.model";
-import Follow from "../models/follow.model";
-import MangaEntry from "../models/manga-entry.model";
-import Review from "../models/review.model";
 import User, { IUser } from "../models/user.model";
-import { PermissionDenied } from "../utils/json-api/json-api.error";
 import { isLogin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
+import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const userRoutes = express.Router();
 
 userRoutes.get('/', async (req, res, next) => {
-  const filter = req.query.filter as any;
-  if (filter?.self) {
-    const user: IUser = res.locals.user;
-
-    delete filter.self
-    filter._id = user._id;
-  }
-
   try {
-    const { data, count } = await MongooseAdapter.find(
-      User,
-      JsonApiQueryParser.parse(req.query, User)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await User.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -44,12 +25,17 @@ userRoutes.get('/', async (req, res, next) => {
 
 userRoutes.post('/', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      User,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await User.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await User.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -57,13 +43,13 @@ userRoutes.post('/', async (req, res, next) => {
 
 userRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      User,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, User)
-    );
+    const body = await User.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -71,19 +57,26 @@ userRoutes.get('/:id', async (req, res, next) => {
 
 userRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await User.findById(req.params.id);
-    if (user?._id !== old?._id) {
-      throw new PermissionDenied();
-    }
+    await User.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc._id === user._id)) {
+          return doc
+            .merge(User.fromJsonApi(req.body))
+            .save();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
-    const data = await MongooseAdapter.update(
-      User,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const body = await User.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -91,16 +84,17 @@ userRoutes.patch('/:id', isLogin(), async (req, res, next) => {
 
 userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
-    const user: IUser = res.locals.user;
-    const old = await User.findById(req.params.id);
-    if (user?._id !== old?._id) {
-      throw new PermissionDenied();
-    }
-
-    await MongooseAdapter.delete(
-      User,
-      req.params.id,
-    );
+    await User.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        const user: IUser | null = res.locals.user;
+        if (user && (user.isAdmin || doc._id === user._id)) {
+          return doc
+            .delete();
+        } else {
+          throw new JsonApiError.PermissionDenied();
+        }
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -111,23 +105,18 @@ userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 userRoutes.get('/:id/followers', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      User,
-      req.params.id,
-      'followers',
-      JsonApiQueryParser.parse(req.query, Follow),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await User.findById(req.params.id)
+      .getRelationship('followers')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -135,23 +124,18 @@ userRoutes.get('/:id/followers', async (req, res, next) => {
 
 userRoutes.get('/:id/following', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      User,
-      req.params.id,
-      'following',
-      JsonApiQueryParser.parse(req.query, Follow),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await User.findById(req.params.id)
+      .getRelationship('following')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -159,23 +143,18 @@ userRoutes.get('/:id/following', async (req, res, next) => {
 
 userRoutes.get('/:id/anime-library', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      User,
-      req.params.id,
-      'anime-library',
-      JsonApiQueryParser.parse(req.query, AnimeEntry),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await User.findById(req.params.id)
+      .getRelationship('anime-library')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -183,23 +162,18 @@ userRoutes.get('/:id/anime-library', async (req, res, next) => {
 
 userRoutes.get('/:id/manga-library', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      User,
-      req.params.id,
-      'manga-library',
-      JsonApiQueryParser.parse(req.query, MangaEntry),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await User.findById(req.params.id)
+      .getRelationship('manga-library')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -207,23 +181,18 @@ userRoutes.get('/:id/manga-library', async (req, res, next) => {
 
 userRoutes.get('/:id/anime-favorites', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      User,
-      req.params.id,
-      'anime-favorites',
-      JsonApiQueryParser.parse(req.query, AnimeEntry),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await User.findById(req.params.id)
+      .getRelationship('anime-favorites')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -231,23 +200,18 @@ userRoutes.get('/:id/anime-favorites', async (req, res, next) => {
 
 userRoutes.get('/:id/manga-favorites', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      User,
-      req.params.id,
-      'manga-favorites',
-      JsonApiQueryParser.parse(req.query, MangaEntry),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await User.findById(req.params.id)
+      .getRelationship('manga-favorites')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -255,23 +219,18 @@ userRoutes.get('/:id/manga-favorites', async (req, res, next) => {
 
 userRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      User,
-      req.params.id,
-      'reviews',
-      JsonApiQueryParser.parse(req.query, Review),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await User.findById(req.params.id)
+      .getRelationship('reviews')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }

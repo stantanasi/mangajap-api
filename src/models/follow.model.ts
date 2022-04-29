@@ -1,8 +1,10 @@
-import { Schema, model, Document } from 'mongoose';
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
+import { Schema, model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IUser } from "./user.model";
 
-export interface IFollow extends Document {
+export interface IFollow {
+  _id: Types.ObjectId;
+
   follower: string & IUser;
   followed: string & IUser;
 
@@ -10,7 +12,10 @@ export interface IFollow extends Document {
   updatedAt: Date;
 }
 
-export const FollowSchema = new Schema<IFollow>({
+export interface IFollowModel extends JsonApiModel<IFollow> {
+}
+
+export const FollowSchema = new Schema<IFollow, IFollowModel>({
   follower: {
     type: String,
     ref: 'User',
@@ -37,19 +42,22 @@ FollowSchema.index({
 }, { unique: true });
 
 
-const Follow = model<IFollow>('Follow', FollowSchema);
-export default Follow;
-
-
-JsonApiSerializer.register('follows', Follow, {
-  followerId: (followerId: string) => {
-    return {
-      follower: followerId,
-    };
-  },
-  followedId: (followedId: string) => {
-    return {
-      followed: followedId,
-    };
+FollowSchema.plugin(MongooseJsonApi, {
+  type: 'follows',
+  filter: { // TODO: DEPRECATED
+    followerId: (followerId: string) => {
+      return {
+        follower: followerId,
+      };
+    },
+    followedId: (followedId: string) => {
+      return {
+        followed: followedId,
+      };
+    },
   },
 });
+
+
+const Follow = model<IFollow, IFollowModel>('Follow', FollowSchema);
+export default Follow;

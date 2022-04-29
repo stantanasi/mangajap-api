@@ -1,37 +1,22 @@
 import express from "express";
-import Chapter from "../models/chapter.model";
-import Franchise from "../models/franchise.model";
-import Genre from "../models/genre.model";
-import MangaEntry from "../models/manga-entry.model";
 import Manga from "../models/manga.model";
-import Review from "../models/review.model";
-import Staff from "../models/staff.model";
-import Theme from "../models/theme.model";
-import Volume from "../models/volume.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
-import JsonApiQueryParser from "../utils/mongoose-jsonapi/jsonapi-query-parser";
-import JsonApiSerializer from "../utils/mongoose-jsonapi/jsonapi-serializer";
-import MongooseAdapter from "../utils/mongoose-jsonapi/mongoose-adapter";
 
 const mangaRoutes = express.Router();
 
 mangaRoutes.get('/', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.find(
-      Manga,
-      JsonApiQueryParser.parse(req.query, Manga)
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count,
+    const body = await Manga.find()
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -39,12 +24,17 @@ mangaRoutes.get('/', async (req, res, next) => {
 
 mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.create(
-      Manga,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    const id = await Manga.fromJsonApi(req.body)
+      .save()
+      .then((doc) => doc._id);
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Manga.findById(id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -52,13 +42,13 @@ mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 mangaRoutes.get('/:id', async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.findById(
-      Manga,
-      req.params.id,
-      JsonApiQueryParser.parse(req.query, Manga)
-    );
+    const body = await Manga.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.status(data ? 200 : 404).json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -66,13 +56,21 @@ mangaRoutes.get('/:id', async (req, res, next) => {
 
 mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
-    const data = await MongooseAdapter.update(
-      Manga,
-      req.params.id,
-      JsonApiSerializer.deserialize(req.body)
-    );
+    await Manga.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .merge(Manga.fromJsonApi(req.body))
+          .save();
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    const body = await Manga.findById(req.params.id)
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -80,10 +78,12 @@ mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
 
 mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
-    await MongooseAdapter.delete(
-      Manga,
-      req.params.id,
-    );
+    await Manga.findById(req.params.id)
+      .orFail()
+      .then((doc) => {
+        return doc
+          .delete();
+      });
 
     res.status(204).send();
   } catch (err) {
@@ -94,23 +94,18 @@ mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 mangaRoutes.get('/:id/volumes', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'volumes',
-      JsonApiQueryParser.parse(req.query, Volume),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('volumes')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -118,23 +113,18 @@ mangaRoutes.get('/:id/volumes', async (req, res, next) => {
 
 mangaRoutes.get('/:id/chapters', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'chapters',
-      JsonApiQueryParser.parse(req.query, Chapter),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('chapters')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -142,23 +132,18 @@ mangaRoutes.get('/:id/chapters', async (req, res, next) => {
 
 mangaRoutes.get('/:id/genres', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'genres',
-      JsonApiQueryParser.parse(req.query, Genre),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('genres')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -166,23 +151,18 @@ mangaRoutes.get('/:id/genres', async (req, res, next) => {
 
 mangaRoutes.get('/:id/themes', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'themes',
-      JsonApiQueryParser.parse(req.query, Theme),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('themes')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -190,23 +170,18 @@ mangaRoutes.get('/:id/themes', async (req, res, next) => {
 
 mangaRoutes.get('/:id/staff', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'staff',
-      JsonApiQueryParser.parse(req.query, Staff),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('staff')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -214,23 +189,18 @@ mangaRoutes.get('/:id/staff', async (req, res, next) => {
 
 mangaRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'reviews',
-      JsonApiQueryParser.parse(req.query, Review),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('reviews')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -238,23 +208,18 @@ mangaRoutes.get('/:id/reviews', async (req, res, next) => {
 
 mangaRoutes.get('/:id/franchises', async (req, res, next) => {
   try {
-    const { data, count } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'franchises',
-      JsonApiQueryParser.parse(req.query, Franchise),
-    );
-
-    res.json(JsonApiSerializer.serialize(data, {
-      meta: {
-        count: count,
-      },
-      pagination: {
-        url: req.originalUrl,
-        count: count!,
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('franchises')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      })
+      .paginate({
+        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
         query: req.query,
-      },
-    }));
+      });
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -262,14 +227,14 @@ mangaRoutes.get('/:id/franchises', async (req, res, next) => {
 
 mangaRoutes.get('/:id/manga-entry', async (req, res, next) => {
   try {
-    const { data } = await MongooseAdapter.findRelationship(
-      Manga,
-      req.params.id,
-      'manga-entry',
-      JsonApiQueryParser.parse(req.query, MangaEntry),
-    );
+    const body = await Manga.findById(req.params.id)
+      .getRelationship('manga-entry')
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
 
-    res.json(JsonApiSerializer.serialize(data));
+    res.json(body);
   } catch (err) {
     next(err);
   }

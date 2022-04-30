@@ -1,14 +1,21 @@
 import express from "express";
 import User, { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
-import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { JsonApiError, JsonApiQueryParams } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const userRoutes = express.Router();
 
 userRoutes.get('/', async (req, res, next) => {
   try {
+    const user: IUser | null = res.locals.user;
+    const query: JsonApiQueryParams = Object.assign({}, req.query);
+    if (query.filter?.self && user) {
+      delete query.filter.self
+      query.filter._id = user._id;
+    }
+
     const body = await User.find()
-      .withJsonApi(req.query)
+      .withJsonApi(query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       })

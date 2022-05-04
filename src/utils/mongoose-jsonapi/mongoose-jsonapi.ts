@@ -1,4 +1,14 @@
-import { Model, Schema, QueryWithHelpers, HydratedDocument, Document, PopulateOptions, SchemaType, VirtualType, Error as MongooseError } from 'mongoose';
+import {
+  Document,
+  Error as MongooseError,
+  HydratedDocument,
+  Model,
+  PopulateOptions,
+  QueryWithHelpers,
+  Schema,
+  SchemaType,
+  VirtualType,
+} from 'mongoose';
 import UrlQuery from '../url-query/url-query';
 
 export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>>(

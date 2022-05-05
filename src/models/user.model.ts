@@ -249,10 +249,10 @@ UserSchema.pre<IUser & Document>('save', async function () {
 });
 
 UserSchema.pre('findOne', async function () {
-  const _id = this.getQuery()._id;
+  const _id = this.getFilter()._id;
   if (!_id) return;
 
-  await User.findOneAndUpdate(this.getQuery(), {
+  await User.findOneAndUpdate(this.getFilter(), {
     followersCount: await Follow.count({
       followed: _id
     }),

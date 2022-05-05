@@ -109,10 +109,10 @@ VolumeSchema.pre<IVolume & Document>('save', async function () {
 });
 
 VolumeSchema.pre('findOne', async function () {
-  const _id = this.getQuery()._id;
+  const _id = this.getFilter()._id;
   if (!_id) return;
 
-  await Volume.findOneAndUpdate(this.getQuery(), {
+  await Volume.findOneAndUpdate(this.getFilter(), {
     chapterCount: await Chapter.count({
       volume: _id,
     }),

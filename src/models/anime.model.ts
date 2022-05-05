@@ -260,10 +260,10 @@ AnimeSchema.pre<IAnime & Document>('save', async function () {
 });
 
 AnimeSchema.pre('findOne', async function () {
-  const _id = this.getQuery()._id;
+  const _id = this.getFilter()._id;
   if (!_id) return;
 
-  await Anime.findOneAndUpdate(this.getQuery(), {
+  await Anime.findOneAndUpdate(this.getFilter(), {
     seasonCount: await Season.count({
       anime: _id,
     }),

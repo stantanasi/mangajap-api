@@ -256,10 +256,10 @@ MangaSchema.pre<IManga & Document>('save', async function () {
 });
 
 MangaSchema.pre('findOne', async function () {
-  const _id = this.getQuery()._id;
+  const _id = this.getFilter()._id;
   if (!_id) return;
 
-  await Manga.findOneAndUpdate(this.getQuery(), {
+  await Manga.findOneAndUpdate(this.getFilter(), {
     volumeCount: await Volume.count({
       manga: _id,
     }),

@@ -69,10 +69,10 @@ SeasonSchema.index({
 
 
 SeasonSchema.pre('findOne', async function () {
-  const _id = this.getQuery()._id;
+  const _id = this.getFilter()._id;
   if (!_id) return;
 
-  await Season.findOneAndUpdate(this.getQuery(), {
+  await Season.findOneAndUpdate(this.getFilter(), {
     episodeCount: await Episode.count({
       season: _id,
     }),

@@ -9,6 +9,7 @@ export interface ISeason {
   titles: {
     [language: string]: string;
   };
+  overview: string;
   number: number;
   episodeCount: number;
 
@@ -26,6 +27,11 @@ export const SeasonSchema = new Schema<ISeason, ISeasonModel>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
+  },
+
+  overview: {
+    type: String,
+    default: '',
   },
 
   number: {

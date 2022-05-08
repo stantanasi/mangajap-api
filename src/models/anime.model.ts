@@ -26,6 +26,7 @@ export interface IAnime {
   origin: string;
   animeType: 'tv' | 'ova' | 'ona' | 'movie' | 'music' | 'special';
   status: 'airing' | 'finished' | 'unreleased' | 'upcoming';
+  inProduction: boolean;
   youtubeVideoId: string;
   coverImage: string | null;
   bannerImage: string | null;
@@ -113,6 +114,11 @@ export const AnimeSchema = new Schema<IAnime, IAnimeModel>({
     type: String,
     required: true,
     enum: ['airing', 'finished', 'unreleased', 'upcoming'],
+  },
+
+  inProduction: {
+    type: Boolean,
+    required: true,
   },
 
   youtubeVideoId: {

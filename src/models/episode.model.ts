@@ -9,10 +9,12 @@ export interface IEpisode {
   titles: {
     [language: string]: string;
   };
+  overview: string;
   relativeNumber: number;
   number: number;
   airDate: Date | null;
   episodeType: '' | 'oav';
+  duration: number;
 
   anime: Types.ObjectId & IAnime;
   season: Types.ObjectId & ISeason;
@@ -28,6 +30,11 @@ export const EpisodeSchema = new Schema<IEpisode, IEpisodeModel>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
+  },
+
+  overview: {
+    type: String,
+    default: '',
   },
 
   relativeNumber: {
@@ -52,6 +59,11 @@ export const EpisodeSchema = new Schema<IEpisode, IEpisodeModel>({
     type: String,
     default: '',
     enum: ['', 'oav']
+  },
+
+  duration: {
+    type: Number,
+    default: 0,
   },
 
 

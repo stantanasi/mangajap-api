@@ -17,7 +17,7 @@ export interface IAnime {
 
   title: string;
   titles: {
-    [language: string]: string
+    [language: string]: string;
   };
   slug: string;
   synopsis: string;
@@ -29,6 +29,9 @@ export interface IAnime {
   youtubeVideoId: string;
   coverImage: string | null;
   bannerImage: string | null;
+  links: {
+    [site: string]: string;
+  };
 
   seasonCount: number;
   episodeCount: number;
@@ -125,6 +128,11 @@ export const AnimeSchema = new Schema<IAnime, IAnimeModel>({
   bannerImage: {
     type: String,
     default: null,
+  },
+
+  links: {
+    type: Schema.Types.Mixed,
+    default: {},
   },
 
 

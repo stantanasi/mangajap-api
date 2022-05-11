@@ -1,6 +1,7 @@
 import {
   Document,
   Model,
+  QueryWithHelpers,
   Schema,
 } from 'mongoose';
 
@@ -10,9 +11,9 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
     fields: string[];
   },
 ) {
-  const schema = _schema as Schema<DocType, M, {}, {}>;
+  const schema = _schema as Schema<DocType, M, SearchInstanceMethods, SearchQueryHelper>;
 
-  schema.pre('find', async function () {
+  schema.pre<QueryWithHelpers<DocType[], DocType, SearchQueryHelper>>('find', async function () {
     const iterate = (obj: any): { key: string, value: any }[] => {
       return Object.keys(obj).reduce((acc, key) => {
         acc = acc.concat({ key: key, value: obj[key] });
@@ -102,10 +103,16 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
 
     this
       .merge({ _id: { $in: ids } })
-      .transform((docs: DocType[]) => {
+      .transformAt(0, (docs: DocType[]) => {
         return docs.sort((a, b) => ids.findIndex((id) => id.toString() == a._id) - ids.findIndex((id) => id.toString() == b._id));
       });
   });
+
+
+  schema.query.transformAt = function (index, fn) {
+    (this as any)._transforms.splice(index, 0, fn);
+    return this as any;
+  }
 }
 
 
@@ -116,4 +123,9 @@ export interface SearchInstanceMethods extends Document {
 }
 
 export interface SearchQueryHelper {
+  transformAt: <MappedType, ResultType, DocType>(
+    this: QueryWithHelpers<ResultType, DocType, SearchQueryHelper>,
+    index: number,
+    fn: (doc: ResultType) => MappedType,
+  ) => QueryWithHelpers<MappedType, DocType, SearchQueryHelper>;
 }

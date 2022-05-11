@@ -329,38 +329,7 @@ MangaSchema.plugin(MongooseJsonApi, {
   filter: {
     query: (query: string) => {
       return {
-        $or: [
-          {
-            title: {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.fr': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.en': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.en_jp': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.ja_jp': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-        ]
+        $search: query,
       };
     }
   },

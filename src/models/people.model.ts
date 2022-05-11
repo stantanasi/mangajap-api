@@ -94,26 +94,7 @@ PeopleSchema.plugin(MongooseJsonApi, {
   filter: {
     query: (query: string) => {
       return {
-        $or: [
-          {
-            firstName: {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            lastName: {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            pseudo: {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-        ]
+        $search: query,
       };
     }
   },

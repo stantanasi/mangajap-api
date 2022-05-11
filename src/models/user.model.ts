@@ -320,14 +320,7 @@ UserSchema.plugin(MongooseJsonApi, {
   filter: {
     query: (query: string) => {
       return {
-        $or: [
-          {
-            pseudo: {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-        ]
+        $search: query,
       };
     }
   },

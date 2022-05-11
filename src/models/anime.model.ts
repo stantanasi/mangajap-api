@@ -3,6 +3,7 @@ import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Episode, { IEpisode } from "./episode.model";
 import { IFranchise } from "./franchise.model";
@@ -54,10 +55,7 @@ export interface IAnime {
   updatedAt: Date;
 }
 
-export interface IAnimeModel extends JsonApiModel<IAnime> {
-}
-
-export const AnimeSchema = new Schema<IAnime, IAnimeModel>({
+export const AnimeSchema = new Schema<IAnime, JsonApiModel<IAnime> & SearchModel<IAnime>>({
   title: {
     type: String,
     required: true,
@@ -326,6 +324,10 @@ AnimeSchema.pre('findOne', async function () {
 });
 
 
+AnimeSchema.plugin(MongooseSearch, {
+  fields: ['title', 'titles'],
+});
+
 AnimeSchema.plugin(MongooseJsonApi, {
   type: 'anime',
   filter: {
@@ -369,7 +371,7 @@ AnimeSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Anime = model<IAnime, IAnimeModel>('Anime', AnimeSchema);
+const Anime = model<IAnime, JsonApiModel<IAnime> & SearchModel<IAnime>>('Anime', AnimeSchema);
 export default Anime;
 
 // TODO: cronjobs

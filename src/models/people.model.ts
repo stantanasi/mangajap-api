@@ -3,6 +3,7 @@ import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IStaff } from "./staff.model";
+import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
 
 export interface IPeople {
   _id: Types.ObjectId;
@@ -20,10 +21,7 @@ export interface IPeople {
   updatedAt: Date;
 }
 
-export interface IPeopleModel extends JsonApiModel<IPeople> {
-}
-
-export const PeopleSchema = new Schema<IPeople, IPeopleModel>({
+export const PeopleSchema = new Schema<IPeople, JsonApiModel<IPeople> & SearchModel<IPeople>>({
   firstName: {
     type: String,
     default: ''
@@ -87,6 +85,10 @@ PeopleSchema.pre<IPeople & Document>('save', async function () {
 });
 
 
+PeopleSchema.plugin(MongooseSearch, {
+  fields: ['firstName', 'lastName', 'pseudo'],
+});
+
 PeopleSchema.plugin(MongooseJsonApi, {
   type: 'peoples',
   filter: {
@@ -118,5 +120,5 @@ PeopleSchema.plugin(MongooseJsonApi, {
 });
 
 
-const People = model<IPeople, IPeopleModel>('People', PeopleSchema);
+const People = model<IPeople, JsonApiModel<IPeople> & SearchModel<IPeople>>('People', PeopleSchema);
 export default People;

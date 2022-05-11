@@ -31,10 +31,25 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
     if (!query) return;
 
     const aggregate = this.model.aggregate()
+      .addFields(options.fields.filter((field) => schema.path(field).instance === 'Mixed').reduce((acc, field) => {
+        return Object.assign(acc, {
+          [field]: {
+            $map: {
+              input: { $objectToArray: `$${field}` },
+              as: 'value',
+              in: '$$value.v',
+            },
+          },
+        });
+      }, {} as any))
       .match({
         $or: options.fields
           .map((field) => [query].concat(query.split(' ')).filter((word) => !!word).map((word) => {
-            return { [field]: { $regex: word, $options: 'i' } };
+            if (schema.path(field).instance === 'String') {
+              return { [field]: { $regex: word, $options: 'i' } };
+            } else {
+              return { [field]: { $elemMatch: { $regex: word, $options: 'i' } } };
+            }
           }))
           .reduce((acc, cur) => acc.concat(cur), []),
       })
@@ -43,15 +58,35 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
           $add: options.fields
             .map((field, i1, arr1) => [query].concat(query.split(' ')).filter((word) => !!word).map((word, i2, arr2) => {
               const coef = (arr1.length - i1) * (arr2.length - i2);
-              return [
-                { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}$`, options: 'i' } }, 100 * coef, 0] },
-                { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}`, options: 'i' } }, 90 * coef, 0] },
-                { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}\b`, options: 'i' } }, 70 * coef, 0] },
-                { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}`, options: 'i' } }, 50 * coef, 0] },
-              ];
+              if (schema.path(field).instance === 'String') {
+                return [
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}$`, options: 'i' } }, 100 * coef, 0] },
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}`, options: 'i' } }, 90 * coef, 0] },
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}\b`, options: 'i' } }, 70 * coef, 0] },
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}`, options: 'i' } }, 50 * coef, 0] },
+                ];
+              } else {
+                return [
+                  {
+                    $reduce: {
+                      input: `$${field}`,
+                      initialValue: 0,
+                      in: {
+                        $add: [
+                          "$$value",
+                          { $cond: [{ $regexMatch: { input: '$$this', regex: `^${word}$`, options: 'i' } }, 100 * coef, 0] },
+                          { $cond: [{ $regexMatch: { input: '$$this', regex: `^${word}`, options: 'i' } }, 90 * coef, 0] },
+                          { $cond: [{ $regexMatch: { input: '$$this', regex: `\b${word}\b`, options: 'i' } }, 70 * coef, 0] },
+                          { $cond: [{ $regexMatch: { input: '$$this', regex: `\b${word}`, options: 'i' } }, 50 * coef, 0] },
+                        ],
+                      },
+                    },
+                  },
+                ];
+              }
             }))
             .reduce((acc, cur) => acc.concat(cur), [])
-            .reduce((acc, cur) => acc.concat(cur), []),
+            .reduce((acc, cur) => acc.concat(cur), [] as any[]),
         },
       })
       .sort({

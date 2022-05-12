@@ -15,6 +15,7 @@ export interface ISeason {
   number: number;
   posterImage: string | null;
 
+  airDate: Date | null;
   episodeCount: number;
 
   anime: Types.ObjectId & IAnime;
@@ -48,6 +49,14 @@ export const SeasonSchema = new Schema<ISeason, ISeasonModel>({
     default: null,
   },
 
+
+  airDate: {
+    type: Date,
+    default: null,
+    transform: function (this, val) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
+  },
 
   episodeCount: {
     type: Number,
@@ -98,6 +107,10 @@ SeasonSchema.pre('findOne', async function () {
   if (!_id) return;
 
   await Season.findOneAndUpdate(this.getFilter(), {
+    airDate: await Episode.findOne({
+      season: _id,
+    }).sort({ number: 1 }).then((episode) => episode?.airDate ?? null),
+
     episodeCount: await Episode.count({
       season: _id,
     }),

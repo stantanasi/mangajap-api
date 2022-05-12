@@ -1,4 +1,6 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types, Document } from 'mongoose';
+import { ref } from 'firebase/storage';
+import { storage, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import Episode, { IEpisode } from "./episode.model";
@@ -11,6 +13,8 @@ export interface ISeason {
   };
   overview: string;
   number: number;
+  posterImage: string | null;
+
   episodeCount: number;
 
   anime: Types.ObjectId & IAnime;
@@ -38,6 +42,12 @@ export const SeasonSchema = new Schema<ISeason, ISeasonModel>({
     type: Number,
     required: true
   },
+
+  posterImage: {
+    type: String,
+    default: null,
+  },
+
 
   episodeCount: {
     type: Number,
@@ -73,6 +83,15 @@ SeasonSchema.index({
   anime: 1
 }, { unique: true });
 
+
+SeasonSchema.pre<ISeason & Document>('save', async function () {
+  if (this.isModified('posterImage')) {
+    this.posterImage = await uploadFile(
+      ref(storage, `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`),
+      this.posterImage,
+    );
+  }
+});
 
 SeasonSchema.pre('findOne', async function () {
   const _id = this.getFilter()._id;

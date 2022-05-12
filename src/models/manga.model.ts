@@ -3,6 +3,7 @@ import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
@@ -55,10 +56,7 @@ export interface IManga {
   updatedAt: Date;
 }
 
-export interface IMangaModel extends JsonApiModel<IManga> {
-}
-
-export const MangaSchema = new Schema<IManga, IMangaModel>({
+export const MangaSchema = new Schema<IManga, JsonApiModel<IManga> & SearchModel<IManga>>({
   title: {
     type: String,
     required: true,
@@ -256,10 +254,10 @@ MangaSchema.pre<IManga & Document>('save', async function () {
 });
 
 MangaSchema.pre('findOne', async function () {
-  const _id = this.getQuery()._id;
+  const _id = this.getFilter()._id;
   if (!_id) return;
 
-  await Manga.findOneAndUpdate(this.getQuery(), {
+  await Manga.findOneAndUpdate(this.getFilter(), {
     volumeCount: await Volume.count({
       manga: _id,
     }),
@@ -322,50 +320,23 @@ MangaSchema.pre('findOne', async function () {
 });
 
 
+MangaSchema.plugin(MongooseSearch, {
+  fields: ['title', 'titles'],
+});
+
 MangaSchema.plugin(MongooseJsonApi, {
   type: 'manga',
   filter: {
     query: (query: string) => {
       return {
-        $or: [
-          {
-            title: {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.fr': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.en': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.en_jp': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.ja_jp': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-        ]
+        $search: query,
       };
     }
   },
 });
 
 
-const Manga = model<IManga, IMangaModel>('Manga', MangaSchema);
+const Manga = model<IManga, JsonApiModel<IManga> & SearchModel<IManga>>('Manga', MangaSchema);
 export default Manga;
 
 

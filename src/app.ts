@@ -30,11 +30,14 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-app.get('/favicon.ico', (_req, res) => res.status(204).send());
+app.use((req, res, next) => {
+  res.header('Content-Type', 'application/vnd.api+json');
+  next();
+});
 
 app.use(async (req, res, next) => {
   try {
-    await connect(process.env.MONGO_DB_URI!)
+    await connect(process.env.MONGO_DB_URI!);
     next();
   } catch (err) {
     next(err);
@@ -79,6 +82,8 @@ app.use(async (req, res, next) => {
     next(err);
   }
 });
+
+app.get('/favicon.ico', (req, res) => res.status(204).send());
 
 app.use('/anime', animeRoutes);
 app.use('/anime-entries', animeEntryRoutes);

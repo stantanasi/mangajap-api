@@ -1,9 +1,25 @@
-import { Model, Schema, QueryWithHelpers, HydratedDocument, Document, PopulateOptions, SchemaType, VirtualType, Error as MongooseError } from 'mongoose';
+import {
+  Document,
+  Error as MongooseError,
+  FilterQuery,
+  HydratedDocument,
+  Model,
+  PopulateOptions,
+  QueryWithHelpers,
+  Schema,
+  SchemaType,
+  VirtualType,
+} from 'mongoose';
 import UrlQuery from '../url-query/url-query';
 
 export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>>(
   _schema: Schema<DocType, M>,
-  options?: JsonApiPluginOptions,
+  options: {
+    type: string;
+    filter?: {
+      [field: string]: (value: string) => FilterQuery<DocType>;
+    };
+  },
 ): void {
   const schema = _schema as Schema<DocType, M, JsonApiInstanceMethods, JsonApiQueryHelper>;
 
@@ -58,7 +74,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
               return {
                 $or: values.split(',')
                   .map((value: string) => {
-                    if (options?.filter?.[field]) {
+                    if (options.filter?.[field]) {
                       return options.filter[field](value);
                     } else {
                       return { [field]: value };
@@ -178,10 +194,10 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
               return {
                 $or: values.split(',')
                   .map((value: string) => {
-                    if (options?.filter?.[field]) {
+                    if (options.filter?.[field]) {
                       return options.filter[field](value);
                     } else {
-                      return { [field]: value };
+                      return { [field]: value } as any;
                     }
                   })
               };
@@ -250,7 +266,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
       if (this.getOptions().getRelationship) {
         const relationship = this.getOptions().getRelationship;
 
-        count = await this.model.findOne(this.getQuery())
+        count = await this.model.findOne(this.getFilter())
           .populate({
             path: relationship,
             match: (this.mongooseOptions().populate as any)[relationship].match,
@@ -267,7 +283,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
           });
 
       } else {
-        count = await this.model.countDocuments(this.getQuery());
+        count = await this.model.countDocuments(this.getFilter());
       }
 
       const limit = +(opts.query.page?.limit ?? 10);
@@ -325,7 +341,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
     const obj: any = this.toObject();
 
-    const type = options?.type;
+    const type = options.type;
     const id = this._id?.toString();
 
     if (!type) {
@@ -436,13 +452,6 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
     });
 
     return Object.assign(this, ...sources);
-  };
-}
-
-export interface JsonApiPluginOptions {
-  type: string;
-  filter?: {
-    [field: string]: (value: string) => any;
   };
 }
 

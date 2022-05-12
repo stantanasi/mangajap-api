@@ -3,6 +3,7 @@ import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Episode, { IEpisode } from "./episode.model";
 import { IFranchise } from "./franchise.model";
@@ -58,10 +59,7 @@ export interface IAnime {
   updatedAt: Date;
 }
 
-export interface IAnimeModel extends JsonApiModel<IAnime> {
-}
-
-export const AnimeSchema = new Schema<IAnime, IAnimeModel>({
+export const AnimeSchema = new Schema<IAnime, JsonApiModel<IAnime> & SearchModel<IAnime>>({
   title: {
     type: String,
     required: true,
@@ -274,10 +272,10 @@ AnimeSchema.pre<IAnime & Document>('save', async function () {
 });
 
 AnimeSchema.pre('findOne', async function () {
-  const _id = this.getQuery()._id;
+  const _id = this.getFilter()._id;
   if (!_id) return;
 
-  await Anime.findOneAndUpdate(this.getQuery(), {
+  await Anime.findOneAndUpdate(this.getFilter(), {
     seasonCount: await Season.count({
       anime: _id,
     }),
@@ -340,50 +338,23 @@ AnimeSchema.pre('findOne', async function () {
 });
 
 
+AnimeSchema.plugin(MongooseSearch, {
+  fields: ['title', 'titles'],
+});
+
 AnimeSchema.plugin(MongooseJsonApi, {
   type: 'anime',
   filter: {
     query: (query: string) => {
       return {
-        $or: [
-          {
-            title: {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.fr': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.en': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.en_jp': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-          {
-            'titles.ja_jp': {
-              $regex: query,
-              $options: 'i',
-            },
-          },
-        ]
+        $search: query,
       };
     }
   },
 });
 
 
-const Anime = model<IAnime, IAnimeModel>('Anime', AnimeSchema);
+const Anime = model<IAnime, JsonApiModel<IAnime> & SearchModel<IAnime>>('Anime', AnimeSchema);
 export default Anime;
 
 // TODO: cronjobs

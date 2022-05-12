@@ -284,13 +284,14 @@ AnimeSchema.pre('findOne', async function () {
       anime: _id,
     }),
 
-    averageRating: (await AnimeEntry.aggregate()
+    averageRating: await AnimeEntry.aggregate()
       .match({ anime: new Types.ObjectId(_id) })
       .group({
         _id: null,
         averageRating: { $avg: '$rating' },
-      }))[0]
-      ?.averageRating ?? null,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.averageRating ?? null),
 
     userCount: await AnimeEntry.count({
       anime: _id,
@@ -306,7 +307,7 @@ AnimeSchema.pre('findOne', async function () {
       anime: _id,
     }),
 
-    popularity: (await Anime.aggregate()
+    popularity: await Anime.aggregate()
       .match({ _id: new Types.ObjectId(_id) })
       .lookup({
         from: 'animeentries',
@@ -332,8 +333,9 @@ AnimeSchema.pre('findOne', async function () {
             { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
           ],
         },
-      }))[0]
-      ?.popularity | 0 ?? 0,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.popularity | 0 ?? 0),
   });
 });
 

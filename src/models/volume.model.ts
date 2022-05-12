@@ -117,13 +117,13 @@ VolumeSchema.pre('findOne', async function () {
       volume: _id,
     }),
 
-    startChapter: (await Chapter.findOne({
+    startChapter: await Chapter.findOne({
       volume: _id,
-    }).sort({ number: 1 }))?.number ?? null,
+    }).sort({ number: 1 }).then((doc) => doc?.number ?? null),
 
-    endChapter: (await Chapter.findOne({
+    endChapter: await Chapter.findOne({
       volume: _id,
-    }).sort({ number: -1 }))?.number ?? null,
+    }).sort({ number: -1 }).then((doc) => doc?.number ?? null),
   });
 });
 

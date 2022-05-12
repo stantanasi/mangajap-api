@@ -264,36 +264,39 @@ UserSchema.pre('findOne', async function () {
       isAdd: true,
     }),
 
-    volumesRead: (await MangaEntry.aggregate()
+    volumesRead: await MangaEntry.aggregate()
       .match({ user: _id })
       .group({
         _id: null,
         total: { $sum: "$volumesRead" },
-      }))[0]
-      ?.total,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.total),
 
-    chaptersRead: (await MangaEntry.aggregate()
+    chaptersRead: await MangaEntry.aggregate()
       .match({ user: _id })
       .group({
         _id: null,
         total: { $sum: "$chaptersRead" },
-      }))[0]
-      ?.total,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.total),
 
     followedAnimeCount: await AnimeEntry.count({
       user: _id,
       isAdd: true,
     }),
 
-    episodesWatch: (await AnimeEntry.aggregate()
+    episodesWatch: await AnimeEntry.aggregate()
       .match({ user: _id })
       .group({
         _id: null,
         total: { $sum: "$episodesWatch" }
-      }))[0]
-      ?.total,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.total),
 
-    timeSpentOnAnime: (await AnimeEntry.aggregate()
+    timeSpentOnAnime: await AnimeEntry.aggregate()
       .match({ user: _id })
       .lookup({
         from: 'animes',
@@ -305,8 +308,9 @@ UserSchema.pre('findOne', async function () {
       .group({
         _id: null,
         timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } },
-      }))[0]
-      ?.timeSpentOnAnime,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.timeSpentOnAnime),
   });
 });
 

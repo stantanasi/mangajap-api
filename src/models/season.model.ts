@@ -109,7 +109,7 @@ SeasonSchema.pre('findOne', async function () {
   await Season.findOneAndUpdate(this.getFilter(), {
     airDate: await Episode.findOne({
       season: _id,
-    }).sort({ number: 1 }).then((episode) => episode?.airDate ?? null),
+    }).sort({ number: 1 }).then((doc) => doc?.airDate ?? null),
 
     episodeCount: await Episode.count({
       season: _id,

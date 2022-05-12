@@ -266,13 +266,14 @@ MangaSchema.pre('findOne', async function () {
       manga: _id,
     }),
 
-    averageRating: (await MangaEntry.aggregate()
+    averageRating: await MangaEntry.aggregate()
       .match({ manga: new Types.ObjectId(_id) })
       .group({
         _id: null,
         averageRating: { $avg: '$rating' },
-      }))[0]
-      ?.averageRating ?? null,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.averageRating ?? null),
 
     userCount: await MangaEntry.count({
       manga: _id,
@@ -288,7 +289,7 @@ MangaSchema.pre('findOne', async function () {
       manga: _id,
     }),
 
-    popularity: (await Manga.aggregate()
+    popularity: await Manga.aggregate()
       .match({ _id: new Types.ObjectId(_id) })
       .lookup({
         from: 'mangaentries',
@@ -314,8 +315,9 @@ MangaSchema.pre('findOne', async function () {
             { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
           ],
         },
-      }))[0]
-      ?.popularity | 0 ?? 0,
+      })
+      .then((docs) => docs[0])
+      .then((doc) => doc?.popularity | 0 ?? 0),
   });
 });
 

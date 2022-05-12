@@ -90,9 +90,9 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
             .reduce((acc, cur) => acc.concat(cur), [] as any[]),
         },
       })
-      .sort({
+      .sort(Object.assign({
         queryScore: -1,
-      });
+      }, this.getOptions().sort));
 
     const limit = this.getOptions().limit;
     if (limit) {

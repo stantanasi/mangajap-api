@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
@@ -17,10 +17,16 @@ export interface IReview {
   updatedAt: Date;
 }
 
-export interface IReviewModel extends JsonApiModel<IReview> {
+export interface ReviewInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const ReviewSchema = new Schema<IReview, IReviewModel>({
+export interface ReviewQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface ReviewModel extends Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> {
+}
+
+export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IReview>, ReviewInstanceMethods, ReviewQueryHelper>({
   content: {
     type: String,
     required: true
@@ -59,5 +65,5 @@ ReviewSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Review = model<IReview, IReviewModel>('Review', ReviewSchema);
+const Review = model<IReview, ReviewModel & JsonApiModel<IReview>>('Review', ReviewSchema);
 export default Review;

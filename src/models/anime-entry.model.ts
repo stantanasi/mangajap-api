@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IUser } from "./user.model";
 
@@ -21,10 +21,16 @@ export interface IAnimeEntry {
   updatedAt: Date;
 }
 
-export interface IAnimeEntryModel extends JsonApiModel<IAnimeEntry> {
+export interface AnimeEntryInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const AnimeEntrySchema = new Schema<IAnimeEntry, IAnimeEntryModel>({
+export interface AnimeEntryQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface AnimeEntryModel extends Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> {
+}
+
+export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
   isAdd: {
     type: Boolean,
     default: true
@@ -93,5 +99,5 @@ AnimeEntrySchema.plugin(MongooseJsonApi, {
 });
 
 
-const AnimeEntry = model<IAnimeEntry, IAnimeEntryModel>('AnimeEntry', AnimeEntrySchema);
+const AnimeEntry = model<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>>('AnimeEntry', AnimeEntrySchema);
 export default AnimeEntry;

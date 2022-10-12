@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { ISeason } from "./season.model";
 
@@ -23,10 +23,16 @@ export interface IEpisode {
   updatedAt: Date;
 }
 
-export interface IEpisodeModel extends JsonApiModel<IEpisode> {
+export interface EpisodeInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const EpisodeSchema = new Schema<IEpisode, IEpisodeModel>({
+export interface EpisodeQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface EpisodeModel extends Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> {
+}
+
+export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IEpisode>, EpisodeInstanceMethods, EpisodeQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -103,5 +109,5 @@ EpisodeSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Episode = model<IEpisode, IEpisodeModel>('Episode', EpisodeSchema);
+const Episode = model<IEpisode, EpisodeModel & JsonApiModel<IEpisode>>('Episode', EpisodeSchema);
 export default Episode;

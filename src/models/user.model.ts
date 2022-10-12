@@ -1,8 +1,8 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Model, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Follow, { IFollow } from "./follow.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
@@ -44,7 +44,16 @@ export interface IUser {
   updatedAt: Date;
 }
 
-export const UserSchema = new Schema<IUser, JsonApiModel<IUser> & SearchModel<IUser>>({
+export interface UserInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+}
+
+export interface UserQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
+}
+
+export interface UserModel extends Model<IUser, UserQueryHelper, UserInstanceMethods> {
+}
+
+export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & SearchModel<IUser>, UserInstanceMethods, UserQueryHelper>({
   _id: {
     type: String,
     required: true,
@@ -331,5 +340,5 @@ UserSchema.plugin(MongooseJsonApi, {
 });
 
 
-const User = model<IUser, JsonApiModel<IUser> & SearchModel<IUser>>('User', UserSchema);
+const User = model<IUser, UserModel & JsonApiModel<IUser> & SearchModel<IUser>>('User', UserSchema);
 export default User;

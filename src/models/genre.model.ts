@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 
@@ -16,10 +16,16 @@ export interface IGenre {
   updatedAt: Date;
 }
 
-export interface IGenreModel extends JsonApiModel<IGenre> {
+export interface GenreInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const GenreSchema = new Schema<IGenre, IGenreModel>({
+export interface GenreQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface GenreModel extends Model<IGenre, GenreQueryHelper, GenreInstanceMethods> {
+}
+
+export const GenreSchema = new Schema<IGenre, GenreModel & JsonApiModel<IGenre>, GenreInstanceMethods, GenreQueryHelper>({
   title: {
     type: String,
     required: true
@@ -56,5 +62,5 @@ GenreSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Genre = model<IGenre, IGenreModel>('Genre', GenreSchema);
+const Genre = model<IGenre, GenreModel & JsonApiModel<IGenre>>('Genre', GenreSchema);
 export default Genre;

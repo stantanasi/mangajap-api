@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IManga } from './manga.model';
 import { IVolume } from './volume.model';
 
@@ -19,10 +19,16 @@ export interface IChapter {
   updatedAt: Date;
 }
 
-export interface IChapterModel extends JsonApiModel<IChapter> {
+export interface ChapterInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const ChapterSchema = new Schema<IChapter, IChapterModel>({
+export interface ChapterQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface ChapterModel extends Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> {
+}
+
+export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IChapter>, ChapterInstanceMethods, ChapterQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -73,5 +79,5 @@ ChapterSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Chapter = model<IChapter, IChapterModel>('Chapter', ChapterSchema);
+const Chapter = model<IChapter, ChapterModel & JsonApiModel<IChapter>>('Chapter', ChapterSchema);
 export default Chapter;

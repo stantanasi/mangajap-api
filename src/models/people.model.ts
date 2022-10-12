@@ -1,9 +1,9 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Schema, model, Model, Document, Types } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IStaff } from "./staff.model";
-import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 
 export interface IPeople {
   _id: Types.ObjectId;
@@ -21,7 +21,16 @@ export interface IPeople {
   updatedAt: Date;
 }
 
-export const PeopleSchema = new Schema<IPeople, JsonApiModel<IPeople> & SearchModel<IPeople>>({
+export interface PeopleInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+}
+
+export interface PeopleQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
+}
+
+export interface PeopleModel extends Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> {
+}
+
+export const PeopleSchema = new Schema<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>, PeopleInstanceMethods, PeopleQueryHelper>({
   firstName: {
     type: String,
     default: ''
@@ -101,5 +110,5 @@ PeopleSchema.plugin(MongooseJsonApi, {
 });
 
 
-const People = model<IPeople, JsonApiModel<IPeople> & SearchModel<IPeople>>('People', PeopleSchema);
+const People = model<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>>('People', PeopleSchema);
 export default People;

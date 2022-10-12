@@ -1,9 +1,9 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
 import Episode, { IEpisode } from "./episode.model";
 import { IFranchise } from "./franchise.model";
@@ -59,7 +59,16 @@ export interface IAnime {
   updatedAt: Date;
 }
 
-export const AnimeSchema = new Schema<IAnime, JsonApiModel<IAnime> & SearchModel<IAnime>>({
+export interface AnimeInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+}
+
+export interface AnimeQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
+}
+
+export interface AnimeModel extends Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> {
+}
+
+export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>, AnimeInstanceMethods, AnimeQueryHelper>({
   title: {
     type: String,
     required: true,
@@ -356,7 +365,7 @@ AnimeSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Anime = model<IAnime, JsonApiModel<IAnime> & SearchModel<IAnime>>('Anime', AnimeSchema);
+const Anime = model<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>>('Anime', AnimeSchema);
 export default Anime;
 
 // TODO: cronjobs

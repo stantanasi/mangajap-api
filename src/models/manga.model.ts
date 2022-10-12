@@ -1,9 +1,9 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import slugify from "slugify";
 import { storage, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import MongooseSearch, { SearchModel } from '../utils/mongoose-search/mongoose-search';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import { IFranchise } from "./franchise.model";
 import { IGenre } from "./genre.model";
 import MangaEntry, { IMangaEntry } from "./manga-entry.model";
@@ -56,7 +56,16 @@ export interface IManga {
   updatedAt: Date;
 }
 
-export const MangaSchema = new Schema<IManga, JsonApiModel<IManga> & SearchModel<IManga>>({
+export interface MangaInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+}
+
+export interface MangaQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
+}
+
+export interface MangaModel extends Model<IManga, MangaQueryHelper, MangaInstanceMethods> {
+}
+
+export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>, MangaInstanceMethods, MangaQueryHelper>({
   title: {
     type: String,
     required: true,
@@ -338,7 +347,7 @@ MangaSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Manga = model<IManga, JsonApiModel<IManga> & SearchModel<IManga>>('Manga', MangaSchema);
+const Manga = model<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>>('Manga', MangaSchema);
 export default Manga;
 
 

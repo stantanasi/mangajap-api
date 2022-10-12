@@ -1,7 +1,7 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Chapter, { IChapter } from './chapter.model';
 import { IManga } from "./manga.model";
 
@@ -26,10 +26,16 @@ export interface IVolume {
   updatedAt: Date;
 }
 
-export interface IVolumeModel extends JsonApiModel<IVolume> {
+export interface VolumeInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const VolumeSchema = new Schema<IVolume, IVolumeModel>({
+export interface VolumeQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface VolumeModel extends Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> {
+}
+
+export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolume>, VolumeInstanceMethods, VolumeQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {}
@@ -133,5 +139,5 @@ VolumeSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Volume = model<IVolume, IVolumeModel>('Volume', VolumeSchema);
+const Volume = model<IVolume, VolumeModel & JsonApiModel<IVolume>>('Volume', VolumeSchema);
 export default Volume;

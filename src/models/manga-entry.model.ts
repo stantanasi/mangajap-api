@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IManga } from "./manga.model";
 import { IUser } from "./user.model";
 
@@ -22,10 +22,16 @@ export interface IMangaEntry {
   updatedAt: Date;
 }
 
-export interface IMangaEntryModel extends JsonApiModel<IMangaEntry> {
+export interface MangaEntryInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const MangaEntrySchema = new Schema<IMangaEntry, IMangaEntryModel>({
+export interface MangaEntryQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface MangaEntryModel extends Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> {
+}
+
+export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>, MangaEntryInstanceMethods, MangaEntryQueryHelper>({
   isAdd: {
     type: Boolean,
     default: false
@@ -99,5 +105,5 @@ MangaEntrySchema.plugin(MongooseJsonApi, {
 });
 
 
-const MangaEntry = model<IMangaEntry, IMangaEntryModel>('MangaEntry', MangaEntrySchema);
+const MangaEntry = model<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>>('MangaEntry', MangaEntrySchema);
 export default MangaEntry;

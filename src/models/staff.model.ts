@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import { IManga } from "./manga.model";
 import { IPeople } from "./people.model";
@@ -17,10 +17,16 @@ export interface IStaff {
   updatedAt: Date;
 }
 
-export interface IStaffModel extends JsonApiModel<IStaff> {
+export interface StaffInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const StaffSchema = new Schema<IStaff, IStaffModel>({
+export interface StaffQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface StaffModel extends Model<IStaff, StaffQueryHelper, StaffInstanceMethods> {
+}
+
+export const StaffSchema = new Schema<IStaff, StaffModel & JsonApiModel<IStaff>, StaffInstanceMethods, StaffQueryHelper>({
   role: {
     type: String,
     required: true,
@@ -60,5 +66,5 @@ StaffSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Staff = model<IStaff, IStaffModel>('Staff', StaffSchema);
+const Staff = model<IStaff, StaffModel & JsonApiModel<IStaff>>('Staff', StaffSchema);
 export default Staff;

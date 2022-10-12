@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Anime, { IAnime } from "./anime.model";
 import Manga, { IManga } from "./manga.model";
 
@@ -18,10 +18,16 @@ export interface IFranchise {
   updatedAt: Date;
 }
 
-export interface IFranchiseModel extends JsonApiModel<IFranchise> {
+export interface FranchiseInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const FranchiseSchema = new Schema<IFranchise, IFranchiseModel>({
+export interface FranchiseQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface FranchiseModel extends Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> {
+}
+
+export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiModel<IFranchise>, FranchiseInstanceMethods, FranchiseQueryHelper>({
   role: {
     type: String,
     required: true,
@@ -85,5 +91,5 @@ FranchiseSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Franchise = model<IFranchise, IFranchiseModel>('Franchise', FranchiseSchema);
+const Franchise = model<IFranchise, FranchiseModel & JsonApiModel<IFranchise>>('Franchise', FranchiseSchema);
 export default Franchise;

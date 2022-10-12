@@ -1,5 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { Schema, model, Model, Types } from 'mongoose';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IUser } from "./user.model";
 
 export interface IFollow {
@@ -12,10 +12,16 @@ export interface IFollow {
   updatedAt: Date;
 }
 
-export interface IFollowModel extends JsonApiModel<IFollow> {
+export interface FollowInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const FollowSchema = new Schema<IFollow, IFollowModel>({
+export interface FollowQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface FollowModel extends Model<IFollow, FollowQueryHelper, FollowInstanceMethods> {
+}
+
+export const FollowSchema = new Schema<IFollow, FollowModel & JsonApiModel<IFollow>, FollowInstanceMethods, FollowQueryHelper>({
   follower: {
     type: String,
     ref: 'User',
@@ -59,5 +65,5 @@ FollowSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Follow = model<IFollow, IFollowModel>('Follow', FollowSchema);
+const Follow = model<IFollow, FollowModel & JsonApiModel<IFollow>>('Follow', FollowSchema);
 export default Follow;

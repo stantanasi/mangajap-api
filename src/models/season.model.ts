@@ -1,7 +1,7 @@
-import { Schema, model, Types, Document } from 'mongoose';
+import { Schema, model, Model, Types, Document } from 'mongoose';
 import { ref } from 'firebase/storage';
 import { storage, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiModel } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import Episode, { IEpisode } from "./episode.model";
 
@@ -25,10 +25,16 @@ export interface ISeason {
   updatedAt: Date;
 }
 
-export interface ISeasonModel extends JsonApiModel<ISeason> {
+export interface SeasonInstanceMethods extends Document, JsonApiInstanceMethods {
 }
 
-export const SeasonSchema = new Schema<ISeason, ISeasonModel>({
+export interface SeasonQueryHelper extends JsonApiQueryHelper {
+}
+
+export interface SeasonModel extends Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> {
+}
+
+export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeason>, SeasonInstanceMethods, SeasonQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -123,5 +129,5 @@ SeasonSchema.plugin(MongooseJsonApi, {
 });
 
 
-const Season = model<ISeason, ISeasonModel>('Season', SeasonSchema);
+const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>('Season', SeasonSchema);
 export default Season;

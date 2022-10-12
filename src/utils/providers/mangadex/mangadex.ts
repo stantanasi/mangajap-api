@@ -76,6 +76,59 @@ export default class MangaDex {
         })
     }
 
+    switch (id) {
+      case '61079efc-d1c4-4565-bbe6-de58e1d75fdf': // Jojo 2
+        manga.volumes = manga.volumes
+          ?.filter((volume) => {
+            if (volume.number > 7) {
+              manga.chapters = manga.chapters?.filter((chapter) => {
+                return volume.chapters?.findIndex((c) => c.number === chapter.number) === -1;
+              });
+            }
+            return volume.number <= 7;
+          });
+        break;
+      case '0d545e62-d4cd-4e65-a65c-a5c46b794918': // Jojo 3
+        manga.volumes = manga.volumes
+          ?.filter((volume) => {
+            if (volume.number > 16) {
+              manga.chapters = manga.chapters?.filter((chapter) => {
+                return volume.chapters?.findIndex((c) => c.number === chapter.number) === -1;
+              });
+            }
+            return volume.number <= 16;
+          });
+        break;
+      case '5ed1f8fc-a119-4cbc-aeae-26ce2bd3f838': // Jojo 4
+        manga.volumes = manga.volumes
+          ?.filter((volume) => {
+            if (volume.number === 19) {
+              volume.number = 18;
+            }
+            if (volume.number > 18) {
+              manga.chapters = manga.chapters?.filter((chapter) => {
+                return volume.chapters?.findIndex((c) => c.number === chapter.number) === -1;
+              });
+            }
+            return volume.number <= 18;
+          });
+        break;
+      case '2725e983-81c3-4a62-8e97-5027c5996c2b': // Jojo 5
+        manga.volumes = manga.volumes
+          ?.filter((volume) => {
+            if (volume.number > 17) {
+              manga.chapters = manga.chapters?.filter((chapter) => {
+                return volume.chapters?.findIndex((c) => c.number === chapter.number) === -1;
+              });
+            }
+            return volume.number <= 17;
+          });
+        break;
+      case '1593cc24-e67a-411e-8e30-eec88a5ee670': // Red storm
+        manga.volumes = [];
+        break;
+    }
+
     return manga;
   }
 }

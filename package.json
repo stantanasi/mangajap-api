@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "node dist/app.js",
     "start:dev": "npm run build && npm start",
+    "cron-job:anime": "npm run build && node dist/bin/cron-jobs/anime.job.js",
     "cron-job:manga": "npm run build && node dist/bin/cron-jobs/manga.job.js"
   },
   "author": "Lory-Stan TANASI",

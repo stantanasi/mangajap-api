@@ -7,15 +7,8 @@ const userRoutes = express.Router();
 
 userRoutes.get('/', async (req, res, next) => {
   try {
-    const user: IUser | null = res.locals.user;
-    const query: JsonApiQueryParams = Object.assign({}, req.query);
-    if (query.filter?.self && user) {
-      delete query.filter.self
-      query.filter._id = user._id;
-    }
-
     const body = await User.find()
-      .withJsonApi(query)
+      .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       })

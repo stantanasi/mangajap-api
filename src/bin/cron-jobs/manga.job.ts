@@ -4,7 +4,7 @@ import { connect } from 'mongoose';
 import Chapter from '../../models/chapter.model';
 import Manga from '../../models/manga.model';
 import Volume from '../../models/volume.model';
-import MangaDex from '../../utils/providers/mangadex/mangadex';
+import MangaDex from '../../utils/providers/mangadex';
 
 (async () => {
   dotenv.config();

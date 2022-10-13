@@ -1,7 +1,7 @@
 import axios from "axios";
-import Anime from "../../../models/anime.model";
-import Episode from "../../../models/episode.model";
-import Season from "../../../models/season.model";
+import Anime from "../../models/anime.model";
+import Episode from "../../models/episode.model";
+import Season from "../../models/season.model";
 
 export default class TheMovieDB {
 

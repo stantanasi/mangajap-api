@@ -1,28 +1,23 @@
 import axios from 'axios';
-import Chapter from '../../../models/chapter.model';
-import Manga from '../../../models/manga.model';
-import Volume from '../../../models/volume.model';
+import Chapter from '../../models/chapter.model';
+import Manga from '../../models/manga.model';
+import Volume from '../../models/volume.model';
 
 export default class MangaDex {
 
   public static async findMangaById(id: string) {
     const manga = await axios.get<MangaDexManga>(`https://api.mangadex.org/manga/${id}`)
       .then((res) => res.data)
-      .then((response) => {
-        if (response.result === 'error') {
-          return null;
-        } else {
-          return new Manga({
-            title: response.data.attributes.title.en,
-            titles: response.data.attributes.altTitles.reduce((acc, cur) => {
-              return Object.assign(acc, cur);
-            }, {}),
+      .then((response) => new Manga({
+        title: response.data.attributes.title.en,
+        titles: response.data.attributes.altTitles.reduce((acc, cur) => {
+          return Object.assign(acc, cur);
+        }, {}),
 
-            volumes: [],
-            chapters: [],
-          });
-        }
-      });
+        volumes: [],
+        chapters: [],
+      }))
+      .catch(() => null);
 
     if (manga === null) return manga;
 

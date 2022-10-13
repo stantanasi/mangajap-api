@@ -4,7 +4,7 @@ import { connect } from 'mongoose';
 import Anime from '../../models/anime.model';
 import Episode from '../../models/episode.model';
 import Season from '../../models/season.model';
-import TheMovieDB from '../../utils/providers/themoviedb/themoviedb';
+import TheMovieDB from '../../utils/providers/themoviedb';
 
 (async () => {
   dotenv.config();

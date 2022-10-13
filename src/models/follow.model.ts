@@ -50,18 +50,6 @@ FollowSchema.index({
 
 FollowSchema.plugin(MongooseJsonApi, {
   type: 'follows',
-  filter: { // TODO: DEPRECATED
-    followerId: (followerId: string) => {
-      return {
-        follower: followerId,
-      };
-    },
-    followedId: (followedId: string) => {
-      return {
-        followed: followedId,
-      };
-    },
-  },
 });
 
 

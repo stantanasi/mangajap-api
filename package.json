@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
-    "start:dev": "npm run build && npm start"
+    "start:dev": "npm run build && npm start",
+    "cron-job:manga": "npm run build && node dist/bin/cron-jobs/manga.job.js"
   },
   "author": "Lory-Stan TANASI",
   "license": "ISC",

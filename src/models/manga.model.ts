@@ -91,7 +91,7 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
     type: Date,
     required: true,
     transform: function (this, val) {
-      return val.toISOString().slice(0, 10);
+      return val?.toISOString().slice(0, 10) ?? val;
     }
   },
 
@@ -99,7 +99,7 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
     type: Date,
     default: null,
     transform: function (this, val) {
-      return val?.toISOString().slice(0, 10) ?? null;
+      return val?.toISOString().slice(0, 10) ?? val;
     },
   },
 

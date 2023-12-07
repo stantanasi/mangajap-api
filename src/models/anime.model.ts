@@ -94,7 +94,7 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> 
     type: Date,
     required: true,
     transform: function (this, val) {
-      return val.toISOString().slice(0, 10);
+      return val?.toISOString().slice(0, 10) ?? val;
     }
   },
 
@@ -102,7 +102,7 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> 
     type: Date,
     default: null,
     transform: function (this, val) {
-      return val?.toISOString().slice(0, 10) ?? null;
+      return val?.toISOString().slice(0, 10) ?? val;
     },
   },
 

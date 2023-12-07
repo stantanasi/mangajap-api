@@ -60,7 +60,7 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
     type: Date,
     default: null,
     transform: function (this, val) {
-      return val?.toISOString().slice(0, 10) ?? null;
+      return val?.toISOString().slice(0, 10) ?? val;
     },
   },
 

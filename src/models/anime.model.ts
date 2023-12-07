@@ -367,33 +367,3 @@ AnimeSchema.plugin(MongooseJsonApi, {
 
 const Anime = model<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>>('Anime', AnimeSchema);
 export default Anime;
-
-// TODO: cronjobs
-// $animes = Anime::getInstance()->getWriteConnection()->query("
-//     SELECT
-//         *
-//     FROM
-//         anime;");
-// foreach ($animes as &$anime) {
-//     $rating = $anime['anime_rating'];
-//     $userCount = $anime['anime_usercount'];
-//     $favoritesCount = $anime['anime_favoritescount'];
-//     $anime['anime_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
-// }
-// array_multisort(array_column($animes, 'anime_weightedrank'), SORT_DESC, $animes);
-// for($i=0; $i<count($animes); $i++) {
-//     $animeId = $animes[$i]["anime_id"];
-//     $animeRank = $i + 1;
-
-//     Anime::getInstance()->getWriteConnection()->execute("
-//         UPDATE
-//             anime
-//         SET
-//             anime_ratingrank = :animeRank
-//         WHERE
-//           anime_id = :animeId;",
-//         [
-//             'animeId' => $animeId,
-//             'animeRank' => $animeRank
-//         ]);
-// }

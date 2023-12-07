@@ -349,34 +349,3 @@ MangaSchema.plugin(MongooseJsonApi, {
 
 const Manga = model<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>>('Manga', MangaSchema);
 export default Manga;
-
-
-// TODO: cronjobs
-// $mangas = Manga::getInstance()->getWriteConnection()->query("
-//     SELECT
-//         *
-//     FROM
-//         manga;");
-// foreach ($mangas as &$manga) {
-//     $rating = $manga['manga_rating'];
-//     $userCount = $manga['manga_usercount'];
-//     $favoritesCount = $manga['manga_favoritescount'];
-//     $manga['manga_weightedrank'] = ($userCount + $favoritesCount) + $rating * $userCount + 2 * $rating * $favoritesCount;
-// }
-// array_multisort(array_column($mangas, 'manga_weightedrank'), SORT_DESC, $mangas);
-// for($i=0; $i<count($mangas); $i++) {
-//     $mangaId = $mangas[$i]["manga_id"];
-//     $mangaRank = $i + 1;
-
-//     Manga::getInstance()->getWriteConnection()->execute("
-//         UPDATE
-//             manga
-//         SET
-//             manga_ratingrank = :mangaRank
-//         WHERE
-//           manga_id = :mangaId;",
-//         [
-//             'mangaId' => $mangaId,
-//             'mangaRank' => $mangaRank
-//         ]);
-// }

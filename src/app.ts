@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import express, { NextFunction, Request, Response } from 'express';
 import { connect } from 'mongoose';
 import cors from 'cors';
@@ -23,8 +24,6 @@ import staffRoutes from './routes/staff.routes';
 import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
-
-dotenv.config();
 
 const app = express();
 

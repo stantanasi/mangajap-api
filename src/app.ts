@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import express, { NextFunction, Request, Response } from 'express';
 import { connect } from 'mongoose';
 import cors from 'cors';
+import { auth } from './firebase-app';
 import { JsonApiError } from './utils/mongoose-jsonapi/mongoose-jsonapi';
 import { AnimeSchema } from './models/anime.model';
 import { MangaSchema } from './models/manga.model';
@@ -24,8 +26,6 @@ import themeRoutes from './routes/theme.routes';
 import userRoutes from './routes/user.routes';
 import volumeRoutes from './routes/volume.routes';
 
-dotenv.config();
-
 const app = express();
 
 app.use(cors());
@@ -46,13 +46,17 @@ app.use(async (req, res, next) => {
 
 app.use(async (req, res, next) => {
   try {
-    // TODO: Use firebase token instead
     let bearerToken = req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await User.findById(bearerToken);
+    const uid = await auth
+      .verifyIdToken(bearerToken ?? '')
+      .then((decoded) => decoded.uid)
+      .catch(() => '');
+
+    const user = await User.findById(uid);
     if (user) {
       AnimeSchema.virtual('anime-entry', {
         ref: 'AnimeEntry',

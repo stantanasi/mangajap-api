@@ -1,5 +1,10 @@
+import * as admin from 'firebase-admin';
 import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, StorageReference, uploadString } from "firebase/storage";
+
+admin.initializeApp({
+  credential: admin.credential.cert(JSON.parse(process.env.SERVICE_ACCOUNT!)),
+});
 
 const firebaseApp = initializeApp({
   apiKey: "AIzaSyBERviz4ObXOcBPCHiY8weoU_zdA8UNcIk",
@@ -12,6 +17,8 @@ const firebaseApp = initializeApp({
 });
 
 export default firebaseApp
+
+export const auth = admin.auth();
 
 export const storage = getStorage(firebaseApp);
 

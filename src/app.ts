@@ -3,6 +3,7 @@ dotenv.config();
 import express, { NextFunction, Request, Response } from 'express';
 import { connect } from 'mongoose';
 import cors from 'cors';
+import { auth } from './firebase-app';
 import { JsonApiError } from './utils/mongoose-jsonapi/mongoose-jsonapi';
 import { AnimeSchema } from './models/anime.model';
 import { MangaSchema } from './models/manga.model';
@@ -45,13 +46,17 @@ app.use(async (req, res, next) => {
 
 app.use(async (req, res, next) => {
   try {
-    // TODO: Use firebase token instead
     let bearerToken = req.headers.authorization;
     if (bearerToken?.startsWith('Bearer ')) {
       bearerToken = bearerToken.substring(7);
     }
 
-    const user = await User.findById(bearerToken);
+    const uid = await auth
+      .verifyIdToken(bearerToken ?? '')
+      .then((decoded) => decoded.uid)
+      .catch(() => '');
+
+    const user = await User.findById(uid);
     if (user) {
       AnimeSchema.virtual('anime-entry', {
         ref: 'AnimeEntry',

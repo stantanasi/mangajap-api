@@ -25,6 +25,7 @@
   - [Prerequisites](#prerequisites)
   - [Setup](#setup)
 - [Development](#development)
+- [Contributing](#contributing)
 - [Author](#author)
 - [License](#license)
 </details>
@@ -43,7 +44,6 @@ With the MangaJap API you can do everything the client can do and much more.
 
 - 100% free and no ads!
 - An enormous collection of manga and anime.
-- Optimized UI & UX.
 
 ### Built with
 
@@ -67,9 +67,7 @@ With the MangaJap API you can do everything the client can do and much more.
 git clone https://github.com/mangajap/mangajap-api.git
 ```
 
-2. Open the project in Visual Studio Code
-
-3. Install the packages required
+2. Install the packages required
 
 ```bash
 npm install
@@ -83,13 +81,23 @@ Run the application
 npm run start:dev
 ```
 
+## Contributing
+
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a pull request
+
 ## Author
 
-- Lory-Stan TANASI
+- [Lory-Stan TANASI](https://github.com/stantanasi)
 
 ## License
 
-This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the `Apache-2.0` License - see the [LICENSE](LICENSE) file for details
 
 <p align="center">
   <br />

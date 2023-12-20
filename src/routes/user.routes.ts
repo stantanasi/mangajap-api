@@ -1,7 +1,8 @@
 import express from "express";
+import { auth } from "../firebase-app";
 import User, { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
-import { JsonApiError, JsonApiQueryParams } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const userRoutes = express.Router();
 
@@ -25,7 +26,23 @@ userRoutes.get('/', async (req, res, next) => {
 
 userRoutes.post('/', async (req, res, next) => {
   try {
-    const id = await User.fromJsonApi(req.body)
+    const user = User.fromJsonApi(req.body);
+
+    const attributes = req.body?.data?.attributes ?? {};
+    for (const attribute of ['email', 'password']) {
+      if (typeof attributes[attribute] === 'undefined' || !attributes[attribute]) {
+        throw new JsonApiError.MissingAttribute(attribute);
+      }
+    }
+
+    const firebaseUser = await auth.createUser({
+      email: attributes.email,
+      password: attributes.password,
+    });
+
+    user._id = firebaseUser.uid;
+
+    const id = await user
       .save()
       .then((doc) => doc._id);
 
@@ -95,6 +112,8 @@ userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
           throw new JsonApiError.PermissionDenied();
         }
       });
+
+    await auth.deleteUser(req.params.id);
 
     res.status(204).send();
   } catch (err) {

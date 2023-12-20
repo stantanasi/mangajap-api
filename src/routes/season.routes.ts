@@ -6,7 +6,7 @@ const seasonRoutes = express.Router();
 
 seasonRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Season.find()
+    const response = await Season.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ seasonRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ seasonRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Season.findById(id)
+    const response = await Season.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ seasonRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 seasonRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Season.findById(req.params.id)
+    const response = await Season.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ seasonRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Season.findById(req.params.id)
+    const response = await Season.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,14 +94,14 @@ seasonRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 seasonRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const body = await Season.findById(req.params.id)
+    const response = await Season.findById(req.params.id)
       .getRelationship('anime')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -109,7 +109,7 @@ seasonRoutes.get('/:id/anime', async (req, res, next) => {
 
 seasonRoutes.get('/:id/episodes', async (req, res, next) => {
   try {
-    const body = await Season.findById(req.params.id)
+    const response = await Season.findById(req.params.id)
       .getRelationship('episodes')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -120,7 +120,7 @@ seasonRoutes.get('/:id/episodes', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

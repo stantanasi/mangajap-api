@@ -6,7 +6,7 @@ const episodeRoutes = express.Router();
 
 episodeRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Episode.find()
+    const response = await Episode.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ episodeRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ episodeRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Episode.findById(id)
+    const response = await Episode.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ episodeRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 episodeRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Episode.findById(req.params.id)
+    const response = await Episode.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ episodeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Episode.findById(req.params.id)
+    const response = await Episode.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,14 +94,14 @@ episodeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 episodeRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const body = await Episode.findById(req.params.id)
+    const response = await Episode.findById(req.params.id)
       .getRelationship('anime')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -109,14 +109,14 @@ episodeRoutes.get('/:id/anime', async (req, res, next) => {
 
 episodeRoutes.get('/:id/season', async (req, res, next) => {
   try {
-    const body = await Episode.findById(req.params.id)
+    const response = await Episode.findById(req.params.id)
       .getRelationship('season')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

@@ -6,7 +6,7 @@ const chapterRoutes = express.Router();
 
 chapterRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Chapter.find()
+    const response = await Chapter.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ chapterRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ chapterRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Chapter.findById(id)
+    const response = await Chapter.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ chapterRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 chapterRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Chapter.findById(req.params.id)
+    const response = await Chapter.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ chapterRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Chapter.findById(req.params.id)
+    const response = await Chapter.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,14 +94,14 @@ chapterRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 chapterRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const body = await Chapter.findById(req.params.id)
+    const response = await Chapter.findById(req.params.id)
       .getRelationship('manga')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -109,14 +109,14 @@ chapterRoutes.get('/:id/manga', async (req, res, next) => {
 
 chapterRoutes.get('/:id/volume', async (req, res, next) => {
   try {
-    const body = await Chapter.findById(req.params.id)
+    const response = await Chapter.findById(req.params.id)
       .getRelationship('volume')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

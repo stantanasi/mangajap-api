@@ -6,7 +6,7 @@ const mangaRoutes = express.Router();
 
 mangaRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Manga.find()
+    const response = await Manga.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ mangaRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Manga.findById(id)
+    const response = await Manga.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 mangaRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,7 +94,7 @@ mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 mangaRoutes.get('/:id/volumes', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('volumes')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -105,7 +105,7 @@ mangaRoutes.get('/:id/volumes', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -113,7 +113,7 @@ mangaRoutes.get('/:id/volumes', async (req, res, next) => {
 
 mangaRoutes.get('/:id/chapters', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('chapters')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -124,7 +124,7 @@ mangaRoutes.get('/:id/chapters', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -132,7 +132,7 @@ mangaRoutes.get('/:id/chapters', async (req, res, next) => {
 
 mangaRoutes.get('/:id/genres', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('genres')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -143,7 +143,7 @@ mangaRoutes.get('/:id/genres', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -151,7 +151,7 @@ mangaRoutes.get('/:id/genres', async (req, res, next) => {
 
 mangaRoutes.get('/:id/themes', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('themes')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -162,7 +162,7 @@ mangaRoutes.get('/:id/themes', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -170,7 +170,7 @@ mangaRoutes.get('/:id/themes', async (req, res, next) => {
 
 mangaRoutes.get('/:id/staff', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('staff')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -181,7 +181,7 @@ mangaRoutes.get('/:id/staff', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -189,7 +189,7 @@ mangaRoutes.get('/:id/staff', async (req, res, next) => {
 
 mangaRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('reviews')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -200,7 +200,7 @@ mangaRoutes.get('/:id/reviews', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -208,7 +208,7 @@ mangaRoutes.get('/:id/reviews', async (req, res, next) => {
 
 mangaRoutes.get('/:id/franchises', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('franchises')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -219,7 +219,7 @@ mangaRoutes.get('/:id/franchises', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -227,14 +227,14 @@ mangaRoutes.get('/:id/franchises', async (req, res, next) => {
 
 mangaRoutes.get('/:id/manga-entry', async (req, res, next) => {
   try {
-    const body = await Manga.findById(req.params.id)
+    const response = await Manga.findById(req.params.id)
       .getRelationship('manga-entry')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

@@ -6,7 +6,7 @@ const staffRoutes = express.Router();
 
 staffRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Staff.find()
+    const response = await Staff.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ staffRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ staffRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Staff.findById(id)
+    const response = await Staff.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ staffRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 staffRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Staff.findById(req.params.id)
+    const response = await Staff.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Staff.findById(req.params.id)
+    const response = await Staff.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,14 +94,14 @@ staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 staffRoutes.get('/:id/people', async (req, res, next) => {
   try {
-    const body = await Staff.findById(req.params.id)
+    const response = await Staff.findById(req.params.id)
       .getRelationship('people')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -109,14 +109,14 @@ staffRoutes.get('/:id/people', async (req, res, next) => {
 
 staffRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const body = await Staff.findById(req.params.id)
+    const response = await Staff.findById(req.params.id)
       .getRelationship('anime')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -124,14 +124,14 @@ staffRoutes.get('/:id/anime', async (req, res, next) => {
 
 staffRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const body = await Staff.findById(req.params.id)
+    const response = await Staff.findById(req.params.id)
       .getRelationship('manga')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

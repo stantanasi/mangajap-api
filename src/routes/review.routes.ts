@@ -8,7 +8,7 @@ const reviewRoutes = express.Router();
 
 reviewRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Review.find()
+    const response = await Review.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -18,7 +18,7 @@ reviewRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -30,13 +30,13 @@ reviewRoutes.post('/', isLogin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Review.findById(id)
+    const response = await Review.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -44,13 +44,13 @@ reviewRoutes.post('/', isLogin(), async (req, res, next) => {
 
 reviewRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Review.findById(req.params.id)
+    const response = await Review.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -71,13 +71,13 @@ reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
         }
       });
 
-    const body = await Review.findById(req.params.id)
+    const response = await Review.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -106,14 +106,14 @@ reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 reviewRoutes.get('/:id/user', async (req, res, next) => {
   try {
-    const body = await Review.findById(req.params.id)
+    const response = await Review.findById(req.params.id)
       .getRelationship('user')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -121,14 +121,14 @@ reviewRoutes.get('/:id/user', async (req, res, next) => {
 
 reviewRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const body = await Review.findById(req.params.id)
+    const response = await Review.findById(req.params.id)
       .getRelationship('manga')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -136,14 +136,14 @@ reviewRoutes.get('/:id/manga', async (req, res, next) => {
 
 reviewRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const body = await Review.findById(req.params.id)
+    const response = await Review.findById(req.params.id)
       .getRelationship('anime')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

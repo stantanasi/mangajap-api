@@ -6,7 +6,7 @@ const themeRoutes = express.Router();
 
 themeRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Theme.find()
+    const response = await Theme.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ themeRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ themeRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Theme.findById(id)
+    const response = await Theme.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ themeRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 themeRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Theme.findById(req.params.id)
+    const response = await Theme.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ themeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Theme.findById(req.params.id)
+    const response = await Theme.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,7 +94,7 @@ themeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 themeRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const body = await Theme.findById(req.params.id)
+    const response = await Theme.findById(req.params.id)
       .getRelationship('manga')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -105,7 +105,7 @@ themeRoutes.get('/:id/manga', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -113,7 +113,7 @@ themeRoutes.get('/:id/manga', async (req, res, next) => {
 
 themeRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const body = await Theme.findById(req.params.id)
+    const response = await Theme.findById(req.params.id)
       .getRelationship('anime')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -124,7 +124,7 @@ themeRoutes.get('/:id/anime', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

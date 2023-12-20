@@ -8,7 +8,7 @@ const followRoutes = express.Router();
 
 followRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Follow.find()
+    const response = await Follow.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -18,7 +18,7 @@ followRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -30,13 +30,13 @@ followRoutes.post('/', isLogin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Follow.findById(id)
+    const response = await Follow.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -44,13 +44,13 @@ followRoutes.post('/', isLogin(), async (req, res, next) => {
 
 followRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Follow.findById(req.params.id)
+    const response = await Follow.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -71,13 +71,13 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
         }
       });
 
-    const body = await Follow.findById(req.params.id)
+    const response = await Follow.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -106,14 +106,14 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 followRoutes.get('/:id/follower', async (req, res, next) => {
   try {
-    const body = await Follow.findById(req.params.id)
+    const response = await Follow.findById(req.params.id)
       .getRelationship('follower')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -121,14 +121,14 @@ followRoutes.get('/:id/follower', async (req, res, next) => {
 
 followRoutes.get('/:id/followed', async (req, res, next) => {
   try {
-    const body = await Follow.findById(req.params.id)
+    const response = await Follow.findById(req.params.id)
       .getRelationship('followed')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

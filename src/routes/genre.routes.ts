@@ -6,7 +6,7 @@ const genreRoutes = express.Router();
 
 genreRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Genre.find()
+    const response = await Genre.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ genreRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ genreRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Genre.findById(id)
+    const response = await Genre.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ genreRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 genreRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Genre.findById(req.params.id)
+    const response = await Genre.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ genreRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Genre.findById(req.params.id)
+    const response = await Genre.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,7 +94,7 @@ genreRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 genreRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const body = await Genre.findById(req.params.id)
+    const response = await Genre.findById(req.params.id)
       .getRelationship('manga')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -105,7 +105,7 @@ genreRoutes.get('/:id/manga', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -113,7 +113,7 @@ genreRoutes.get('/:id/manga', async (req, res, next) => {
 
 genreRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const body = await Genre.findById(req.params.id)
+    const response = await Genre.findById(req.params.id)
       .getRelationship('anime')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -124,7 +124,7 @@ genreRoutes.get('/:id/anime', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

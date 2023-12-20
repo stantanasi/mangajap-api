@@ -8,7 +8,7 @@ const animeEntryRoutes = express.Router();
 
 animeEntryRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await AnimeEntry.find()
+    const response = await AnimeEntry.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -18,7 +18,7 @@ animeEntryRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -30,13 +30,13 @@ animeEntryRoutes.post('/', isLogin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await AnimeEntry.findById(id)
+    const response = await AnimeEntry.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -44,13 +44,13 @@ animeEntryRoutes.post('/', isLogin(), async (req, res, next) => {
 
 animeEntryRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await AnimeEntry.findById(req.params.id)
+    const response = await AnimeEntry.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -71,13 +71,13 @@ animeEntryRoutes.patch('/:id', async (req, res, next) => {
         }
       });
 
-    const body = await AnimeEntry.findById(req.params.id)
+    const response = await AnimeEntry.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -106,14 +106,14 @@ animeEntryRoutes.delete('/:id', async (req, res, next) => {
 
 animeEntryRoutes.get('/:id/anime', async (req, res, next) => {
   try {
-    const body = await AnimeEntry.findById(req.params.id)
+    const response = await AnimeEntry.findById(req.params.id)
       .getRelationship('anime')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -121,14 +121,14 @@ animeEntryRoutes.get('/:id/anime', async (req, res, next) => {
 
 animeEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
-    const body = await AnimeEntry.findById(req.params.id)
+    const response = await AnimeEntry.findById(req.params.id)
       .getRelationship('user')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

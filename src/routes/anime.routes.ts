@@ -6,7 +6,7 @@ const animeRoutes = express.Router();
 
 animeRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Anime.find()
+    const response = await Anime.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ animeRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ animeRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Anime.findById(id)
+    const response = await Anime.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ animeRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 animeRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ animeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,7 +94,7 @@ animeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 animeRoutes.get('/:id/seasons', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('seasons')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -105,7 +105,7 @@ animeRoutes.get('/:id/seasons', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -113,7 +113,7 @@ animeRoutes.get('/:id/seasons', async (req, res, next) => {
 
 animeRoutes.get('/:id/episodes', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('episodes')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -124,7 +124,7 @@ animeRoutes.get('/:id/episodes', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -132,7 +132,7 @@ animeRoutes.get('/:id/episodes', async (req, res, next) => {
 
 animeRoutes.get('/:id/genres', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('genres')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -143,7 +143,7 @@ animeRoutes.get('/:id/genres', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -151,7 +151,7 @@ animeRoutes.get('/:id/genres', async (req, res, next) => {
 
 animeRoutes.get('/:id/themes', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('themes')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -162,7 +162,7 @@ animeRoutes.get('/:id/themes', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -170,7 +170,7 @@ animeRoutes.get('/:id/themes', async (req, res, next) => {
 
 animeRoutes.get('/:id/staff', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('staff')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -181,7 +181,7 @@ animeRoutes.get('/:id/staff', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -189,7 +189,7 @@ animeRoutes.get('/:id/staff', async (req, res, next) => {
 
 animeRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('reviews')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -200,7 +200,7 @@ animeRoutes.get('/:id/reviews', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -208,7 +208,7 @@ animeRoutes.get('/:id/reviews', async (req, res, next) => {
 
 animeRoutes.get('/:id/franchises', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('franchises')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -219,7 +219,7 @@ animeRoutes.get('/:id/franchises', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -227,14 +227,14 @@ animeRoutes.get('/:id/franchises', async (req, res, next) => {
 
 animeRoutes.get('/:id/anime-entry', async (req, res, next) => {
   try {
-    const body = await Anime.findById(req.params.id)
+    const response = await Anime.findById(req.params.id)
       .getRelationship('anime-entry')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

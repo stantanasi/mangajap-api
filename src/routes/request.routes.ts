@@ -8,7 +8,7 @@ const requestRoutes = express.Router();
 
 requestRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Request.find()
+    const response = await Request.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -18,7 +18,7 @@ requestRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -30,13 +30,13 @@ requestRoutes.post('/', isLogin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Request.findById(id)
+    const response = await Request.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -44,13 +44,13 @@ requestRoutes.post('/', isLogin(), async (req, res, next) => {
 
 requestRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Request.findById(req.params.id)
+    const response = await Request.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -71,13 +71,13 @@ requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
         }
       });
 
-    const body = await Request.findById(req.params.id)
+    const response = await Request.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -106,14 +106,14 @@ requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 
 requestRoutes.get('/:id/user', async (req, res, next) => {
   try {
-    const body = await Request.findById(req.params.id)
+    const response = await Request.findById(req.params.id)
       .getRelationship('user')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

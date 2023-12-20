@@ -18,7 +18,7 @@ peopleRoutes.get('/', async (req, res, next) => {
       query.sort = query.sort?.split(',').filter((sort) => sort !== 'random').join(',');
     }
 
-    const body = await People.find()
+    const response = await People.find()
       .withJsonApi(query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -28,7 +28,7 @@ peopleRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -40,13 +40,13 @@ peopleRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await People.findById(id)
+    const response = await People.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -54,13 +54,13 @@ peopleRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 peopleRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await People.findById(req.params.id)
+    const response = await People.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -76,13 +76,13 @@ peopleRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await People.findById(req.params.id)
+    const response = await People.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -106,7 +106,7 @@ peopleRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 peopleRoutes.get('/:id/staff', async (req, res, next) => {
   try {
-    const body = await People.findById(req.params.id)
+    const response = await People.findById(req.params.id)
       .getRelationship('staff')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -117,7 +117,7 @@ peopleRoutes.get('/:id/staff', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -125,7 +125,7 @@ peopleRoutes.get('/:id/staff', async (req, res, next) => {
 
 peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
   try {
-    const body = await People.findById(req.params.id)
+    const response = await People.findById(req.params.id)
       .getRelationship('manga-staff')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -136,7 +136,7 @@ peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -144,7 +144,7 @@ peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
 
 peopleRoutes.get('/:id/anime-staff', async (req, res, next) => {
   try {
-    const body = await People.findById(req.params.id)
+    const response = await People.findById(req.params.id)
       .getRelationship('anime-staff')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -155,7 +155,7 @@ peopleRoutes.get('/:id/anime-staff', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

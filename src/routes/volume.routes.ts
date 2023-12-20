@@ -6,7 +6,7 @@ const volumeRoutes = express.Router();
 
 volumeRoutes.get('/', async (req, res, next) => {
   try {
-    const body = await Volume.find()
+    const response = await Volume.find()
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
@@ -16,7 +16,7 @@ volumeRoutes.get('/', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -28,13 +28,13 @@ volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
       .save()
       .then((doc) => doc._id);
 
-    const body = await Volume.findById(id)
+    const response = await Volume.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -42,13 +42,13 @@ volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
 
 volumeRoutes.get('/:id', async (req, res, next) => {
   try {
-    const body = await Volume.findById(req.params.id)
+    const response = await Volume.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -64,13 +64,13 @@ volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
           .save();
       });
 
-    const body = await Volume.findById(req.params.id)
+    const response = await Volume.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -94,14 +94,14 @@ volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 
 volumeRoutes.get('/:id/manga', async (req, res, next) => {
   try {
-    const body = await Volume.findById(req.params.id)
+    const response = await Volume.findById(req.params.id)
       .getRelationship('manga')
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }
@@ -109,7 +109,7 @@ volumeRoutes.get('/:id/manga', async (req, res, next) => {
 
 volumeRoutes.get('/:id/chapters', async (req, res, next) => {
   try {
-    const body = await Volume.findById(req.params.id)
+    const response = await Volume.findById(req.params.id)
       .getRelationship('franchises')
       .withJsonApi(req.query)
       .toJsonApi({
@@ -120,7 +120,7 @@ volumeRoutes.get('/:id/chapters', async (req, res, next) => {
         query: req.query,
       });
 
-    res.json(body);
+    res.json(response);
   } catch (err) {
     next(err);
   }

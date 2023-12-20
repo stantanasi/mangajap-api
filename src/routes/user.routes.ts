@@ -113,6 +113,8 @@ userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
         }
       });
 
+    await auth.deleteUser(req.params.id);
+
     res.status(204).send();
   } catch (err) {
     next(err);

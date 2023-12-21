@@ -11,9 +11,6 @@ import { IReview } from "./review.model";
 export interface IUser {
   _id: string;
 
-  isAdmin: boolean;
-  isPremium: boolean;
-
   pseudo: string;
   firstName: string;
   lastName: string;
@@ -57,17 +54,6 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
   _id: {
     type: String,
     required: true,
-  },
-
-
-  isAdmin: {
-    type: Boolean,
-    default: false
-  },
-
-  isPremium: {
-    type: Boolean,
-    default: false
   },
 
 

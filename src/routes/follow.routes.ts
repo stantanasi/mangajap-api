@@ -63,8 +63,7 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         const token: DecodedIdToken | null = res.locals.token;
-        const user: IUser | null = res.locals.user;
-        if (user && (token?.isAdmin || doc.follower === user._id || doc.followed === user._id)) {
+        if (token && (token.isAdmin || doc.follower === token.uid || doc.followed === token.uid)) {
           return doc
             .merge(Follow.fromJsonApi(req.body))
             .save();
@@ -91,8 +90,7 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         const token: DecodedIdToken | null = res.locals.token;
-        const user: IUser | null = res.locals.user;
-        if (user && (token?.isAdmin || doc.follower === user._id || doc.followed === user._id)) {
+        if (token && (token.isAdmin || doc.follower === token.uid || doc.followed === token.uid)) {
           return doc
             .delete();
         } else {

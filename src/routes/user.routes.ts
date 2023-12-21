@@ -79,8 +79,7 @@ userRoutes.patch('/:id', isLogin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         const token: DecodedIdToken | null = res.locals.token;
-        const user: IUser | null = res.locals.user;
-        if (user && (token?.isAdmin || doc._id === user._id)) {
+        if (token && (token.isAdmin || doc._id === token.uid)) {
           return doc
             .merge(User.fromJsonApi(req.body))
             .save();
@@ -107,8 +106,7 @@ userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         const token: DecodedIdToken | null = res.locals.token;
-        const user: IUser | null = res.locals.user;
-        if (user && (token?.isAdmin || doc._id === user._id)) {
+        if (token && (token.isAdmin || doc._id === token.uid)) {
           return doc
             .delete();
         } else {

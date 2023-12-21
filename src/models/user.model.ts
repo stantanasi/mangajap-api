@@ -1,5 +1,5 @@
 import { Schema, model, Model, Document } from 'mongoose';
-import { uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
@@ -306,6 +306,14 @@ UserSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.timeSpentOnAnime),
   });
+});
+
+UserSchema.pre<IUser & Document>('deleteOne', async function () {
+  if (this.avatar) {
+    await deleteFile(
+      `users/${this._id}/images/profile.jpg`,
+    );
+  }
 });
 
 

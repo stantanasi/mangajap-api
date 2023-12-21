@@ -1,6 +1,6 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
 import slugify from "slugify";
-import { uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
@@ -345,6 +345,20 @@ AnimeSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.popularity | 0 ?? 0),
   });
+});
+
+AnimeSchema.pre<IAnime & Document>('deleteOne', async function () {
+  if (this.coverImage) {
+    await deleteFile(
+      `anime/${this._id}/images/cover.jpg`,
+    );
+  }
+
+  if (this.bannerImage) {
+    await deleteFile(
+      `anime/${this._id}/images/banner.jpg`,
+    );
+  }
 });
 
 

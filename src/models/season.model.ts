@@ -1,5 +1,5 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import Episode, { IEpisode } from "./episode.model";
@@ -120,6 +120,14 @@ SeasonSchema.pre('findOne', async function () {
       season: _id,
     }),
   });
+});
+
+SeasonSchema.pre<ISeason & Document>('deleteOne', async function () {
+  if (this.posterImage) {
+    await deleteFile(
+      `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
+    );
+  }
 });
 
 

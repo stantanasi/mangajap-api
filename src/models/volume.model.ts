@@ -1,5 +1,5 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Chapter, { IChapter } from './chapter.model';
 import { IManga } from "./manga.model";
@@ -130,6 +130,14 @@ VolumeSchema.pre('findOne', async function () {
       volume: _id,
     }).sort({ number: -1 }).then((doc) => doc?.number ?? null),
   });
+});
+
+VolumeSchema.pre<IVolume & Document>('deleteOne', async function () {
+  if (this.coverImage) {
+    await deleteFile(
+      `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
+    );
+  }
 });
 
 

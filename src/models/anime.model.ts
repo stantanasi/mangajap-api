@@ -1,7 +1,6 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
 import slugify from "slugify";
-import { storage, uploadFile } from '../firebase-app';
+import { uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
@@ -267,14 +266,14 @@ AnimeSchema.pre<IAnime & Document>('validate', async function () {
 AnimeSchema.pre<IAnime & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
-      ref(storage, `anime/${this._id}/images/cover.jpg`),
+      `anime/${this._id}/images/cover.jpg`,
       this.coverImage,
     );
   }
 
   if (this.isModified('bannerImage')) {
     this.bannerImage = await uploadFile(
-      ref(storage, `anime/${this._id}/images/banner.jpg`),
+      `anime/${this._id}/images/banner.jpg`,
       this.bannerImage,
     );
   }

@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import { initializeApp } from "firebase/app";
-import { deleteObject, getDownloadURL, getStorage, StorageReference, uploadString } from "firebase/storage";
+import { deleteObject, getDownloadURL, getStorage, ref, uploadString } from "firebase/storage";
 
 admin.initializeApp({
   credential: admin.credential.cert(JSON.parse(process.env.SERVICE_ACCOUNT!)),
@@ -22,25 +22,27 @@ export const auth = admin.auth();
 
 export const storage = getStorage(firebaseApp);
 
-export const uploadFile = async (storageRef: StorageReference, file: string | null) => {
-  if (file === null) {
+export const uploadFile = async (path: string, data: string | null): Promise<string | null> => {
+  const storageRef = ref(storage, path);
+
+  if (data === null) {
     return deleteObject(storageRef)
       .then(() => null)
       .catch(() => null);
   } else {
-    file = file.replace(/(\r\n|\n|\r)/gm, '');
+    data = data.replace(/(\r\n|\n|\r)/gm, '');
 
-    if (file.startsWith('data')) {
+    if (data.startsWith('data')) {
       return uploadString(
         storageRef,
-        file,
+        data,
         'data_url',
         { contentType: 'image/jpeg' },
       ).then((result) => getDownloadURL(result.ref));
     } else {
       return uploadString(
         storageRef,
-        file,
+        data,
         'base64',
         { contentType: 'image/jpeg' },
       ).then((result) => getDownloadURL(result.ref));

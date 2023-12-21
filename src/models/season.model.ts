@@ -1,6 +1,5 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
-import { storage, uploadFile } from '../firebase-app';
+import { uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import Episode, { IEpisode } from "./episode.model";
@@ -102,7 +101,7 @@ SeasonSchema.index({
 SeasonSchema.pre<ISeason & Document>('save', async function () {
   if (this.isModified('posterImage')) {
     this.posterImage = await uploadFile(
-      ref(storage, `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`),
+      `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
       this.posterImage,
     );
   }

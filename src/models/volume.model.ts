@@ -1,6 +1,5 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
-import { storage, uploadFile } from '../firebase-app';
+import { uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Chapter, { IChapter } from './chapter.model';
 import { IManga } from "./manga.model";
@@ -108,7 +107,7 @@ VolumeSchema.index({
 VolumeSchema.pre<IVolume & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
-      ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`),
+      `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
       this.coverImage,
     );
   }

@@ -1,6 +1,5 @@
 import { Schema, model, Model, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
-import { storage, uploadFile } from '../firebase-app';
+import { uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
@@ -235,7 +234,7 @@ UserSchema.virtual('reviews', {
 UserSchema.pre<IUser & Document>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
-      ref(storage, `users/${this._id}/images/profile.jpg`),
+      `users/${this._id}/images/profile.jpg`,
       this.avatar,
     );
   }

@@ -1,7 +1,6 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
 import slugify from "slugify";
-import { storage, uploadFile } from '../firebase-app';
+import { uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import { IFranchise } from "./franchise.model";
@@ -249,14 +248,14 @@ MangaSchema.pre<IManga & Document>('validate', async function () {
 MangaSchema.pre<IManga & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
-      ref(storage, `manga/${this._id}/images/cover.jpg`),
+      `manga/${this._id}/images/cover.jpg`,
       this.coverImage,
     );
   }
 
   if (this.isModified('bannerImage')) {
     this.bannerImage = await uploadFile(
-      ref(storage, `manga/${this._id}/images/banner.jpg`),
+      `manga/${this._id}/images/banner.jpg`,
       this.bannerImage,
     );
   }

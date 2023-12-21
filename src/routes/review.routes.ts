@@ -1,4 +1,5 @@
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import Review from "../models/review.model";
 import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
@@ -61,8 +62,8 @@ reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     await Review.findById(req.params.id)
       .orFail()
       .then((doc) => {
-        const user: IUser | null = res.locals.user;
-        if (user && (user.isAdmin || doc.user === user._id)) {
+        const token: DecodedIdToken | null = res.locals.token;
+        if (token && (token.isAdmin || doc.user === token.uid)) {
           return doc
             .merge(Review.fromJsonApi(req.body))
             .save();
@@ -88,8 +89,8 @@ reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
     await Review.findById(req.params.id)
       .orFail()
       .then((doc) => {
-        const user: IUser | null = res.locals.user;
-        if (user && (user.isAdmin || doc.user === user._id)) {
+        const token: DecodedIdToken | null = res.locals.token;
+        if (token && (token.isAdmin || doc.user === token.uid)) {
           return doc
             .delete();
         } else {

@@ -7,7 +7,6 @@ import { auth } from './firebase-app';
 import { JsonApiError } from './utils/mongoose-jsonapi/mongoose-jsonapi';
 import { AnimeSchema } from './models/anime.model';
 import { MangaSchema } from './models/manga.model';
-import User from './models/user.model';
 import animeEntryRoutes from './routes/anime-entry.routes';
 import animeRoutes from './routes/anime.routes';
 import chapterRoutes from './routes/chapter.routes';
@@ -51,35 +50,34 @@ app.use(async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const uid = await auth
+    const token = await auth
       .verifyIdToken(bearerToken ?? '')
-      .then((decoded) => decoded.uid)
-      .catch(() => '');
+      .then((token) => {
+        AnimeSchema.virtual('anime-entry', {
+          ref: 'AnimeEntry',
+          localField: '_id',
+          foreignField: 'anime',
+          justOne: true,
+          match: {
+            user: token.uid,
+          },
+        });
 
-    const user = await User.findById(uid);
-    if (user) {
-      AnimeSchema.virtual('anime-entry', {
-        ref: 'AnimeEntry',
-        localField: '_id',
-        foreignField: 'anime',
-        justOne: true,
-        match: {
-          user: user._id,
-        },
-      });
+        MangaSchema.virtual('manga-entry', {
+          ref: 'MangaEntry',
+          localField: '_id',
+          foreignField: 'manga',
+          justOne: true,
+          match: {
+            user: token.uid,
+          },
+        });
 
-      MangaSchema.virtual('manga-entry', {
-        ref: 'MangaEntry',
-        localField: '_id',
-        foreignField: 'manga',
-        justOne: true,
-        match: {
-          user: user._id,
-        },
-      });
-    }
+        return token;
+      })
+      .catch(() => null);
 
-    res.locals.user = user;
+    res.locals.token = token;
 
     next();
   } catch (err) {

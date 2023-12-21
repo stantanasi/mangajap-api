@@ -1,4 +1,5 @@
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import Follow from "../models/follow.model";
 import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
@@ -61,8 +62,8 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     await Follow.findById(req.params.id)
       .orFail()
       .then((doc) => {
-        const user: IUser | null = res.locals.user;
-        if (user && (user.isAdmin || doc.follower === user._id || doc.followed === user._id)) {
+        const token: DecodedIdToken | null = res.locals.token;
+        if (token && (token.isAdmin || doc.follower === token.uid || doc.followed === token.uid)) {
           return doc
             .merge(Follow.fromJsonApi(req.body))
             .save();
@@ -88,8 +89,8 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
     await Follow.findById(req.params.id)
       .orFail()
       .then((doc) => {
-        const user: IUser | null = res.locals.user;
-        if (user && (user.isAdmin || doc.follower === user._id || doc.followed === user._id)) {
+        const token: DecodedIdToken | null = res.locals.token;
+        if (token && (token.isAdmin || doc.follower === token.uid || doc.followed === token.uid)) {
           return doc
             .delete();
         } else {

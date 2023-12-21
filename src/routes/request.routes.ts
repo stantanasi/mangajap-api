@@ -1,4 +1,5 @@
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import Request from "../models/request.model";
 import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
@@ -61,8 +62,9 @@ requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     await Request.findById(req.params.id)
       .orFail()
       .then((doc) => {
+        const token: DecodedIdToken | null = res.locals.token;
         const user: IUser | null = res.locals.user;
-        if (user && (user.isAdmin || doc.user === user._id)) {
+        if (user && (token?.isAdmin || doc.user === user._id)) {
           return doc
             .merge(Request.fromJsonApi(req.body))
             .save();
@@ -88,8 +90,9 @@ requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
     await Request.findById(req.params.id)
       .orFail()
       .then((doc) => {
+        const token: DecodedIdToken | null = res.locals.token;
         const user: IUser | null = res.locals.user;
-        if (user && (user.isAdmin || doc.user === user._id)) {
+        if (user && (token?.isAdmin || doc.user === user._id)) {
           return doc
             .delete();
         } else {

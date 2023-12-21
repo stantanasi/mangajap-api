@@ -51,12 +51,11 @@ app.use(async (req, res, next) => {
       bearerToken = bearerToken.substring(7);
     }
 
-    const uid = await auth
+    const token = await auth
       .verifyIdToken(bearerToken ?? '')
-      .then((decoded) => decoded.uid)
-      .catch(() => '');
+      .catch(() => null);
 
-    const user = await User.findById(uid);
+    const user = await User.findById(token?.uid ?? '');
     if (user) {
       AnimeSchema.virtual('anime-entry', {
         ref: 'AnimeEntry',
@@ -79,6 +78,7 @@ app.use(async (req, res, next) => {
       });
     }
 
+    res.locals.token = token;
     res.locals.user = user;
 
     next();

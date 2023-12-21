@@ -26,7 +26,7 @@ export const uploadFile = async (path: string, data: string | null): Promise<str
   const storageRef = ref(storage, path);
 
   if (data === null) {
-    return deleteObject(storageRef)
+    return deleteFile(path)
       .then(() => null)
       .catch(() => null);
   } else {
@@ -48,4 +48,11 @@ export const uploadFile = async (path: string, data: string | null): Promise<str
       ).then((result) => getDownloadURL(result.ref));
     }
   }
+}
+
+export const deleteFile = async (path: string) => {
+  const storageRef = ref(storage, path);
+
+  return deleteObject(storageRef)
+    .catch(() => { });
 }

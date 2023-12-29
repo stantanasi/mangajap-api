@@ -399,16 +399,16 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
       ...this.schema.paths,
       ...this.schema.virtuals
     } as {
-      [key: string]: SchemaType | VirtualType
+      [key: string]: SchemaType | VirtualType<HydratedDocument<any>>
     })
       .map(([path, type]) => {
-        const isId = (type: SchemaType | VirtualType): boolean => {
+        const isId = (type: SchemaType | VirtualType<HydratedDocument<any>>): boolean => {
           return (type as any).path === '_id';
         }
-        const isAttribute = (type: SchemaType | VirtualType): boolean => {
+        const isAttribute = (type: SchemaType | VirtualType<HydratedDocument<any>>): boolean => {
           return !isId(type) && !isRelationship(type);
         }
-        const isRelationship = (type: SchemaType | VirtualType): boolean => {
+        const isRelationship = (type: SchemaType | VirtualType<HydratedDocument<any>>): boolean => {
           return !!(type as any).options?.ref || !!(type as any).options.type?.[0]?.ref ||
             !!(type as any).options?.refPath || !!(type as any).options.type?.[0]?.refPath;
         }

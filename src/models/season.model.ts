@@ -1,6 +1,5 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
-import { storage, uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IAnime } from "./anime.model";
 import Episode, { IEpisode } from "./episode.model";
@@ -59,7 +58,7 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
   airDate: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -102,7 +101,7 @@ SeasonSchema.index({
 SeasonSchema.pre<ISeason & Document>('save', async function () {
   if (this.isModified('posterImage')) {
     this.posterImage = await uploadFile(
-      ref(storage, `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`),
+      `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
       this.posterImage,
     );
   }
@@ -117,10 +116,18 @@ SeasonSchema.pre('findOne', async function () {
       season: _id,
     }).sort({ number: 1 }).then((doc) => doc?.airDate ?? null),
 
-    episodeCount: await Episode.count({
+    episodeCount: await Episode.countDocuments({
       season: _id,
     }),
   });
+});
+
+SeasonSchema.pre<ISeason & Document>('deleteOne', async function () {
+  if (this.posterImage) {
+    await deleteFile(
+      `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
+    );
+  }
 });
 
 

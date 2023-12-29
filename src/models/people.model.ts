@@ -1,6 +1,5 @@
 import { Schema, model, Model, Document, Types } from 'mongoose';
-import { ref } from 'firebase/storage';
-import { storage, uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import { IStaff } from "./staff.model";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
@@ -87,8 +86,16 @@ PeopleSchema.virtual('manga-staff', {
 PeopleSchema.pre<IPeople & Document>('save', async function () {
   if (this.isModified('image')) {
     this.image = await uploadFile(
-      ref(storage, `peoples/${this._id}/images/profile.jpg`),
+      `peoples/${this._id}/images/profile.jpg`,
       this.image,
+    );
+  }
+});
+
+PeopleSchema.pre<IPeople & Document>('deleteOne', async function () {
+  if (this.image) {
+    await deleteFile(
+      `peoples/${this._id}/images/profile.jpg`,
     );
   }
 });

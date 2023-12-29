@@ -42,7 +42,7 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
   publishedAt: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },

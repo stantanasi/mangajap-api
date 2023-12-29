@@ -1,6 +1,5 @@
 import { Schema, model, Model, Types, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
-import { storage, uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import Chapter, { IChapter } from './chapter.model';
 import { IManga } from "./manga.model";
@@ -49,7 +48,7 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolu
   published: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -108,7 +107,7 @@ VolumeSchema.index({
 VolumeSchema.pre<IVolume & Document>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
-      ref(storage, `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`),
+      `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
       this.coverImage,
     );
   }
@@ -119,7 +118,7 @@ VolumeSchema.pre('findOne', async function () {
   if (!_id) return;
 
   await Volume.findOneAndUpdate(this.getFilter(), {
-    chapterCount: await Chapter.count({
+    chapterCount: await Chapter.countDocuments({
       volume: _id,
     }),
 
@@ -131,6 +130,14 @@ VolumeSchema.pre('findOne', async function () {
       volume: _id,
     }).sort({ number: -1 }).then((doc) => doc?.number ?? null),
   });
+});
+
+VolumeSchema.pre<IVolume & Document>('deleteOne', async function () {
+  if (this.coverImage) {
+    await deleteFile(
+      `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
+    );
+  }
 });
 
 

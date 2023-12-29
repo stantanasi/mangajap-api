@@ -25,11 +25,25 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
         return acc;
       }, [] as any[]);
     };
+    const cleanFilter = (obj: any) => {
+      Object.keys(obj).forEach((key) => {
+        if (key === '$search') {
+          delete obj[key];
+        }
+
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          cleanFilter(obj[key]);
+        }
+      });
+    };
 
     const query: string | undefined = iterate(this.getFilter())
       .find((filter) => filter.key === '$search')
       ?.value;
-    if (!query) return;
+    if (!query) {
+      cleanFilter(this.getFilter())
+      return;
+    }
 
     const aggregate = this.model.aggregate()
       .addFields(options.fields.filter((field) => schema.path(field).instance === 'Mixed').reduce((acc, field) => {
@@ -100,6 +114,8 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
     }
 
     const ids = await aggregate.then((docs) => docs.map((doc) => doc._id));
+
+    cleanFilter(this.getFilter());
 
     this
       .merge({ _id: { $in: ids } })

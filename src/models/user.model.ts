@@ -1,6 +1,5 @@
 import { Schema, model, Model, Document } from 'mongoose';
-import { ref } from 'firebase/storage';
-import { storage, uploadFile } from '../firebase-app';
+import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
@@ -86,7 +85,7 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
   birthday: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -99,7 +98,7 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
   avatar: {
     type: String,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: string | null | undefined) {
       return val ? {
         tiny: val,
         small: val,
@@ -235,7 +234,7 @@ UserSchema.virtual('reviews', {
 UserSchema.pre<IUser & Document>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
-      ref(storage, `users/${this._id}/images/profile.jpg`),
+      `users/${this._id}/images/profile.jpg`,
       this.avatar,
     );
   }
@@ -246,15 +245,15 @@ UserSchema.pre('findOne', async function () {
   if (!_id) return;
 
   await User.findOneAndUpdate(this.getFilter(), {
-    followersCount: await Follow.count({
+    followersCount: await Follow.countDocuments({
       followed: _id
     }),
 
-    followingCount: await Follow.count({
+    followingCount: await Follow.countDocuments({
       follower: _id
     }),
 
-    followedMangaCount: await MangaEntry.count({
+    followedMangaCount: await MangaEntry.countDocuments({
       user: _id,
       isAdd: true,
     }),
@@ -277,7 +276,7 @@ UserSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.total),
 
-    followedAnimeCount: await AnimeEntry.count({
+    followedAnimeCount: await AnimeEntry.countDocuments({
       user: _id,
       isAdd: true,
     }),
@@ -307,6 +306,14 @@ UserSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.timeSpentOnAnime),
   });
+});
+
+UserSchema.pre<IUser & Document>('deleteOne', async function () {
+  if (this.avatar) {
+    await deleteFile(
+      `users/${this._id}/images/profile.jpg`,
+    );
+  }
 });
 
 

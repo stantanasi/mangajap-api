@@ -91,7 +91,7 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
     required: true,
     transform: function (this, val: Date | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
-    }
+    },
   },
 
   endDate: {
@@ -137,43 +137,43 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
 
   volumeCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   chapterCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
 
   averageRating: {
     type: Number,
-    default: null
+    default: null,
   },
 
   ratingRank: {
     type: Number,
-    default: null
+    default: null,
   },
 
   popularity: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   userCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   favoritesCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   reviewCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
 
@@ -218,7 +218,7 @@ MangaSchema.virtual('chapters', {
 MangaSchema.virtual('staff', {
   ref: 'Staff',
   localField: '_id',
-  foreignField: 'manga'
+  foreignField: 'manga',
 });
 
 MangaSchema.virtual('reviews', {
@@ -233,7 +233,7 @@ MangaSchema.virtual('reviews', {
 MangaSchema.virtual('franchises', {
   ref: 'Franchise',
   localField: '_id',
-  foreignField: 'source'
+  foreignField: 'source',
 });
 
 MangaSchema.virtual('manga-entry');
@@ -320,7 +320,7 @@ MangaSchema.pre('findOne', async function () {
           $add: [
             '$userCount', '$favoritesCount',
             { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
-            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
+            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] },
           ],
         },
       })
@@ -355,12 +355,12 @@ MangaSchema.plugin(MongooseJsonApi, {
       return {
         $search: query,
       };
-    }
+    },
   },
 });
 
 
-export type TManga = HydratedDocument<IManga, MangaInstanceMethods, MangaQueryHelper>
+export type TManga = HydratedDocument<IManga, MangaInstanceMethods, MangaQueryHelper>;
 
 const Manga = model<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>>('Manga', MangaSchema);
 export default Manga;

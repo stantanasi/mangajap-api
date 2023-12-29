@@ -25,13 +25,13 @@ export const FollowSchema = new Schema<IFollow, FollowModel & JsonApiModel<IFoll
   follower: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
 
   followed: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
 }, {
   id: false,
@@ -44,7 +44,7 @@ export const FollowSchema = new Schema<IFollow, FollowModel & JsonApiModel<IFoll
 
 FollowSchema.index({
   follower: 1,
-  followed: 1
+  followed: 1,
 }, { unique: true });
 
 
@@ -53,7 +53,7 @@ FollowSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TFollow = HydratedDocument<IFollow, FollowInstanceMethods, FollowQueryHelper>
+export type TFollow = HydratedDocument<IFollow, FollowInstanceMethods, FollowQueryHelper>;
 
 const Follow = model<IFollow, FollowModel & JsonApiModel<IFollow>>('Follow', FollowSchema);
 export default Follow;

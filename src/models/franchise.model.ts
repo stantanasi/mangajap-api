@@ -31,33 +31,33 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiMo
   role: {
     type: String,
     required: true,
-    enum: ['adaptation', 'alternative_setting', 'alternative_version', 'character', 'full_story', 'other', 'parent_story', 'prequel', 'sequel', 'side_story', 'spinoff', 'summary']
+    enum: ['adaptation', 'alternative_setting', 'alternative_version', 'character', 'full_story', 'other', 'parent_story', 'prequel', 'sequel', 'side_story', 'spinoff', 'summary'],
   },
 
 
   source: {
     type: Schema.Types.ObjectId,
     refPath: 'sourceModel',
-    required: true
+    required: true,
   },
 
   destination: {
     type: Schema.Types.ObjectId,
     refPath: 'destinationModel',
-    required: true
+    required: true,
   },
 
 
   sourceModel: {
     type: String,
     required: true,
-    enum: ['Anime', 'Manga']
+    enum: ['Anime', 'Manga'],
   },
 
   destinationModel: {
     type: String,
     required: true,
-    enum: ['Anime', 'Manga']
+    enum: ['Anime', 'Manga'],
   },
 }, {
   id: false,
@@ -91,7 +91,7 @@ FranchiseSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TFranchise = HydratedDocument<IFranchise, FranchiseInstanceMethods, FranchiseQueryHelper>
+export type TFranchise = HydratedDocument<IFranchise, FranchiseInstanceMethods, FranchiseQueryHelper>;
 
 const Franchise = model<IFranchise, FranchiseModel & JsonApiModel<IFranchise>>('Franchise', FranchiseSchema);
 export default Franchise;

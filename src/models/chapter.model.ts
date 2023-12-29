@@ -36,7 +36,7 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
 
   number: {
     type: Number,
-    required: true
+    required: true,
   },
 
   publishedAt: {
@@ -51,7 +51,7 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
   manga: {
     type: Schema.Types.ObjectId,
     ref: 'Manga',
-    required: true
+    required: true,
   },
 
   volume: {
@@ -70,7 +70,7 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
 
 ChapterSchema.index({
   number: 1,
-  manga: 1
+  manga: 1,
 }, { unique: true });
 
 
@@ -79,7 +79,7 @@ ChapterSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TChapter = HydratedDocument<IChapter, ChapterInstanceMethods, ChapterQueryHelper>
+export type TChapter = HydratedDocument<IChapter, ChapterInstanceMethods, ChapterQueryHelper>;
 
 const Chapter = model<IChapter, ChapterModel & JsonApiModel<IChapter>>('Chapter', ChapterSchema);
 export default Chapter;

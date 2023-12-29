@@ -33,51 +33,51 @@ export interface AnimeEntryModel extends Model<IAnimeEntry, AnimeEntryQueryHelpe
 export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
   isAdd: {
     type: Boolean,
-    default: true
+    default: true,
   },
 
   isFavorites: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   status: {
     type: String,
     default: 'watching',
-    enum: ['watching', 'completed', 'planned', 'on_hold', 'dropped']
+    enum: ['watching', 'completed', 'planned', 'on_hold', 'dropped'],
   },
 
   episodesWatch: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   rating: {
     type: Number,
-    default: null
+    default: null,
   },
 
   startedAt: {
     type: Date,
-    default: new Date()
+    default: new Date(),
   },
 
   finishedAt: {
     type: Date,
-    default: null
+    default: null,
   },
 
 
   user: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
     ref: 'Anime',
-    required: true
+    required: true,
   },
 }, {
   id: false,
@@ -90,7 +90,7 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonAp
 
 AnimeEntrySchema.index({
   user: 1,
-  anime: 1
+  anime: 1,
 }, { unique: true });
 
 
@@ -99,7 +99,7 @@ AnimeEntrySchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TAnimeEntry = HydratedDocument<IAnimeEntry, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>
+export type TAnimeEntry = HydratedDocument<IAnimeEntry, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>;
 
 const AnimeEntry = model<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>>('AnimeEntry', AnimeEntrySchema);
 export default AnimeEntry;

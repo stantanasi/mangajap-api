@@ -37,12 +37,12 @@ export interface VolumeModel extends Model<IVolume, VolumeQueryHelper, VolumeIns
 export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolume>, VolumeInstanceMethods, VolumeQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
-    default: {}
+    default: {},
   },
 
   number: {
     type: Number,
-    required: true
+    required: true,
   },
 
   published: {
@@ -66,19 +66,19 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolu
 
   startChapter: {
     type: Number,
-    default: null
+    default: null,
   },
 
   endChapter: {
     type: Number,
-    default: null
+    default: null,
   },
 
 
   manga: {
     type: Schema.Types.ObjectId,
     ref: 'Manga',
-    required: true
+    required: true,
   },
 }, {
   id: false,
@@ -100,7 +100,7 @@ VolumeSchema.virtual('chapters', {
 
 VolumeSchema.index({
   number: 1,
-  manga: 1
+  manga: 1,
 }, { unique: true });
 
 
@@ -146,7 +146,7 @@ VolumeSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TVolume = HydratedDocument<IVolume, VolumeInstanceMethods, VolumeQueryHelper>
+export type TVolume = HydratedDocument<IVolume, VolumeInstanceMethods, VolumeQueryHelper>;
 
 const Volume = model<IVolume, VolumeModel & JsonApiModel<IVolume>>('Volume', VolumeSchema);
 export default Volume;

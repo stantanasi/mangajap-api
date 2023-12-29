@@ -58,28 +58,28 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
 
   pseudo: {
     type: String,
-    required: true
+    required: true,
   },
 
   firstName: {
     type: String,
-    default: ''
+    default: '',
   },
 
   lastName: {
     type: String,
-    default: ''
+    default: '',
   },
 
   about: {
     type: String,
-    default: ''
+    default: '',
   },
 
   gender: {
     type: String,
     default: null,
-    enum: ['men', 'women', 'other', null]
+    enum: ['men', 'women', 'other', null],
   },
 
   birthday: {
@@ -92,7 +92,7 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
 
   country: {
     type: String,
-    default: ''
+    default: '',
   },
 
   avatar: {
@@ -106,48 +106,48 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
         large: val,
         original: val,
       } : null;
-    }
+    },
   },
 
 
   followersCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   followingCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   followedMangaCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   volumesRead: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   chaptersRead: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   followedAnimeCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   episodesWatch: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   timeSpentOnAnime: {
     type: Number,
-    default: 0
+    default: 0,
   },
 }, {
   id: false,
@@ -161,13 +161,13 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
 UserSchema.virtual('followers', {
   ref: 'Follow',
   localField: '_id',
-  foreignField: 'followed'
+  foreignField: 'followed',
 });
 
 UserSchema.virtual('following', {
   ref: 'Follow',
   localField: '_id',
-  foreignField: 'follower'
+  foreignField: 'follower',
 });
 
 UserSchema.virtual('anime-library', {
@@ -227,7 +227,7 @@ UserSchema.virtual('manga-favorites', {
 UserSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
-  foreignField: 'user'
+  foreignField: 'user',
 });
 
 
@@ -328,12 +328,12 @@ UserSchema.plugin(MongooseJsonApi, {
       return {
         $search: query,
       };
-    }
+    },
   },
 });
 
 
-export type TUser = HydratedDocument<IUser, UserInstanceMethods, UserQueryHelper>
+export type TUser = HydratedDocument<IUser, UserInstanceMethods, UserQueryHelper>;
 
 const User = model<IUser, UserModel & JsonApiModel<IUser> & SearchModel<IUser>>('User', UserSchema);
 export default User;

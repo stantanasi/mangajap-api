@@ -30,26 +30,26 @@ export const StaffSchema = new Schema<IStaff, StaffModel & JsonApiModel<IStaff>,
   role: {
     type: String,
     required: true,
-    enum: ['author', 'illustrator', 'story_and_art', 'licensor', 'producer', 'studio', 'original_creator']
+    enum: ['author', 'illustrator', 'story_and_art', 'licensor', 'producer', 'studio', 'original_creator'],
   },
 
 
   people: {
     type: Schema.Types.ObjectId,
     ref: 'People',
-    required: true
+    required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
     ref: 'Anime',
-    default: undefined
+    default: undefined,
   },
 
   manga: {
     type: Schema.Types.ObjectId,
     ref: 'Manga',
-    default: undefined
+    default: undefined,
   },
 }, {
   id: false,
@@ -66,7 +66,7 @@ StaffSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TStaff = HydratedDocument<IStaff, StaffInstanceMethods, StaffQueryHelper>
+export type TStaff = HydratedDocument<IStaff, StaffInstanceMethods, StaffQueryHelper>;
 
 const Staff = model<IStaff, StaffModel & JsonApiModel<IStaff>>('Staff', StaffSchema);
 export default Staff;

@@ -28,7 +28,7 @@ export interface ThemeModel extends Model<ITheme, ThemeQueryHelper, ThemeInstanc
 export const ThemeSchema = new Schema<ITheme, ThemeModel & JsonApiModel<ITheme>, ThemeInstanceMethods, ThemeQueryHelper>({
   title: {
     type: String,
-    required: true
+    required: true,
   },
 
   description: {
@@ -62,7 +62,7 @@ ThemeSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TTheme = HydratedDocument<ITheme, ThemeInstanceMethods, ThemeQueryHelper>
+export type TTheme = HydratedDocument<ITheme, ThemeInstanceMethods, ThemeQueryHelper>;
 
 const Theme = model<ITheme, ThemeModel & JsonApiModel<ITheme>>('Theme', ThemeSchema);
 export default Theme;

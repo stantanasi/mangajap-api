@@ -29,26 +29,26 @@ export interface ReviewModel extends Model<IReview, ReviewQueryHelper, ReviewIns
 export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IReview>, ReviewInstanceMethods, ReviewQueryHelper>({
   content: {
     type: String,
-    required: true
+    required: true,
   },
 
 
   user: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
     ref: 'Anime',
-    default: undefined
+    default: undefined,
   },
 
   manga: {
     type: Schema.Types.ObjectId,
     ref: 'Manga',
-    default: undefined
+    default: undefined,
   },
 }, {
   id: false,
@@ -65,7 +65,7 @@ ReviewSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TReview = HydratedDocument<IReview, ReviewInstanceMethods, ReviewQueryHelper>
+export type TReview = HydratedDocument<IReview, ReviewInstanceMethods, ReviewQueryHelper>;
 
 const Review = model<IReview, ReviewModel & JsonApiModel<IReview>>('Review', ReviewSchema);
 export default Review;

@@ -34,50 +34,50 @@ export interface MangaEntryModel extends Model<IMangaEntry, MangaEntryQueryHelpe
 export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>, MangaEntryInstanceMethods, MangaEntryQueryHelper>({
   isAdd: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   isFavorites: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   status: {
     type: String,
     default: 'reading',
-    enum: ['reading', 'completed', 'planned', 'on_hold', 'dropped']
+    enum: ['reading', 'completed', 'planned', 'on_hold', 'dropped'],
   },
 
   volumesRead: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   chaptersRead: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   rating: {
     type: Number,
-    default: null
+    default: null,
   },
 
   startedAt: {
     type: Date,
-    default: new Date()
+    default: new Date(),
   },
 
   finishedAt: {
     type: Date,
-    default: null
+    default: null,
   },
 
 
   user: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
 
   manga: {
@@ -96,7 +96,7 @@ export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel & JsonAp
 
 MangaEntrySchema.index({
   user: 1,
-  manga: 1
+  manga: 1,
 }, { unique: true });
 
 
@@ -105,7 +105,7 @@ MangaEntrySchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TMangaEntry = HydratedDocument<IMangaEntry, MangaEntryInstanceMethods, MangaEntryQueryHelper>
+export type TMangaEntry = HydratedDocument<IMangaEntry, MangaEntryInstanceMethods, MangaEntryQueryHelper>;
 
 const MangaEntry = model<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>>('MangaEntry', MangaEntrySchema);
 export default MangaEntry;

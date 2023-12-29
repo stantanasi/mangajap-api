@@ -28,29 +28,29 @@ export interface RequestModel extends Model<IRequest, RequestQueryHelper, Reques
 export const RequestSchema = new Schema<IRequest, RequestModel & JsonApiModel<IRequest>, RequestInstanceMethods, RequestQueryHelper>({
   requestType: {
     type: String,
-    required: true
+    required: true,
   },
 
   data: {
     type: String,
-    required: true
+    required: true,
   },
 
   isDone: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   userHasRead: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
 
   user: {
     type: String,
     ref: 'User',
-    required: true
+    required: true,
   },
 }, {
   id: false,
@@ -67,7 +67,7 @@ RequestSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TRequest = HydratedDocument<IRequest, RequestInstanceMethods, RequestQueryHelper>
+export type TRequest = HydratedDocument<IRequest, RequestInstanceMethods, RequestQueryHelper>;
 
 const Request = model<IRequest, RequestModel & JsonApiModel<IRequest>>('Request', RequestSchema);
 export default Request;

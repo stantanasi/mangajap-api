@@ -45,12 +45,12 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
 
   relativeNumber: {
     type: Number,
-    required: true
+    required: true,
   },
 
   number: {
     type: Number,
-    required: true
+    required: true,
   },
 
   airDate: {
@@ -64,7 +64,7 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
   episodeType: {
     type: String,
     default: '',
-    enum: ['', 'oav']
+    enum: ['', 'oav'],
   },
 
   duration: {
@@ -76,13 +76,13 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
   anime: {
     type: Schema.Types.ObjectId,
     ref: 'Anime',
-    required: true
+    required: true,
   },
 
   season: {
     type: Schema.Types.ObjectId,
     ref: 'Season',
-    required: true
+    required: true,
   },
 }, {
   id: false,
@@ -95,12 +95,12 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
 
 EpisodeSchema.index({
   number: 1,
-  anime: 1
+  anime: 1,
 }, { unique: true });
 
 EpisodeSchema.index({
   relativeNumber: 1,
-  season: 1
+  season: 1,
 }, { unique: true });
 
 
@@ -109,7 +109,7 @@ EpisodeSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TEpisode = HydratedDocument<IEpisode, EpisodeInstanceMethods, EpisodeQueryHelper>
+export type TEpisode = HydratedDocument<IEpisode, EpisodeInstanceMethods, EpisodeQueryHelper>;
 
 const Episode = model<IEpisode, EpisodeModel & JsonApiModel<IEpisode>>('Episode', EpisodeSchema);
 export default Episode;

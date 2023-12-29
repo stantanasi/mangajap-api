@@ -28,7 +28,7 @@ export interface GenreModel extends Model<IGenre, GenreQueryHelper, GenreInstanc
 export const GenreSchema = new Schema<IGenre, GenreModel & JsonApiModel<IGenre>, GenreInstanceMethods, GenreQueryHelper>({
   title: {
     type: String,
-    required: true
+    required: true,
   },
 
   description: {
@@ -47,13 +47,13 @@ export const GenreSchema = new Schema<IGenre, GenreModel & JsonApiModel<IGenre>,
 GenreSchema.virtual('animes', {
   ref: 'Anime',
   localField: '_id',
-  foreignField: 'genres'
+  foreignField: 'genres',
 });
 
 GenreSchema.virtual('mangas', {
   ref: 'Manga',
   localField: '_id',
-  foreignField: 'genres'
+  foreignField: 'genres',
 });
 
 
@@ -62,7 +62,7 @@ GenreSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TGenre = HydratedDocument<IGenre, GenreInstanceMethods, GenreQueryHelper>
+export type TGenre = HydratedDocument<IGenre, GenreInstanceMethods, GenreQueryHelper>;
 
 const Genre = model<IGenre, GenreModel & JsonApiModel<IGenre>>('Genre', GenreSchema);
 export default Genre;

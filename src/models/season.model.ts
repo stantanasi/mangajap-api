@@ -46,7 +46,7 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
 
   number: {
     type: Number,
-    required: true
+    required: true,
   },
 
   posterImage: {
@@ -65,14 +65,14 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
 
   episodeCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
 
   anime: {
     type: Schema.Types.ObjectId,
     ref: 'Anime',
-    required: true
+    required: true,
   },
 }, {
   id: false,
@@ -94,7 +94,7 @@ SeasonSchema.virtual('episodes', {
 
 SeasonSchema.index({
   number: 1,
-  anime: 1
+  anime: 1,
 }, { unique: true });
 
 
@@ -136,7 +136,7 @@ SeasonSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>
+export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>;
 
 const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>('Season', SeasonSchema);
 export default Season;

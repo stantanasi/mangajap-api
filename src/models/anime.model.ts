@@ -94,7 +94,7 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> 
     required: true,
     transform: function (this, val: Date | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
-    }
+    },
   },
 
   endDate: {
@@ -236,7 +236,7 @@ AnimeSchema.virtual('episodes', {
 AnimeSchema.virtual('staff', {
   ref: 'Staff',
   localField: '_id',
-  foreignField: 'anime'
+  foreignField: 'anime',
 });
 
 AnimeSchema.virtual('reviews', {
@@ -251,7 +251,7 @@ AnimeSchema.virtual('reviews', {
 AnimeSchema.virtual('franchises', {
   ref: 'Franchise',
   localField: '_id',
-  foreignField: 'source'
+  foreignField: 'source',
 });
 
 AnimeSchema.virtual('anime-entry');
@@ -338,7 +338,7 @@ AnimeSchema.pre('findOne', async function () {
           $add: [
             '$userCount', '$favoritesCount',
             { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
-            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
+            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] },
           ],
         },
       })
@@ -378,7 +378,7 @@ AnimeSchema.plugin(MongooseJsonApi, {
 });
 
 
-export type TAnime = HydratedDocument<IAnime, AnimeInstanceMethods, AnimeQueryHelper>
+export type TAnime = HydratedDocument<IAnime, AnimeInstanceMethods, AnimeQueryHelper>;
 
 const Anime = model<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>>('Anime', AnimeSchema);
 export default Anime;

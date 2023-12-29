@@ -32,17 +32,17 @@ export interface PeopleModel extends Model<IPeople, PeopleQueryHelper, PeopleIns
 export const PeopleSchema = new Schema<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>, PeopleInstanceMethods, PeopleQueryHelper>({
   firstName: {
     type: String,
-    default: ''
+    default: '',
   },
 
   lastName: {
     type: String,
-    default: ''
+    default: '',
   },
 
   pseudo: {
     type: String,
-    default: ''
+    default: '',
   },
 
   image: {
@@ -61,7 +61,7 @@ export const PeopleSchema = new Schema<IPeople, PeopleModel & JsonApiModel<IPeop
 PeopleSchema.virtual('staff', {
   ref: 'Staff',
   localField: '_id',
-  foreignField: 'people'
+  foreignField: 'people',
 });
 
 PeopleSchema.virtual('anime-staff', {
@@ -69,8 +69,8 @@ PeopleSchema.virtual('anime-staff', {
   localField: '_id',
   foreignField: 'people',
   match: {
-    anime: { $exists: true, $ne: null }
-  }
+    anime: { $exists: true, $ne: null },
+  },
 });
 
 PeopleSchema.virtual('manga-staff', {
@@ -78,8 +78,8 @@ PeopleSchema.virtual('manga-staff', {
   localField: '_id',
   foreignField: 'people',
   match: {
-    manga: { $exists: true, $ne: null }
-  }
+    manga: { $exists: true, $ne: null },
+  },
 });
 
 
@@ -112,12 +112,12 @@ PeopleSchema.plugin(MongooseJsonApi, {
       return {
         $search: query,
       };
-    }
+    },
   },
 });
 
 
-export type TPeople = HydratedDocument<IPeople, PeopleInstanceMethods, PeopleQueryHelper>
+export type TPeople = HydratedDocument<IPeople, PeopleInstanceMethods, PeopleQueryHelper>;
 
 const People = model<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>>('People', PeopleSchema);
 export default People;

@@ -1,7 +1,7 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import { deleteFile, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import { TStaff } from "./staff.model";
 
 export interface IPeople {
@@ -13,8 +13,8 @@ export interface IPeople {
   image: string | null;
 
   staff?: TStaff[];
-  'anime-staff'?: TStaff[];
-  'manga-staff'?: TStaff[];
+  "anime-staff"?: TStaff[];
+  "manga-staff"?: TStaff[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -32,17 +32,17 @@ export interface PeopleModel extends Model<IPeople, PeopleQueryHelper, PeopleIns
 export const PeopleSchema = new Schema<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>, PeopleInstanceMethods, PeopleQueryHelper>({
   firstName: {
     type: String,
-    default: '',
+    default: "",
   },
 
   lastName: {
     type: String,
-    default: '',
+    default: "",
   },
 
   pseudo: {
     type: String,
-    default: '',
+    default: "",
   },
 
   image: {
@@ -58,33 +58,33 @@ export const PeopleSchema = new Schema<IPeople, PeopleModel & JsonApiModel<IPeop
   toObject: { virtuals: true },
 });
 
-PeopleSchema.virtual('staff', {
-  ref: 'Staff',
-  localField: '_id',
-  foreignField: 'people',
+PeopleSchema.virtual("staff", {
+  ref: "Staff",
+  localField: "_id",
+  foreignField: "people",
 });
 
-PeopleSchema.virtual('anime-staff', {
-  ref: 'Staff',
-  localField: '_id',
-  foreignField: 'people',
+PeopleSchema.virtual("anime-staff", {
+  ref: "Staff",
+  localField: "_id",
+  foreignField: "people",
   match: {
     anime: { $exists: true, $ne: null },
   },
 });
 
-PeopleSchema.virtual('manga-staff', {
-  ref: 'Staff',
-  localField: '_id',
-  foreignField: 'people',
+PeopleSchema.virtual("manga-staff", {
+  ref: "Staff",
+  localField: "_id",
+  foreignField: "people",
   match: {
     manga: { $exists: true, $ne: null },
   },
 });
 
 
-PeopleSchema.pre<TPeople>('save', async function () {
-  if (this.isModified('image')) {
+PeopleSchema.pre<TPeople>("save", async function () {
+  if (this.isModified("image")) {
     this.image = await uploadFile(
       `peoples/${this._id}/images/profile.jpg`,
       this.image,
@@ -92,7 +92,7 @@ PeopleSchema.pre<TPeople>('save', async function () {
   }
 });
 
-PeopleSchema.pre<TPeople>('deleteOne', async function () {
+PeopleSchema.pre<TPeople>("deleteOne", async function () {
   if (this.image) {
     await deleteFile(
       `peoples/${this._id}/images/profile.jpg`,
@@ -102,11 +102,11 @@ PeopleSchema.pre<TPeople>('deleteOne', async function () {
 
 
 PeopleSchema.plugin(MongooseSearch, {
-  fields: ['firstName', 'lastName', 'pseudo'],
+  fields: ["firstName", "lastName", "pseudo"],
 });
 
 PeopleSchema.plugin(MongooseJsonApi, {
-  type: 'peoples',
+  type: "peoples",
   filter: {
     query: (query: string) => {
       return {
@@ -119,5 +119,5 @@ PeopleSchema.plugin(MongooseJsonApi, {
 
 export type TPeople = HydratedDocument<IPeople, PeopleInstanceMethods, PeopleQueryHelper>;
 
-const People = model<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>>('People', PeopleSchema);
+const People = model<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>>("People", PeopleSchema);
 export default People;

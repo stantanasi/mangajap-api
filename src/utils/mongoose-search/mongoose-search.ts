@@ -2,7 +2,7 @@ import {
   Model,
   QueryWithHelpers,
   Schema,
-} from 'mongoose';
+} from "mongoose";
 
 export default function MongooseSearch<DocType extends { _id: any }, M extends SearchModel<DocType>>(
   _schema: Schema<DocType, M>,
@@ -12,12 +12,12 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
 ) {
   const schema = _schema as Schema<DocType, M, SearchInstanceMethods, SearchQueryHelper>;
 
-  schema.pre<QueryWithHelpers<DocType[], DocType, SearchQueryHelper>>('find', async function () {
+  schema.pre<QueryWithHelpers<DocType[], DocType, SearchQueryHelper>>("find", async function () {
     const iterate = (obj: any): { key: string, value: any }[] => {
       return Object.keys(obj).reduce((acc, key) => {
         acc = acc.concat({ key: key, value: obj[key] });
 
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
+        if (typeof obj[key] === "object" && obj[key] !== null) {
           acc = acc.concat(iterate(obj[key]));
         }
 
@@ -26,18 +26,18 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
     };
     const cleanFilter = (obj: any) => {
       Object.keys(obj).forEach((key) => {
-        if (key === '$search') {
+        if (key === "$search") {
           delete obj[key];
         }
 
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
+        if (typeof obj[key] === "object" && obj[key] !== null) {
           cleanFilter(obj[key]);
         }
       });
     };
 
     const query: string | undefined = iterate(this.getFilter())
-      .find((filter) => filter.key === '$search')
+      .find((filter) => filter.key === "$search")
       ?.value;
     if (!query) {
       cleanFilter(this.getFilter())
@@ -45,24 +45,24 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
     }
 
     const aggregate = this.model.aggregate()
-      .addFields(options.fields.filter((field) => schema.path(field).instance === 'Mixed').reduce((acc, field) => {
+      .addFields(options.fields.filter((field) => schema.path(field).instance === "Mixed").reduce((acc, field) => {
         return Object.assign(acc, {
           [field]: {
             $map: {
               input: { $objectToArray: `$${field}` },
-              as: 'value',
-              in: '$$value.v',
+              as: "value",
+              in: "$$value.v",
             },
           },
         });
       }, {} as any))
       .match({
         $or: options.fields
-          .map((field) => [query].concat(query.split(' ')).filter((word) => !!word).map((word) => {
-            if (schema.path(field).instance === 'String') {
-              return { [field]: { $regex: word, $options: 'i' } };
+          .map((field) => [query].concat(query.split(" ")).filter((word) => !!word).map((word) => {
+            if (schema.path(field).instance === "String") {
+              return { [field]: { $regex: word, $options: "i" } };
             } else {
-              return { [field]: { $elemMatch: { $regex: word, $options: 'i' } } };
+              return { [field]: { $elemMatch: { $regex: word, $options: "i" } } };
             }
           }))
           .reduce((acc, cur) => acc.concat(cur), []),
@@ -70,14 +70,14 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
       .addFields({
         queryScore: {
           $add: options.fields
-            .map((field, i1, arr1) => [query].concat(query.split(' ')).filter((word) => !!word).map((word, i2, arr2) => {
+            .map((field, i1, arr1) => [query].concat(query.split(" ")).filter((word) => !!word).map((word, i2, arr2) => {
               const coef = (arr1.length - i1) * (arr2.length - i2);
-              if (schema.path(field).instance === 'String') {
+              if (schema.path(field).instance === "String") {
                 return [
-                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}$`, options: 'i' } }, 100 * coef, 0] },
-                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}`, options: 'i' } }, 90 * coef, 0] },
-                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}\b`, options: 'i' } }, 70 * coef, 0] },
-                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}`, options: 'i' } }, 50 * coef, 0] },
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}$`, options: "i" } }, 100 * coef, 0] },
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `^${word}`, options: "i" } }, 90 * coef, 0] },
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}\b`, options: "i" } }, 70 * coef, 0] },
+                  { $cond: [{ $regexMatch: { input: `$${field}`, regex: `\b${word}`, options: "i" } }, 50 * coef, 0] },
                 ];
               } else {
                 return [
@@ -88,10 +88,10 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
                       in: {
                         $add: [
                           "$$value",
-                          { $cond: [{ $regexMatch: { input: '$$this', regex: `^${word}$`, options: 'i' } }, 100 * coef, 0] },
-                          { $cond: [{ $regexMatch: { input: '$$this', regex: `^${word}`, options: 'i' } }, 90 * coef, 0] },
-                          { $cond: [{ $regexMatch: { input: '$$this', regex: `\b${word}\b`, options: 'i' } }, 70 * coef, 0] },
-                          { $cond: [{ $regexMatch: { input: '$$this', regex: `\b${word}`, options: 'i' } }, 50 * coef, 0] },
+                          { $cond: [{ $regexMatch: { input: "$$this", regex: `^${word}$`, options: "i" } }, 100 * coef, 0] },
+                          { $cond: [{ $regexMatch: { input: "$$this", regex: `^${word}`, options: "i" } }, 90 * coef, 0] },
+                          { $cond: [{ $regexMatch: { input: "$$this", regex: `\b${word}\b`, options: "i" } }, 70 * coef, 0] },
+                          { $cond: [{ $regexMatch: { input: "$$this", regex: `\b${word}`, options: "i" } }, 50 * coef, 0] },
                         ],
                       },
                     },

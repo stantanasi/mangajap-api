@@ -1,19 +1,19 @@
-import axios from 'axios';
-import dotenv from 'dotenv';
-import { connect } from 'mongoose';
-import Chapter from '../../models/chapter.model';
-import Manga from '../../models/manga.model';
-import Volume from '../../models/volume.model';
-import MangaDex from '../../utils/providers/mangadex';
+import axios from "axios";
+import dotenv from "dotenv";
+import { connect } from "mongoose";
+import Chapter from "../../models/chapter.model";
+import Manga from "../../models/manga.model";
+import Volume from "../../models/volume.model";
+import MangaDex from "../../utils/providers/mangadex";
 
 (async () => {
   dotenv.config();
 
-  console.log('-------- START --------');
+  console.log("-------- START --------");
 
   await connect(process.env.MONGO_DB_URI!);
 
-  for (const manga of await Manga.find({ 'links.mangadex': { $exists: true } }).populate('volumes').populate('chapters')) {
+  for (const manga of await Manga.find({ "links.mangadex": { $exists: true } }).populate("volumes").populate("chapters")) {
     const mangaMD = await MangaDex.findMangaById(manga.links.mangadex);
 
     if (!mangaMD) return null;
@@ -26,21 +26,21 @@ import MangaDex from '../../utils/providers/mangadex';
           number: volumeMD.number,
           coverImage: volumeMD.coverImage ?
             await axios
-              .get(volumeMD.coverImage, { responseType: 'arraybuffer' })
-              .then(response => Buffer.from(response.data, 'binary').toString('base64')) :
+              .get(volumeMD.coverImage, { responseType: "arraybuffer" })
+              .then(response => Buffer.from(response.data, "binary").toString("base64")) :
             null,
           manga: manga._id,
         });
         await volume.save();
         manga.volumes?.push(volume);
-        console.log(manga.title, '|', 'Volume', volume.number, '|', 'CREATE');
+        console.log(manga.title, "|", "Volume", volume.number, "|", "CREATE");
 
       } else if (volume && (!volume.coverImage && volumeMD.coverImage)) {
         volume.coverImage = await axios
-          .get(volumeMD.coverImage, { responseType: 'arraybuffer' })
-          .then(response => Buffer.from(response.data, 'binary').toString('base64'));
+          .get(volumeMD.coverImage, { responseType: "arraybuffer" })
+          .then(response => Buffer.from(response.data, "binary").toString("base64"));
         await volume.save();
-        console.log(manga.title, '|', 'Volume', volume.number, '|', 'UPDATE');
+        console.log(manga.title, "|", "Volume", volume.number, "|", "UPDATE");
       }
 
       for (const chapterMD of (volumeMD.chapters ?? [])) {
@@ -54,12 +54,12 @@ import MangaDex from '../../utils/providers/mangadex';
           });
           await chapter.save();
           manga.chapters?.push(chapter);
-          console.log(manga.title, '|', 'Chapter', chapter.number, '|', 'CREATE');
+          console.log(manga.title, "|", "Chapter", chapter.number, "|", "CREATE");
 
         } else if (chapter && (!chapter.volume && volume)) {
           chapter.volume = volume._id;
           await chapter.save();
-          console.log(manga.title, '|', 'Chapter', chapter.number, '|', 'UPDATE');
+          console.log(manga.title, "|", "Chapter", chapter.number, "|", "UPDATE");
         }
       }
     }
@@ -73,12 +73,12 @@ import MangaDex from '../../utils/providers/mangadex';
           manga: manga._id,
         });
         await chapter.save();
-        console.log(manga.title, '|', 'Chapter', chapter.number, '|', 'CREATE');
+        console.log(manga.title, "|", "Chapter", chapter.number, "|", "CREATE");
       }
     }
   }
 
-  console.log('-------- FINISHED --------');
+  console.log("-------- FINISHED --------");
   process.exit();
 })().catch((e) => {
   console.error(e);

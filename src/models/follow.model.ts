@@ -1,5 +1,5 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TUser } from "./user.model";
 
 export interface IFollow {
@@ -24,13 +24,13 @@ export interface FollowModel extends Model<IFollow, FollowQueryHelper, FollowIns
 export const FollowSchema = new Schema<IFollow, FollowModel & JsonApiModel<IFollow>, FollowInstanceMethods, FollowQueryHelper>({
   follower: {
     type: String,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
 
   followed: {
     type: String,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
 }, {
@@ -49,11 +49,11 @@ FollowSchema.index({
 
 
 FollowSchema.plugin(MongooseJsonApi, {
-  type: 'follows',
+  type: "follows",
 });
 
 
 export type TFollow = HydratedDocument<IFollow, FollowInstanceMethods, FollowQueryHelper>;
 
-const Follow = model<IFollow, FollowModel & JsonApiModel<IFollow>>('Follow', FollowSchema);
+const Follow = model<IFollow, FollowModel & JsonApiModel<IFollow>>("Follow", FollowSchema);
 export default Follow;

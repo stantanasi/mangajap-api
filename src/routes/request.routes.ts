@@ -7,15 +7,15 @@ import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const requestRoutes = express.Router();
 
-requestRoutes.get('/', async (req, res, next) => {
+requestRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Request.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -25,7 +25,7 @@ requestRoutes.get('/', async (req, res, next) => {
   }
 });
 
-requestRoutes.post('/', isLogin(), async (req, res, next) => {
+requestRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const id = await Request.fromJsonApi(req.body)
       .save()
@@ -34,7 +34,7 @@ requestRoutes.post('/', isLogin(), async (req, res, next) => {
     const response = await Request.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -43,12 +43,12 @@ requestRoutes.post('/', isLogin(), async (req, res, next) => {
   }
 });
 
-requestRoutes.get('/:id', async (req, res, next) => {
+requestRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Request.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -57,7 +57,7 @@ requestRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+requestRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     await Request.findById(req.params.id)
       .orFail()
@@ -75,7 +75,7 @@ requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     const response = await Request.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -84,7 +84,7 @@ requestRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   }
 });
 
-requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+requestRoutes.delete("/:id", isLogin(), async (req, res, next) => {
   try {
     await Request.findById(req.params.id)
       .orFail()
@@ -105,13 +105,13 @@ requestRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 });
 
 
-requestRoutes.get('/:id/user', async (req, res, next) => {
+requestRoutes.get("/:id/user", async (req, res, next) => {
   try {
     const response = await Request.findById(req.params.id)
-      .getRelationship('user')
+      .getRelationship("user")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

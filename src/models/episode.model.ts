@@ -1,5 +1,5 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TAnime } from "./anime.model";
 import { TSeason } from "./season.model";
 
@@ -13,7 +13,7 @@ export interface IEpisode {
   relativeNumber: number;
   number: number;
   airDate: Date | null;
-  episodeType: '' | 'oav';
+  episodeType: "" | "oav";
   duration: number;
 
   anime: Types.ObjectId | TAnime;
@@ -40,7 +40,7 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
 
   overview: {
     type: String,
-    default: '',
+    default: "",
   },
 
   relativeNumber: {
@@ -63,8 +63,8 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
 
   episodeType: {
     type: String,
-    default: '',
-    enum: ['', 'oav'],
+    default: "",
+    enum: ["", "oav"],
   },
 
   duration: {
@@ -75,13 +75,13 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: 'Anime',
+    ref: "Anime",
     required: true,
   },
 
   season: {
     type: Schema.Types.ObjectId,
-    ref: 'Season',
+    ref: "Season",
     required: true,
   },
 }, {
@@ -105,11 +105,11 @@ EpisodeSchema.index({
 
 
 EpisodeSchema.plugin(MongooseJsonApi, {
-  type: 'episodes',
+  type: "episodes",
 });
 
 
 export type TEpisode = HydratedDocument<IEpisode, EpisodeInstanceMethods, EpisodeQueryHelper>;
 
-const Episode = model<IEpisode, EpisodeModel & JsonApiModel<IEpisode>>('Episode', EpisodeSchema);
+const Episode = model<IEpisode, EpisodeModel & JsonApiModel<IEpisode>>("Episode", EpisodeSchema);
 export default Episode;

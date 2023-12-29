@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const animeRoutes = express.Router();
 
-animeRoutes.get('/', async (req, res, next) => {
+animeRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Anime.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ animeRoutes.get('/', async (req, res, next) => {
   }
 });
 
-animeRoutes.post('/', isAdmin(), async (req, res, next) => {
+animeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Anime.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ animeRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Anime.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ animeRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id', async (req, res, next) => {
+animeRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ animeRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-animeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+animeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Anime.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ animeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ animeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-animeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+animeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Anime.findById(req.params.id)
       .orFail()
@@ -92,16 +92,16 @@ animeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-animeRoutes.get('/:id/seasons', async (req, res, next) => {
+animeRoutes.get("/:id/seasons", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('seasons')
+      .getRelationship("seasons")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -111,16 +111,16 @@ animeRoutes.get('/:id/seasons', async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id/episodes', async (req, res, next) => {
+animeRoutes.get("/:id/episodes", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('episodes')
+      .getRelationship("episodes")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -130,16 +130,16 @@ animeRoutes.get('/:id/episodes', async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id/genres', async (req, res, next) => {
+animeRoutes.get("/:id/genres", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('genres')
+      .getRelationship("genres")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -149,16 +149,16 @@ animeRoutes.get('/:id/genres', async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id/themes', async (req, res, next) => {
+animeRoutes.get("/:id/themes", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('themes')
+      .getRelationship("themes")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -168,16 +168,16 @@ animeRoutes.get('/:id/themes', async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id/staff', async (req, res, next) => {
+animeRoutes.get("/:id/staff", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('staff')
+      .getRelationship("staff")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -187,16 +187,16 @@ animeRoutes.get('/:id/staff', async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id/reviews', async (req, res, next) => {
+animeRoutes.get("/:id/reviews", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('reviews')
+      .getRelationship("reviews")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -206,16 +206,16 @@ animeRoutes.get('/:id/reviews', async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id/franchises', async (req, res, next) => {
+animeRoutes.get("/:id/franchises", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('franchises')
+      .getRelationship("franchises")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -225,13 +225,13 @@ animeRoutes.get('/:id/franchises', async (req, res, next) => {
   }
 });
 
-animeRoutes.get('/:id/anime-entry', async (req, res, next) => {
+animeRoutes.get("/:id/anime-entry", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship('anime-entry')
+      .getRelationship("anime-entry")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

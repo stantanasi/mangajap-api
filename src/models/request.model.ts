@@ -1,5 +1,5 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TUser } from "./user.model";
 
 export interface IRequest {
@@ -49,7 +49,7 @@ export const RequestSchema = new Schema<IRequest, RequestModel & JsonApiModel<IR
 
   user: {
     type: String,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
 }, {
@@ -63,11 +63,11 @@ export const RequestSchema = new Schema<IRequest, RequestModel & JsonApiModel<IR
 
 
 RequestSchema.plugin(MongooseJsonApi, {
-  type: 'requests',
+  type: "requests",
 });
 
 
 export type TRequest = HydratedDocument<IRequest, RequestInstanceMethods, RequestQueryHelper>;
 
-const Request = model<IRequest, RequestModel & JsonApiModel<IRequest>>('Request', RequestSchema);
+const Request = model<IRequest, RequestModel & JsonApiModel<IRequest>>("Request", RequestSchema);
 export default Request;

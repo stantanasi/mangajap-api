@@ -7,15 +7,15 @@ import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const reviewRoutes = express.Router();
 
-reviewRoutes.get('/', async (req, res, next) => {
+reviewRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Review.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -25,7 +25,7 @@ reviewRoutes.get('/', async (req, res, next) => {
   }
 });
 
-reviewRoutes.post('/', isLogin(), async (req, res, next) => {
+reviewRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const id = await Review.fromJsonApi(req.body)
       .save()
@@ -34,7 +34,7 @@ reviewRoutes.post('/', isLogin(), async (req, res, next) => {
     const response = await Review.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -43,12 +43,12 @@ reviewRoutes.post('/', isLogin(), async (req, res, next) => {
   }
 });
 
-reviewRoutes.get('/:id', async (req, res, next) => {
+reviewRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -57,7 +57,7 @@ reviewRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+reviewRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     await Review.findById(req.params.id)
       .orFail()
@@ -75,7 +75,7 @@ reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     const response = await Review.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -84,7 +84,7 @@ reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   }
 });
 
-reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+reviewRoutes.delete("/:id", isLogin(), async (req, res, next) => {
   try {
     await Review.findById(req.params.id)
       .orFail()
@@ -105,13 +105,13 @@ reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 });
 
 
-reviewRoutes.get('/:id/user', async (req, res, next) => {
+reviewRoutes.get("/:id/user", async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
-      .getRelationship('user')
+      .getRelationship("user")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -120,13 +120,13 @@ reviewRoutes.get('/:id/user', async (req, res, next) => {
   }
 });
 
-reviewRoutes.get('/:id/manga', async (req, res, next) => {
+reviewRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
-      .getRelationship('manga')
+      .getRelationship("manga")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -135,13 +135,13 @@ reviewRoutes.get('/:id/manga', async (req, res, next) => {
   }
 });
 
-reviewRoutes.get('/:id/anime', async (req, res, next) => {
+reviewRoutes.get("/:id/anime", async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
-      .getRelationship('anime')
+      .getRelationship("anime")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

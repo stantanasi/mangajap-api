@@ -1,6 +1,6 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import { deleteFile, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TAnime } from "./anime.model";
 import Episode, { TEpisode } from "./episode.model";
 
@@ -41,7 +41,7 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
 
   overview: {
     type: String,
-    default: '',
+    default: "",
   },
 
   number: {
@@ -71,7 +71,7 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: 'Anime',
+    ref: "Anime",
     required: true,
   },
 }, {
@@ -83,10 +83,10 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
   toObject: { virtuals: true },
 });
 
-SeasonSchema.virtual('episodes', {
-  ref: 'Episode',
-  localField: '_id',
-  foreignField: 'season',
+SeasonSchema.virtual("episodes", {
+  ref: "Episode",
+  localField: "_id",
+  foreignField: "season",
   options: {
     sort: { number: 1 },
   },
@@ -98,8 +98,8 @@ SeasonSchema.index({
 }, { unique: true });
 
 
-SeasonSchema.pre<TSeason>('save', async function () {
-  if (this.isModified('posterImage')) {
+SeasonSchema.pre<TSeason>("save", async function () {
+  if (this.isModified("posterImage")) {
     this.posterImage = await uploadFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
       this.posterImage,
@@ -107,7 +107,7 @@ SeasonSchema.pre<TSeason>('save', async function () {
   }
 });
 
-SeasonSchema.pre('findOne', async function () {
+SeasonSchema.pre("findOne", async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -122,7 +122,7 @@ SeasonSchema.pre('findOne', async function () {
   });
 });
 
-SeasonSchema.pre<TSeason>('deleteOne', async function () {
+SeasonSchema.pre<TSeason>("deleteOne", async function () {
   if (this.posterImage) {
     await deleteFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
@@ -132,11 +132,11 @@ SeasonSchema.pre<TSeason>('deleteOne', async function () {
 
 
 SeasonSchema.plugin(MongooseJsonApi, {
-  type: 'seasons',
+  type: "seasons",
 });
 
 
 export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>;
 
-const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>('Season', SeasonSchema);
+const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>("Season", SeasonSchema);
 export default Season;

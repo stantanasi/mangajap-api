@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const mangaRoutes = express.Router();
 
-mangaRoutes.get('/', async (req, res, next) => {
+mangaRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Manga.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ mangaRoutes.get('/', async (req, res, next) => {
   }
 });
 
-mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
+mangaRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Manga.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Manga.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ mangaRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id', async (req, res, next) => {
+mangaRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ mangaRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+mangaRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Manga.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Manga.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ mangaRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+mangaRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Manga.findById(req.params.id)
       .orFail()
@@ -92,16 +92,16 @@ mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-mangaRoutes.get('/:id/volumes', async (req, res, next) => {
+mangaRoutes.get("/:id/volumes", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('volumes')
+      .getRelationship("volumes")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -111,16 +111,16 @@ mangaRoutes.get('/:id/volumes', async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id/chapters', async (req, res, next) => {
+mangaRoutes.get("/:id/chapters", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('chapters')
+      .getRelationship("chapters")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -130,16 +130,16 @@ mangaRoutes.get('/:id/chapters', async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id/genres', async (req, res, next) => {
+mangaRoutes.get("/:id/genres", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('genres')
+      .getRelationship("genres")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -149,16 +149,16 @@ mangaRoutes.get('/:id/genres', async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id/themes', async (req, res, next) => {
+mangaRoutes.get("/:id/themes", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('themes')
+      .getRelationship("themes")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -168,16 +168,16 @@ mangaRoutes.get('/:id/themes', async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id/staff', async (req, res, next) => {
+mangaRoutes.get("/:id/staff", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('staff')
+      .getRelationship("staff")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -187,16 +187,16 @@ mangaRoutes.get('/:id/staff', async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id/reviews', async (req, res, next) => {
+mangaRoutes.get("/:id/reviews", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('reviews')
+      .getRelationship("reviews")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -206,16 +206,16 @@ mangaRoutes.get('/:id/reviews', async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id/franchises', async (req, res, next) => {
+mangaRoutes.get("/:id/franchises", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('franchises')
+      .getRelationship("franchises")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -225,13 +225,13 @@ mangaRoutes.get('/:id/franchises', async (req, res, next) => {
   }
 });
 
-mangaRoutes.get('/:id/manga-entry', async (req, res, next) => {
+mangaRoutes.get("/:id/manga-entry", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship('manga-entry')
+      .getRelationship("manga-entry")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

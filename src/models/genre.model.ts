@@ -1,5 +1,5 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 
@@ -33,7 +33,7 @@ export const GenreSchema = new Schema<IGenre, GenreModel & JsonApiModel<IGenre>,
 
   description: {
     type: String,
-    default: '',
+    default: "",
   },
 }, {
   id: false,
@@ -44,25 +44,25 @@ export const GenreSchema = new Schema<IGenre, GenreModel & JsonApiModel<IGenre>,
   toObject: { virtuals: true },
 });
 
-GenreSchema.virtual('animes', {
-  ref: 'Anime',
-  localField: '_id',
-  foreignField: 'genres',
+GenreSchema.virtual("animes", {
+  ref: "Anime",
+  localField: "_id",
+  foreignField: "genres",
 });
 
-GenreSchema.virtual('mangas', {
-  ref: 'Manga',
-  localField: '_id',
-  foreignField: 'genres',
+GenreSchema.virtual("mangas", {
+  ref: "Manga",
+  localField: "_id",
+  foreignField: "genres",
 });
 
 
 GenreSchema.plugin(MongooseJsonApi, {
-  type: 'genres',
+  type: "genres",
 });
 
 
 export type TGenre = HydratedDocument<IGenre, GenreInstanceMethods, GenreQueryHelper>;
 
-const Genre = model<IGenre, GenreModel & JsonApiModel<IGenre>>('Genre', GenreSchema);
+const Genre = model<IGenre, GenreModel & JsonApiModel<IGenre>>("Genre", GenreSchema);
 export default Genre;

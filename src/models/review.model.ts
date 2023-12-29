@@ -1,5 +1,5 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 import { TUser } from "./user.model";
@@ -35,19 +35,19 @@ export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IRevi
 
   user: {
     type: String,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: 'Anime',
+    ref: "Anime",
     default: undefined,
   },
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: 'Manga',
+    ref: "Manga",
     default: undefined,
   },
 }, {
@@ -61,11 +61,11 @@ export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IRevi
 
 
 ReviewSchema.plugin(MongooseJsonApi, {
-  type: 'reviews',
+  type: "reviews",
 });
 
 
 export type TReview = HydratedDocument<IReview, ReviewInstanceMethods, ReviewQueryHelper>;
 
-const Review = model<IReview, ReviewModel & JsonApiModel<IReview>>('Review', ReviewSchema);
+const Review = model<IReview, ReviewModel & JsonApiModel<IReview>>("Review", ReviewSchema);
 export default Review;

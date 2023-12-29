@@ -1,19 +1,19 @@
-import axios from 'axios';
-import dotenv from 'dotenv';
-import { connect } from 'mongoose';
-import Anime from '../../models/anime.model';
-import Episode from '../../models/episode.model';
-import Season from '../../models/season.model';
-import TheMovieDB from '../../utils/providers/themoviedb';
+import axios from "axios";
+import dotenv from "dotenv";
+import { connect } from "mongoose";
+import Anime from "../../models/anime.model";
+import Episode from "../../models/episode.model";
+import Season from "../../models/season.model";
+import TheMovieDB from "../../utils/providers/themoviedb";
 
 (async () => {
   dotenv.config();
 
-  console.log('-------- START --------');
+  console.log("-------- START --------");
 
   await connect(process.env.MONGO_DB_URI!);
 
-  for (const anime of await Anime.find({ 'links.themoviedb': { $exists: true } }).populate('seasons').populate('episodes')) {
+  for (const anime of await Anime.find({ "links.themoviedb": { $exists: true } }).populate("seasons").populate("episodes")) {
     const animeTMDB = await TheMovieDB.findAnimeById(anime.links.themoviedb);
 
     if (!animeTMDB) return;
@@ -21,7 +21,7 @@ import TheMovieDB from '../../utils/providers/themoviedb';
     if (anime.inProduction !== animeTMDB.inProduction) {
       anime.inProduction = animeTMDB.inProduction;
       await anime.save();
-      console.log(anime.title, '|', 'UPDATE');
+      console.log(anime.title, "|", "UPDATE");
     }
 
     for (const seasonTMDB of (animeTMDB.seasons ?? [])) {
@@ -32,15 +32,15 @@ import TheMovieDB from '../../utils/providers/themoviedb';
           titles: seasonTMDB.titles,
           posterImage: seasonTMDB.posterImage ?
             await axios
-              .get(seasonTMDB.posterImage, { responseType: 'arraybuffer' })
-              .then(response => Buffer.from(response.data, 'binary').toString('base64')) :
+              .get(seasonTMDB.posterImage, { responseType: "arraybuffer" })
+              .then(response => Buffer.from(response.data, "binary").toString("base64")) :
             null,
           overview: seasonTMDB.overview,
           number: seasonTMDB.number,
           anime: anime._id,
         });
         await season.save();
-        console.log(anime.title, '|', 'Season', season.number, '|', 'CREATE');
+        console.log(anime.title, "|", "Season", season.number, "|", "CREATE");
 
         anime.seasons?.push(season);
       } else {
@@ -61,14 +61,14 @@ import TheMovieDB from '../../utils/providers/themoviedb';
             season: season._id,
           });
           await episode.save();
-          console.log(anime.title, '|', `S${season.number} E${episode.relativeNumber} (${episode.number})`, '|', 'CREATE');
+          console.log(anime.title, "|", `S${season.number} E${episode.relativeNumber} (${episode.number})`, "|", "CREATE");
         } else {
         }
       }
     }
   }
 
-  console.log('-------- FINISHED --------');
+  console.log("-------- FINISHED --------");
   process.exit();
 })().catch((e) => {
   console.error(e);

@@ -1,7 +1,7 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import { deleteFile, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import Chapter, { TChapter } from './chapter.model';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import Chapter, { TChapter } from "./chapter.model";
 import { TManga } from "./manga.model";
 
 export interface IVolume {
@@ -77,7 +77,7 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolu
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: 'Manga',
+    ref: "Manga",
     required: true,
   },
 }, {
@@ -89,10 +89,10 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolu
   toObject: { virtuals: true },
 });
 
-VolumeSchema.virtual('chapters', {
-  ref: 'Chapter',
-  localField: '_id',
-  foreignField: 'volume',
+VolumeSchema.virtual("chapters", {
+  ref: "Chapter",
+  localField: "_id",
+  foreignField: "volume",
   options: {
     sort: { number: 1 },
   },
@@ -104,8 +104,8 @@ VolumeSchema.index({
 }, { unique: true });
 
 
-VolumeSchema.pre<TVolume>('save', async function () {
-  if (this.isModified('coverImage')) {
+VolumeSchema.pre<TVolume>("save", async function () {
+  if (this.isModified("coverImage")) {
     this.coverImage = await uploadFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
       this.coverImage,
@@ -113,7 +113,7 @@ VolumeSchema.pre<TVolume>('save', async function () {
   }
 });
 
-VolumeSchema.pre('findOne', async function () {
+VolumeSchema.pre("findOne", async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -132,7 +132,7 @@ VolumeSchema.pre('findOne', async function () {
   });
 });
 
-VolumeSchema.pre<TVolume>('deleteOne', async function () {
+VolumeSchema.pre<TVolume>("deleteOne", async function () {
   if (this.coverImage) {
     await deleteFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
@@ -142,11 +142,11 @@ VolumeSchema.pre<TVolume>('deleteOne', async function () {
 
 
 VolumeSchema.plugin(MongooseJsonApi, {
-  type: 'volumes',
+  type: "volumes",
 });
 
 
 export type TVolume = HydratedDocument<IVolume, VolumeInstanceMethods, VolumeQueryHelper>;
 
-const Volume = model<IVolume, VolumeModel & JsonApiModel<IVolume>>('Volume', VolumeSchema);
+const Volume = model<IVolume, VolumeModel & JsonApiModel<IVolume>>("Volume", VolumeSchema);
 export default Volume;

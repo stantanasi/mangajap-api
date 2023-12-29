@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const themeRoutes = express.Router();
 
-themeRoutes.get('/', async (req, res, next) => {
+themeRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Theme.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ themeRoutes.get('/', async (req, res, next) => {
   }
 });
 
-themeRoutes.post('/', isAdmin(), async (req, res, next) => {
+themeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Theme.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ themeRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Theme.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ themeRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-themeRoutes.get('/:id', async (req, res, next) => {
+themeRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ themeRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-themeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+themeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Theme.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ themeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Theme.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ themeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-themeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+themeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Theme.findById(req.params.id)
       .orFail()
@@ -92,16 +92,16 @@ themeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-themeRoutes.get('/:id/manga', async (req, res, next) => {
+themeRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
-      .getRelationship('manga')
+      .getRelationship("manga")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -111,16 +111,16 @@ themeRoutes.get('/:id/manga', async (req, res, next) => {
   }
 });
 
-themeRoutes.get('/:id/anime', async (req, res, next) => {
+themeRoutes.get("/:id/anime", async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
-      .getRelationship('anime')
+      .getRelationship("anime")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 

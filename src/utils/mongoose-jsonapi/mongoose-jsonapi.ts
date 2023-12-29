@@ -9,8 +9,8 @@ import {
   Schema,
   SchemaType,
   VirtualType,
-} from 'mongoose';
-import UrlQuery from '../url-query/url-query';
+} from "mongoose";
+import UrlQuery from "../url-query/url-query";
 
 export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>>(
   _schema: Schema<DocType, M>,
@@ -72,7 +72,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
           $and: Object.entries(query.filter)
             .map(([field, values]) => {
               return {
-                $or: values.split(',')
+                $or: values.split(",")
                   .map((value: string) => {
                     if (options.filter?.[field]) {
                       return options.filter[field](value);
@@ -86,8 +86,8 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
         // Inclusion of Related Resources
         populate: query.include
-          ?.split(',')
-          .map(includes => includes.split('.'))
+          ?.split(",")
+          .map(includes => includes.split("."))
           .reduce((acc, includes) => {
             includes.reduce((acc2, include) => {
               let index = acc2.findIndex(relationship => relationship.path === include);
@@ -97,7 +97,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
                   populate: [],
                   // // TODO: implement JSON:API Sparse Fieldsets (eg. fields[type]=....)
                   // select: query.fields?.[type]
-                  //   ?.split(',')
+                  //   ?.split(",")
                   //   .reduce((acc, field) => {
                   //     acc[field] = 1;
                   //     return acc;
@@ -115,7 +115,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
         // // TODO: implement JSON:API Sparse Fieldsets (eg. fields[type]=....)
         // select: query.fields?.[type]
-        //   ?.split(',')
+        //   ?.split(",")
         //   .reduce((acc, field) => {
         //     acc[field] = 1;
         //     return acc;
@@ -132,9 +132,9 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
           // Sorting
           sort: query.sort
-            ?.split(',')
+            ?.split(",")
             .reduce((acc, sort) => {
-              if (sort.charAt(0) === '-') {
+              if (sort.charAt(0) === "-") {
                 acc[sort.slice(1)] = -1;
               } else {
                 acc[sort] = 1;
@@ -150,8 +150,8 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
       // Inclusion of Related Resources
       if (query.include) {
         this.populate(query.include
-          .split(',')
-          .map(includes => includes.split('.'))
+          .split(",")
+          .map(includes => includes.split("."))
           .reduce((acc, includes) => {
             includes.reduce((acc2, include) => {
               let index = acc2.findIndex(relationship => relationship.path === include);
@@ -161,7 +161,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
                   populate: [],
                   // // TODO: implement JSON:API Sparse Fieldsets (eg. fields[type]=....)
                   // select: query.fields?.[type]
-                  //   ?.split(',')
+                  //   ?.split(",")
                   //   .reduce((acc, field) => {
                   //     acc[field] = 1;
                   //     return acc;
@@ -181,7 +181,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
       // Sparse Fieldsets
       if (query.fields) {
         this.select(query.fields[options.type]
-          ?.split(',')
+          ?.split(",")
           .reduce((acc, field) => {
             acc[field] = 1;
             return acc;
@@ -193,9 +193,9 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
       // Sorting
       if (query.sort) {
         this.sort(query.sort
-          .split(',')
+          .split(",")
           .reduce((acc, sort) => {
-            if (sort.charAt(0) === '-') {
+            if (sort.charAt(0) === "-") {
               acc[sort.slice(1)] = -1;
             } else {
               acc[sort] = 1;
@@ -227,7 +227,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
           $and: Object.entries(query.filter)
             .map(([field, values]) => {
               return {
-                $or: values.split(',')
+                $or: values.split(",")
                   .map((value: string) => {
                     if (options.filter?.[field]) {
                       return options.filter[field](value);
@@ -246,7 +246,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
   schema.query.toJsonApi = function (opts) {
     // Throw an error if no document has been found
-    if ((this as any).op === 'findOne') {
+    if ((this as any).op === "findOne") {
       this.orFail(() => {
         throw new JsonApiError.ResourceNotFoundError(this.getFilter()._id);
       });
@@ -255,7 +255,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
     return this.transform((doc) => {
       const body: JsonApiBody = {
         jsonapi: {
-          version: '1.0',
+          version: "1.0",
         },
       };
 
@@ -297,7 +297,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
   schema.query.paginate = function (opts) {
     return this.transform(async (body) => {
-      const url = opts.url.split("?").shift() ?? '/';
+      const url = opts.url.split("?").shift() ?? "/";
 
       let count = 0;
       if (this.getOptions().getRelationship) {
@@ -372,7 +372,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
   schema.methods.toJsonApi = function (opts) {
     const body: JsonApiBody = {
       jsonapi: {
-        version: '1.0',
+        version: "1.0",
       },
     };
 
@@ -382,7 +382,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
     const id = this._id?.toString();
 
     if (!type) {
-      throw new Error(`${this} doesn't have a JSON:API type`);
+      throw new Error(`${this} doesn"t have a JSON:API type`);
     }
 
     const data: JsonApiResource = {
@@ -405,7 +405,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
     })
       .map(([path, type]) => {
         const isId = (type: SchemaType | VirtualType<HydratedDocument<any>>): boolean => {
-          return (type as any).path === '_id';
+          return (type as any).path === "_id";
         }
         const isAttribute = (type: SchemaType | VirtualType<HydratedDocument<any>>): boolean => {
           return !isId(type) && !isRelationship(type);
@@ -473,7 +473,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
     sources = sources.map((source) => {
       if (source instanceof Document) {
         return source.directModifiedPaths().reduce((acc, cur) => {
-          cur.split('.').reduce((obj, path, i, arr) => {
+          cur.split(".").reduce((obj, path, i, arr) => {
             if (i !== arr.length - 1) {
               return obj[path] = {};
             } else {
@@ -639,8 +639,8 @@ export class JsonApiError extends Error implements IJsonApiError {
   static from(err: Error): JsonApiError {
     if (err instanceof MongooseError.DocumentNotFoundError) {
       return new JsonApiError({
-        status: '404',
-        title: 'Resource not Found',
+        status: "404",
+        title: "Resource not Found",
         detail: err.message,
         meta: {
           stack: err.stack,
@@ -648,7 +648,7 @@ export class JsonApiError extends Error implements IJsonApiError {
       });
     } else {
       return new JsonApiError({
-        status: '500',
+        status: "500",
         title: err.name,
         detail: err.message,
         meta: {
@@ -681,8 +681,8 @@ export class JsonApiError extends Error implements IJsonApiError {
   static PermissionDenied = class extends JsonApiError {
     constructor() {
       super({
-        status: '403',
-        title: 'Permission denied',
+        status: "403",
+        title: "Permission denied",
       });
     }
   }
@@ -690,9 +690,9 @@ export class JsonApiError extends Error implements IJsonApiError {
   static RouteNotFoundError = class extends JsonApiError {
     constructor(path: string) {
       super({
-        status: '404',
-        title: 'Route not found',
-        detail: `The path '${path}' does not exist.`,
+        status: "404",
+        title: "Route not found",
+        detail: `The path "${path}" does not exist.`,
       })
     }
   }
@@ -700,8 +700,8 @@ export class JsonApiError extends Error implements IJsonApiError {
   static ResourceNotFoundError = class extends JsonApiError {
     constructor(id: any) {
       super({
-        status: '404',
-        title: 'Resource not Found',
+        status: "404",
+        title: "Resource not Found",
         detail: `The resource identified by ${id} could not be found`,
       })
     }
@@ -710,8 +710,8 @@ export class JsonApiError extends Error implements IJsonApiError {
   static MissingAttribute = class extends JsonApiError {
     constructor(attribute: string) {
       super({
-        status: '400',
-        title: 'Missing attribute',
+        status: "400",
+        title: "Missing attribute",
         detail: `Missing required attribute: ${attribute}`,
       })
     }

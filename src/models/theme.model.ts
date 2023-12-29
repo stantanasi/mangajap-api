@@ -1,5 +1,5 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 
@@ -33,7 +33,7 @@ export const ThemeSchema = new Schema<ITheme, ThemeModel & JsonApiModel<ITheme>,
 
   description: {
     type: String,
-    default: '',
+    default: "",
   },
 }, {
   id: false,
@@ -44,25 +44,25 @@ export const ThemeSchema = new Schema<ITheme, ThemeModel & JsonApiModel<ITheme>,
   toObject: { virtuals: true },
 });
 
-ThemeSchema.virtual('animes', {
-  ref: 'Anime',
-  localField: '_id',
-  foreignField: 'themes',
+ThemeSchema.virtual("animes", {
+  ref: "Anime",
+  localField: "_id",
+  foreignField: "themes",
 });
 
-ThemeSchema.virtual('mangas', {
-  ref: 'Manga',
-  localField: '_id',
-  foreignField: 'themes',
+ThemeSchema.virtual("mangas", {
+  ref: "Manga",
+  localField: "_id",
+  foreignField: "themes",
 });
 
 
 ThemeSchema.plugin(MongooseJsonApi, {
-  type: 'themes',
+  type: "themes",
 });
 
 
 export type TTheme = HydratedDocument<ITheme, ThemeInstanceMethods, ThemeQueryHelper>;
 
-const Theme = model<ITheme, ThemeModel & JsonApiModel<ITheme>>('Theme', ThemeSchema);
+const Theme = model<ITheme, ThemeModel & JsonApiModel<ITheme>>("Theme", ThemeSchema);
 export default Theme;

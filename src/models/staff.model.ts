@@ -1,5 +1,5 @@
-import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 import { TPeople } from "./people.model";
@@ -7,7 +7,7 @@ import { TPeople } from "./people.model";
 export interface IStaff {
   _id: Types.ObjectId;
 
-  role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
+  role: "author" | "illustrator" | "story_and_art" | "licensor" | "producer" | "studio" | "original_creator";
 
   people: Types.ObjectId | TPeople;
   anime?: Types.ObjectId | TAnime;
@@ -30,25 +30,25 @@ export const StaffSchema = new Schema<IStaff, StaffModel & JsonApiModel<IStaff>,
   role: {
     type: String,
     required: true,
-    enum: ['author', 'illustrator', 'story_and_art', 'licensor', 'producer', 'studio', 'original_creator'],
+    enum: ["author", "illustrator", "story_and_art", "licensor", "producer", "studio", "original_creator"],
   },
 
 
   people: {
     type: Schema.Types.ObjectId,
-    ref: 'People',
+    ref: "People",
     required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: 'Anime',
+    ref: "Anime",
     default: undefined,
   },
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: 'Manga',
+    ref: "Manga",
     default: undefined,
   },
 }, {
@@ -62,11 +62,11 @@ export const StaffSchema = new Schema<IStaff, StaffModel & JsonApiModel<IStaff>,
 
 
 StaffSchema.plugin(MongooseJsonApi, {
-  type: 'staff',
+  type: "staff",
 });
 
 
 export type TStaff = HydratedDocument<IStaff, StaffInstanceMethods, StaffQueryHelper>;
 
-const Staff = model<IStaff, StaffModel & JsonApiModel<IStaff>>('Staff', StaffSchema);
+const Staff = model<IStaff, StaffModel & JsonApiModel<IStaff>>("Staff", StaffSchema);
 export default Staff;

@@ -111,7 +111,7 @@ app.all('*', (req, res) => {
 
 // Error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.log(err);
+  console.error(err);
   if (err instanceof JsonApiError) {
     res.status(+(err.status || 500)).json(err);
   } else {

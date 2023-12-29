@@ -1,7 +1,7 @@
-import { Schema, model, Model, Types } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IAnime } from "./anime.model";
-import { IManga } from "./manga.model";
+import { TAnime } from "./anime.model";
+import { TManga } from "./manga.model";
 
 export interface IGenre {
   _id: Types.ObjectId;
@@ -9,14 +9,14 @@ export interface IGenre {
   title: string;
   description: string;
 
-  animes?: IAnime[];
-  mangas?: IManga[];
+  animes?: TAnime[];
+  mangas?: TManga[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface GenreInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface GenreInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface GenreQueryHelper extends JsonApiQueryHelper {
@@ -61,6 +61,8 @@ GenreSchema.plugin(MongooseJsonApi, {
   type: 'genres',
 });
 
+
+export type TGenre = HydratedDocument<IGenre, GenreInstanceMethods, GenreQueryHelper>
 
 const Genre = model<IGenre, GenreModel & JsonApiModel<IGenre>>('Genre', GenreSchema);
 export default Genre;

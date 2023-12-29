@@ -1,8 +1,8 @@
-import { Schema, model, Model, Types, Document } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import Chapter, { IChapter } from './chapter.model';
-import { IManga } from "./manga.model";
+import Chapter, { TChapter } from './chapter.model';
+import { TManga } from "./manga.model";
 
 export interface IVolume {
   _id: Types.ObjectId;
@@ -18,14 +18,14 @@ export interface IVolume {
   startChapter: number | null;
   endChapter: number | null;
 
-  manga: Types.ObjectId | IManga;
-  chapters?: IChapter[];
+  manga: Types.ObjectId | TManga;
+  chapters?: TChapter[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface VolumeInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface VolumeInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface VolumeQueryHelper extends JsonApiQueryHelper {
@@ -104,7 +104,7 @@ VolumeSchema.index({
 }, { unique: true });
 
 
-VolumeSchema.pre<IVolume & Document>('save', async function () {
+VolumeSchema.pre<TVolume>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
@@ -132,7 +132,7 @@ VolumeSchema.pre('findOne', async function () {
   });
 });
 
-VolumeSchema.pre<IVolume & Document>('deleteOne', async function () {
+VolumeSchema.pre<TVolume>('deleteOne', async function () {
   if (this.coverImage) {
     await deleteFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
@@ -145,6 +145,8 @@ VolumeSchema.plugin(MongooseJsonApi, {
   type: 'volumes',
 });
 
+
+export type TVolume = HydratedDocument<IVolume, VolumeInstanceMethods, VolumeQueryHelper>
 
 const Volume = model<IVolume, VolumeModel & JsonApiModel<IVolume>>('Volume', VolumeSchema);
 export default Volume;

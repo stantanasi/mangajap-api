@@ -1,6 +1,6 @@
-import { Schema, model, Model, Types } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IUser } from "./user.model";
+import { TUser } from "./user.model";
 
 export interface IRequest {
   _id: Types.ObjectId;
@@ -10,13 +10,13 @@ export interface IRequest {
   isDone: boolean;
   userHasRead: boolean;
 
-  user: string | IUser;
+  user: string | TUser;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface RequestInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface RequestInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface RequestQueryHelper extends JsonApiQueryHelper {
@@ -66,6 +66,8 @@ RequestSchema.plugin(MongooseJsonApi, {
   type: 'requests',
 });
 
+
+export type TRequest = HydratedDocument<IRequest, RequestInstanceMethods, RequestQueryHelper>
 
 const Request = model<IRequest, RequestModel & JsonApiModel<IRequest>>('Request', RequestSchema);
 export default Request;

@@ -1,7 +1,7 @@
-import { Schema, model, Model, Types } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IAnime } from "./anime.model";
-import { ISeason } from "./season.model";
+import { TAnime } from "./anime.model";
+import { TSeason } from "./season.model";
 
 export interface IEpisode {
   _id: Types.ObjectId;
@@ -16,14 +16,14 @@ export interface IEpisode {
   episodeType: '' | 'oav';
   duration: number;
 
-  anime: Types.ObjectId | IAnime;
-  season: Types.ObjectId | ISeason;
+  anime: Types.ObjectId | TAnime;
+  season: Types.ObjectId | TSeason;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface EpisodeInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface EpisodeInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface EpisodeQueryHelper extends JsonApiQueryHelper {
@@ -108,6 +108,8 @@ EpisodeSchema.plugin(MongooseJsonApi, {
   type: 'episodes',
 });
 
+
+export type TEpisode = HydratedDocument<IEpisode, EpisodeInstanceMethods, EpisodeQueryHelper>
 
 const Episode = model<IEpisode, EpisodeModel & JsonApiModel<IEpisode>>('Episode', EpisodeSchema);
 export default Episode;

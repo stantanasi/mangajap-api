@@ -1,11 +1,11 @@
-import { Schema, model, Model, Document } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
-import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
-import Follow, { IFollow } from "./follow.model";
-import MangaEntry, { IMangaEntry } from "./manga-entry.model";
-import { IReview } from "./review.model";
+import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
+import Follow, { TFollow } from "./follow.model";
+import MangaEntry, { TMangaEntry } from "./manga-entry.model";
+import { TReview } from "./review.model";
 
 export interface IUser {
   _id: string;
@@ -28,19 +28,19 @@ export interface IUser {
   episodesWatch: number;
   timeSpentOnAnime: number;
 
-  followers?: IFollow[];
-  following?: IFollow[];
-  'anime-library'?: IAnimeEntry[];
-  'manga-library'?: IMangaEntry[];
-  'anime-favorites'?: IAnimeEntry[];
-  'manga-favorites'?: IMangaEntry[];
-  reviews?: IReview[];
+  followers?: TFollow[];
+  following?: TFollow[];
+  'anime-library'?: TAnimeEntry[];
+  'manga-library'?: TMangaEntry[];
+  'anime-favorites'?: TAnimeEntry[];
+  'manga-favorites'?: TMangaEntry[];
+  reviews?: TReview[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface UserInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+export interface UserInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
 }
 
 export interface UserQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
@@ -231,7 +231,7 @@ UserSchema.virtual('reviews', {
 });
 
 
-UserSchema.pre<IUser & Document>('save', async function () {
+UserSchema.pre<TUser>('save', async function () {
   if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
       `users/${this._id}/images/profile.jpg`,
@@ -308,7 +308,7 @@ UserSchema.pre('findOne', async function () {
   });
 });
 
-UserSchema.pre<IUser & Document>('deleteOne', async function () {
+UserSchema.pre<TUser>('deleteOne', async function () {
   if (this.avatar) {
     await deleteFile(
       `users/${this._id}/images/profile.jpg`,
@@ -332,6 +332,8 @@ UserSchema.plugin(MongooseJsonApi, {
   },
 });
 
+
+export type TUser = HydratedDocument<IUser, UserInstanceMethods, UserQueryHelper>
 
 const User = model<IUser, UserModel & JsonApiModel<IUser> & SearchModel<IUser>>('User', UserSchema);
 export default User;

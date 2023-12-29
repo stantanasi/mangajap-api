@@ -1,8 +1,8 @@
-import { Schema, model, Model, Document, Types } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IStaff } from "./staff.model";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
+import { TStaff } from "./staff.model";
 
 export interface IPeople {
   _id: Types.ObjectId;
@@ -12,15 +12,15 @@ export interface IPeople {
   pseudo: string;
   image: string | null;
 
-  staff?: IStaff[];
-  'anime-staff'?: IStaff[];
-  'manga-staff'?: IStaff[];
+  staff?: TStaff[];
+  'anime-staff'?: TStaff[];
+  'manga-staff'?: TStaff[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface PeopleInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+export interface PeopleInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
 }
 
 export interface PeopleQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
@@ -83,7 +83,7 @@ PeopleSchema.virtual('manga-staff', {
 });
 
 
-PeopleSchema.pre<IPeople & Document>('save', async function () {
+PeopleSchema.pre<TPeople>('save', async function () {
   if (this.isModified('image')) {
     this.image = await uploadFile(
       `peoples/${this._id}/images/profile.jpg`,
@@ -92,7 +92,7 @@ PeopleSchema.pre<IPeople & Document>('save', async function () {
   }
 });
 
-PeopleSchema.pre<IPeople & Document>('deleteOne', async function () {
+PeopleSchema.pre<TPeople>('deleteOne', async function () {
   if (this.image) {
     await deleteFile(
       `peoples/${this._id}/images/profile.jpg`,
@@ -116,6 +116,8 @@ PeopleSchema.plugin(MongooseJsonApi, {
   },
 });
 
+
+export type TPeople = HydratedDocument<IPeople, PeopleInstanceMethods, PeopleQueryHelper>
 
 const People = model<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>>('People', PeopleSchema);
 export default People;

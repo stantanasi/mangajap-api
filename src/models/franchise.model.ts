@@ -1,15 +1,15 @@
-import { Schema, model, Model, Types } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import Anime, { IAnime } from "./anime.model";
-import Manga, { IManga } from "./manga.model";
+import Anime, { TAnime } from "./anime.model";
+import Manga, { TManga } from "./manga.model";
 
 export interface IFranchise {
   _id: Types.ObjectId;
 
   role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
 
-  source: Types.ObjectId | (IAnime | IManga);
-  destination: Types.ObjectId | (IAnime | IManga);
+  source: Types.ObjectId | (TAnime | TManga);
+  destination: Types.ObjectId | (TAnime | TManga);
 
   sourceModel: 'Anime' | 'Manga';
   destinationModel: 'Anime' | 'Manga';
@@ -18,7 +18,7 @@ export interface IFranchise {
   updatedAt: Date;
 }
 
-export interface FranchiseInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface FranchiseInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface FranchiseQueryHelper extends JsonApiQueryHelper {
@@ -69,7 +69,7 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiMo
 });
 
 
-FranchiseSchema.pre<IFranchise & Document>('validate', async function () {
+FranchiseSchema.pre<TFranchise>('validate', async function () {
   if (!this.sourceModel && this.source) {
     if (await Anime.exists({ _id: this.source }))
       this.sourceModel = 'Anime';
@@ -90,6 +90,8 @@ FranchiseSchema.plugin(MongooseJsonApi, {
   type: 'franchises',
 });
 
+
+export type TFranchise = HydratedDocument<IFranchise, FranchiseInstanceMethods, FranchiseQueryHelper>
 
 const Franchise = model<IFranchise, FranchiseModel & JsonApiModel<IFranchise>>('Franchise', FranchiseSchema);
 export default Franchise;

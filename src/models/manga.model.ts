@@ -1,16 +1,16 @@
-import { Schema, model, Model, Types, Document } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import slugify from "slugify";
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
-import { IFranchise } from "./franchise.model";
-import { IGenre } from "./genre.model";
-import MangaEntry, { IMangaEntry } from "./manga-entry.model";
-import Review, { IReview } from "./review.model";
-import { IStaff } from "./staff.model";
-import { ITheme } from "./theme.model";
-import Volume, { IVolume } from "./volume.model";
-import Chapter, { IChapter } from './chapter.model';
+import Chapter, { TChapter } from './chapter.model';
+import { TFranchise } from "./franchise.model";
+import { TGenre } from "./genre.model";
+import MangaEntry, { TMangaEntry } from "./manga-entry.model";
+import Review, { TReview } from "./review.model";
+import { TStaff } from "./staff.model";
+import { TTheme } from "./theme.model";
+import Volume, { TVolume } from "./volume.model";
 
 export interface IManga {
   _id: Types.ObjectId;
@@ -42,20 +42,20 @@ export interface IManga {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: Types.ObjectId[] | IGenre[];
-  themes: Types.ObjectId[] | ITheme[];
-  volumes?: IVolume[];
-  chapters?: IChapter[];
-  staff?: IStaff[];
-  reviews?: IReview[];
-  franchises?: IFranchise[];
-  'manga-entry'?: IMangaEntry | null;
+  genres: Types.ObjectId[] | TGenre[];
+  themes: Types.ObjectId[] | TTheme[];
+  volumes?: TVolume[];
+  chapters?: TChapter[];
+  staff?: TStaff[];
+  reviews?: TReview[];
+  franchises?: TFranchise[];
+  'manga-entry'?: TMangaEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface MangaInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+export interface MangaInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
 }
 
 export interface MangaQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
@@ -239,13 +239,13 @@ MangaSchema.virtual('franchises', {
 MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<IManga & Document>('validate', async function () {
+MangaSchema.pre<TManga>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-MangaSchema.pre<IManga & Document>('save', async function () {
+MangaSchema.pre<TManga>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       `manga/${this._id}/images/cover.jpg`,
@@ -329,7 +329,7 @@ MangaSchema.pre('findOne', async function () {
   });
 });
 
-MangaSchema.pre<IManga & Document>('deleteOne', async function () {
+MangaSchema.pre<TManga>('deleteOne', async function () {
   if (this.coverImage) {
     await deleteFile(
       `manga/${this._id}/images/cover.jpg`,
@@ -359,6 +359,8 @@ MangaSchema.plugin(MongooseJsonApi, {
   },
 });
 
+
+export type TManga = HydratedDocument<IManga, MangaInstanceMethods, MangaQueryHelper>
 
 const Manga = model<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>>('Manga', MangaSchema);
 export default Manga;

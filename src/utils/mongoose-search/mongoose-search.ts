@@ -1,5 +1,4 @@
 import {
-  Document,
   Model,
   QueryWithHelpers,
   Schema,
@@ -135,7 +134,7 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
 export interface SearchModel<T> extends Model<T, SearchQueryHelper, SearchInstanceMethods> {
 }
 
-export interface SearchInstanceMethods extends Document {
+export interface SearchInstanceMethods {
 }
 
 export interface SearchQueryHelper {

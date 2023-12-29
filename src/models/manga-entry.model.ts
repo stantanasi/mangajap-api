@@ -1,7 +1,7 @@
-import { Schema, model, Model, Types } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IManga } from "./manga.model";
-import { IUser } from "./user.model";
+import { TManga } from "./manga.model";
+import { TUser } from "./user.model";
 
 export interface IMangaEntry {
   _id: Types.ObjectId;
@@ -15,14 +15,14 @@ export interface IMangaEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: string | IUser;
-  manga: Types.ObjectId | IManga;
+  user: string | TUser;
+  manga: Types.ObjectId | TManga;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface MangaEntryInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface MangaEntryInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface MangaEntryQueryHelper extends JsonApiQueryHelper {
@@ -104,6 +104,8 @@ MangaEntrySchema.plugin(MongooseJsonApi, {
   type: 'manga-entries',
 });
 
+
+export type TMangaEntry = HydratedDocument<IMangaEntry, MangaEntryInstanceMethods, MangaEntryQueryHelper>
 
 const MangaEntry = model<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>>('MangaEntry', MangaEntrySchema);
 export default MangaEntry;

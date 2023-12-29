@@ -1,9 +1,9 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { connect, Document } from 'mongoose';
+import { connect } from 'mongoose';
 import Anime from '../../models/anime.model';
-import Episode, { IEpisode } from '../../models/episode.model';
-import Season, { ISeason } from '../../models/season.model';
+import Episode from '../../models/episode.model';
+import Season from '../../models/season.model';
 import TheMovieDB from '../../utils/providers/themoviedb';
 
 (async () => {
@@ -38,8 +38,8 @@ import TheMovieDB from '../../utils/providers/themoviedb';
           overview: seasonTMDB.overview,
           number: seasonTMDB.number,
           anime: anime._id,
-        }) as ISeason;
-        await (season as unknown as Document<ISeason>).save();
+        });
+        await season.save();
         console.log(anime.title, '|', 'Season', season.number, '|', 'CREATE');
 
         anime.seasons?.push(season);
@@ -59,8 +59,8 @@ import TheMovieDB from '../../utils/providers/themoviedb';
             duration: episodeTMDB.duration,
             anime: anime._id,
             season: season._id,
-          }) as IEpisode;
-          await (episode as unknown as Document<IEpisode>).save();
+          });
+          await episode.save();
           console.log(anime.title, '|', `S${season.number} E${episode.relativeNumber} (${episode.number})`, '|', 'CREATE');
         } else {
         }

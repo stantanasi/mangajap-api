@@ -1,8 +1,8 @@
-import { Schema, model, Model, Types, Document } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IAnime } from "./anime.model";
-import Episode, { IEpisode } from "./episode.model";
+import { TAnime } from "./anime.model";
+import Episode, { TEpisode } from "./episode.model";
 
 export interface ISeason {
   _id: Types.ObjectId;
@@ -17,14 +17,14 @@ export interface ISeason {
   airDate: Date | null;
   episodeCount: number;
 
-  anime: Types.ObjectId | IAnime;
-  episodes?: IEpisode[];
+  anime: Types.ObjectId | TAnime;
+  episodes?: TEpisode[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface SeasonInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface SeasonInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface SeasonQueryHelper extends JsonApiQueryHelper {
@@ -98,7 +98,7 @@ SeasonSchema.index({
 }, { unique: true });
 
 
-SeasonSchema.pre<ISeason & Document>('save', async function () {
+SeasonSchema.pre<TSeason>('save', async function () {
   if (this.isModified('posterImage')) {
     this.posterImage = await uploadFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
@@ -122,7 +122,7 @@ SeasonSchema.pre('findOne', async function () {
   });
 });
 
-SeasonSchema.pre<ISeason & Document>('deleteOne', async function () {
+SeasonSchema.pre<TSeason>('deleteOne', async function () {
   if (this.posterImage) {
     await deleteFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
@@ -135,6 +135,8 @@ SeasonSchema.plugin(MongooseJsonApi, {
   type: 'seasons',
 });
 
+
+export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>
 
 const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>('Season', SeasonSchema);
 export default Season;

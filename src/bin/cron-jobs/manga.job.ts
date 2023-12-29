@@ -1,9 +1,9 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { connect, Document } from 'mongoose';
-import Chapter, { IChapter } from '../../models/chapter.model';
+import { connect } from 'mongoose';
+import Chapter from '../../models/chapter.model';
 import Manga from '../../models/manga.model';
-import Volume, { IVolume } from '../../models/volume.model';
+import Volume from '../../models/volume.model';
 import MangaDex from '../../utils/providers/mangadex';
 
 (async () => {
@@ -30,8 +30,8 @@ import MangaDex from '../../utils/providers/mangadex';
               .then(response => Buffer.from(response.data, 'binary').toString('base64')) :
             null,
           manga: manga._id,
-        }) as IVolume;
-        await (volume as unknown as Document<IVolume>).save();
+        });
+        await volume.save();
         manga.volumes?.push(volume);
         console.log(manga.title, '|', 'Volume', volume.number, '|', 'CREATE');
 
@@ -39,7 +39,7 @@ import MangaDex from '../../utils/providers/mangadex';
         volume.coverImage = await axios
           .get(volumeMD.coverImage, { responseType: 'arraybuffer' })
           .then(response => Buffer.from(response.data, 'binary').toString('base64'));
-        await (volume as unknown as Document<IVolume>).save();
+        await volume.save();
         console.log(manga.title, '|', 'Volume', volume.number, '|', 'UPDATE');
       }
 
@@ -51,14 +51,14 @@ import MangaDex from '../../utils/providers/mangadex';
             number: chapterMD.number,
             manga: manga._id,
             volume: volume?._id,
-          }) as IChapter;
-          await (chapter as unknown as Document<IChapter>).save();
+          });
+          await chapter.save();
           manga.chapters?.push(chapter);
           console.log(manga.title, '|', 'Chapter', chapter.number, '|', 'CREATE');
 
         } else if (chapter && (!chapter.volume && volume)) {
           chapter.volume = volume._id;
-          await (chapter as unknown as Document<IChapter>).save();
+          await chapter.save();
           console.log(manga.title, '|', 'Chapter', chapter.number, '|', 'UPDATE');
         }
       }
@@ -71,8 +71,8 @@ import MangaDex from '../../utils/providers/mangadex';
         chapter = new Chapter({
           number: chapterMD.number,
           manga: manga._id,
-        }) as IChapter;
-        await (chapter as unknown as Document<IChapter>).save();
+        });
+        await chapter.save();
         console.log(manga.title, '|', 'Chapter', chapter.number, '|', 'CREATE');
       }
     }

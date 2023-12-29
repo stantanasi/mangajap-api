@@ -1,16 +1,16 @@
-import { Schema, model, Model, Types, Document } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import slugify from "slugify";
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
-import AnimeEntry, { IAnimeEntry } from "./anime-entry.model";
-import Episode, { IEpisode } from "./episode.model";
-import { IFranchise } from "./franchise.model";
-import { IGenre } from "./genre.model";
-import Review, { IReview } from "./review.model";
-import Season, { ISeason } from "./season.model";
-import { IStaff } from "./staff.model";
-import { ITheme } from "./theme.model";
+import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
+import Episode, { TEpisode } from "./episode.model";
+import { TFranchise } from "./franchise.model";
+import { TGenre } from "./genre.model";
+import Review, { TReview } from "./review.model";
+import Season, { TSeason } from "./season.model";
+import { TStaff } from "./staff.model";
+import { TTheme } from "./theme.model";
 
 export interface IAnime {
   _id: Types.ObjectId;
@@ -45,20 +45,20 @@ export interface IAnime {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: Types.ObjectId[] | IGenre[];
-  themes: Types.ObjectId[] | ITheme[];
-  seasons?: ISeason[];
-  episodes?: IEpisode[];
-  staff?: IStaff[];
-  reviews?: IReview[];
-  franchises?: IFranchise[];
-  'anime-entry'?: IAnimeEntry | null;
+  genres: Types.ObjectId[] | TGenre[];
+  themes: Types.ObjectId[] | TTheme[];
+  seasons?: TSeason[];
+  episodes?: TEpisode[];
+  staff?: TStaff[];
+  reviews?: TReview[];
+  franchises?: TFranchise[];
+  'anime-entry'?: TAnimeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface AnimeInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
+export interface AnimeInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
 }
 
 export interface AnimeQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
@@ -257,13 +257,13 @@ AnimeSchema.virtual('franchises', {
 AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<IAnime & Document>('validate', async function () {
+AnimeSchema.pre<TAnime>('validate', async function () {
   if (this.isModified('title')) {
     this.slug = slugify(this.title);
   }
 });
 
-AnimeSchema.pre<IAnime & Document>('save', async function () {
+AnimeSchema.pre<TAnime>('save', async function () {
   if (this.isModified('coverImage')) {
     this.coverImage = await uploadFile(
       `anime/${this._id}/images/cover.jpg`,
@@ -347,7 +347,7 @@ AnimeSchema.pre('findOne', async function () {
   });
 });
 
-AnimeSchema.pre<IAnime & Document>('deleteOne', async function () {
+AnimeSchema.pre<TAnime>('deleteOne', async function () {
   if (this.coverImage) {
     await deleteFile(
       `anime/${this._id}/images/cover.jpg`,
@@ -377,6 +377,8 @@ AnimeSchema.plugin(MongooseJsonApi, {
   },
 });
 
+
+export type TAnime = HydratedDocument<IAnime, AnimeInstanceMethods, AnimeQueryHelper>
 
 const Anime = model<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>>('Anime', AnimeSchema);
 export default Anime;

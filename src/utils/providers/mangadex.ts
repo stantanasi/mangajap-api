@@ -1,7 +1,7 @@
 import axios from 'axios';
-import Chapter, { IChapter } from '../../models/chapter.model';
+import Chapter from '../../models/chapter.model';
 import Manga from '../../models/manga.model';
-import Volume, { IVolume } from '../../models/volume.model';
+import Volume from '../../models/volume.model';
 
 export default class MangaDex {
 
@@ -30,7 +30,7 @@ export default class MangaDex {
             .map((chapter) => {
               return new Chapter({
                 number: +chapter.chapter,
-              }) as IChapter;
+              });
             });
 
           if (+volume.volume && Number.isInteger(+volume.volume)) {
@@ -38,7 +38,7 @@ export default class MangaDex {
               number: +volume.volume,
 
               chapters: chapters,
-            }) as IVolume);
+            }));
           }
 
           manga.chapters = manga.chapters?.concat(chapters);
@@ -64,7 +64,7 @@ export default class MangaDex {
                 coverImage: cover ?
                   `https://uploads.mangadex.org/covers/${id}/${cover.attributes.fileName}` :
                   null,
-              }) as IVolume;
+              });
               manga.volumes?.push(volume);
             }
           });

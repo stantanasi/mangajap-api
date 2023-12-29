@@ -1,23 +1,23 @@
-import { Schema, model, Model, Types } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IAnime } from "./anime.model";
-import { IManga } from "./manga.model";
-import { IPeople } from "./people.model";
+import { TAnime } from "./anime.model";
+import { TManga } from "./manga.model";
+import { TPeople } from "./people.model";
 
 export interface IStaff {
   _id: Types.ObjectId;
 
   role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
 
-  people: Types.ObjectId | IPeople;
-  anime?: Types.ObjectId | IAnime;
-  manga?: Types.ObjectId | IManga;
+  people: Types.ObjectId | TPeople;
+  anime?: Types.ObjectId | TAnime;
+  manga?: Types.ObjectId | TManga;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface StaffInstanceMethods extends Document, JsonApiInstanceMethods {
+export interface StaffInstanceMethods extends JsonApiInstanceMethods {
 }
 
 export interface StaffQueryHelper extends JsonApiQueryHelper {
@@ -65,6 +65,8 @@ StaffSchema.plugin(MongooseJsonApi, {
   type: 'staff',
 });
 
+
+export type TStaff = HydratedDocument<IStaff, StaffInstanceMethods, StaffQueryHelper>
 
 const Staff = model<IStaff, StaffModel & JsonApiModel<IStaff>>('Staff', StaffSchema);
 export default Staff;

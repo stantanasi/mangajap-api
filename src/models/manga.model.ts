@@ -55,14 +55,11 @@ export interface IManga {
   updatedAt: Date;
 }
 
-export interface MangaInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
-}
+export interface MangaInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
 
-export interface MangaQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
-}
+export interface MangaQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
 
-export interface MangaModel extends Model<IManga, MangaQueryHelper, MangaInstanceMethods> {
-}
+export interface MangaModel extends Model<IManga, MangaQueryHelper, MangaInstanceMethods> { }
 
 export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>, MangaInstanceMethods, MangaQueryHelper>({
   title: {

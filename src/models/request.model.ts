@@ -16,14 +16,11 @@ export interface IRequest {
   updatedAt: Date;
 }
 
-export interface RequestInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface RequestInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface RequestQueryHelper extends JsonApiQueryHelper {
-}
+export interface RequestQueryHelper extends JsonApiQueryHelper { }
 
-export interface RequestModel extends Model<IRequest, RequestQueryHelper, RequestInstanceMethods> {
-}
+export interface RequestModel extends Model<IRequest, RequestQueryHelper, RequestInstanceMethods> { }
 
 export const RequestSchema = new Schema<IRequest, RequestModel & JsonApiModel<IRequest>, RequestInstanceMethods, RequestQueryHelper>({
   requestType: {

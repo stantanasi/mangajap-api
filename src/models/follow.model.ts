@@ -12,14 +12,11 @@ export interface IFollow {
   updatedAt: Date;
 }
 
-export interface FollowInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface FollowInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface FollowQueryHelper extends JsonApiQueryHelper {
-}
+export interface FollowQueryHelper extends JsonApiQueryHelper { }
 
-export interface FollowModel extends Model<IFollow, FollowQueryHelper, FollowInstanceMethods> {
-}
+export interface FollowModel extends Model<IFollow, FollowQueryHelper, FollowInstanceMethods> { }
 
 export const FollowSchema = new Schema<IFollow, FollowModel & JsonApiModel<IFollow>, FollowInstanceMethods, FollowQueryHelper>({
   follower: {

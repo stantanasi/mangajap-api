@@ -23,14 +23,11 @@ export interface IEpisode {
   updatedAt: Date;
 }
 
-export interface EpisodeInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface EpisodeInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface EpisodeQueryHelper extends JsonApiQueryHelper {
-}
+export interface EpisodeQueryHelper extends JsonApiQueryHelper { }
 
-export interface EpisodeModel extends Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> {
-}
+export interface EpisodeModel extends Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> { }
 
 export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IEpisode>, EpisodeInstanceMethods, EpisodeQueryHelper>({
   titles: {

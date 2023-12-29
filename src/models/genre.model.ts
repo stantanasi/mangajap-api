@@ -16,14 +16,11 @@ export interface IGenre {
   updatedAt: Date;
 }
 
-export interface GenreInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface GenreInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface GenreQueryHelper extends JsonApiQueryHelper {
-}
+export interface GenreQueryHelper extends JsonApiQueryHelper { }
 
-export interface GenreModel extends Model<IGenre, GenreQueryHelper, GenreInstanceMethods> {
-}
+export interface GenreModel extends Model<IGenre, GenreQueryHelper, GenreInstanceMethods> { }
 
 export const GenreSchema = new Schema<IGenre, GenreModel & JsonApiModel<IGenre>, GenreInstanceMethods, GenreQueryHelper>({
   title: {

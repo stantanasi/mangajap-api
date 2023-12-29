@@ -19,14 +19,11 @@ export interface IChapter {
   updatedAt: Date;
 }
 
-export interface ChapterInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface ChapterInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface ChapterQueryHelper extends JsonApiQueryHelper {
-}
+export interface ChapterQueryHelper extends JsonApiQueryHelper { }
 
-export interface ChapterModel extends Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> {
-}
+export interface ChapterModel extends Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> { }
 
 export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IChapter>, ChapterInstanceMethods, ChapterQueryHelper>({
   titles: {

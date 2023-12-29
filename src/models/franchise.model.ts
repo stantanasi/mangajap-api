@@ -18,14 +18,11 @@ export interface IFranchise {
   updatedAt: Date;
 }
 
-export interface FranchiseInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface FranchiseInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface FranchiseQueryHelper extends JsonApiQueryHelper {
-}
+export interface FranchiseQueryHelper extends JsonApiQueryHelper { }
 
-export interface FranchiseModel extends Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> {
-}
+export interface FranchiseModel extends Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> { }
 
 export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiModel<IFranchise>, FranchiseInstanceMethods, FranchiseQueryHelper>({
   role: {

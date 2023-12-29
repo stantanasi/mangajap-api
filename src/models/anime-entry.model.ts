@@ -21,14 +21,11 @@ export interface IAnimeEntry {
   updatedAt: Date;
 }
 
-export interface AnimeEntryInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface AnimeEntryInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface AnimeEntryQueryHelper extends JsonApiQueryHelper {
-}
+export interface AnimeEntryQueryHelper extends JsonApiQueryHelper { }
 
-export interface AnimeEntryModel extends Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> {
-}
+export interface AnimeEntryModel extends Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> { }
 
 export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
   isAdd: {

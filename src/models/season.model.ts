@@ -24,14 +24,11 @@ export interface ISeason {
   updatedAt: Date;
 }
 
-export interface SeasonInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface SeasonInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface SeasonQueryHelper extends JsonApiQueryHelper {
-}
+export interface SeasonQueryHelper extends JsonApiQueryHelper { }
 
-export interface SeasonModel extends Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> {
-}
+export interface SeasonModel extends Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> { }
 
 export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeason>, SeasonInstanceMethods, SeasonQueryHelper>({
   titles: {

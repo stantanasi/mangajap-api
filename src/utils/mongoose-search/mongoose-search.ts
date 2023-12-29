@@ -131,11 +131,9 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
 }
 
 
-export interface SearchModel<T> extends Model<T, SearchQueryHelper, SearchInstanceMethods> {
-}
+export interface SearchModel<T> extends Model<T, SearchQueryHelper, SearchInstanceMethods> { }
 
-export interface SearchInstanceMethods {
-}
+export interface SearchInstanceMethods { }
 
 export interface SearchQueryHelper {
   transformAt: <MappedType, ResultType, DocType>(

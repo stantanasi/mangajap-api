@@ -22,14 +22,11 @@ export interface IMangaEntry {
   updatedAt: Date;
 }
 
-export interface MangaEntryInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface MangaEntryInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface MangaEntryQueryHelper extends JsonApiQueryHelper {
-}
+export interface MangaEntryQueryHelper extends JsonApiQueryHelper { }
 
-export interface MangaEntryModel extends Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> {
-}
+export interface MangaEntryModel extends Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> { }
 
 export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>, MangaEntryInstanceMethods, MangaEntryQueryHelper>({
   isAdd: {

@@ -40,14 +40,11 @@ export interface IUser {
   updatedAt: Date;
 }
 
-export interface UserInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
-}
+export interface UserInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
 
-export interface UserQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
-}
+export interface UserQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
 
-export interface UserModel extends Model<IUser, UserQueryHelper, UserInstanceMethods> {
-}
+export interface UserModel extends Model<IUser, UserQueryHelper, UserInstanceMethods> { }
 
 export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & SearchModel<IUser>, UserInstanceMethods, UserQueryHelper>({
   _id: {

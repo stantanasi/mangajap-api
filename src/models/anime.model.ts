@@ -58,14 +58,11 @@ export interface IAnime {
   updatedAt: Date;
 }
 
-export interface AnimeInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
-}
+export interface AnimeInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
 
-export interface AnimeQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
-}
+export interface AnimeQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
 
-export interface AnimeModel extends Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> {
-}
+export interface AnimeModel extends Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> { }
 
 export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>, AnimeInstanceMethods, AnimeQueryHelper>({
   title: {

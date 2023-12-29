@@ -16,14 +16,11 @@ export interface ITheme {
   updatedAt: Date;
 }
 
-export interface ThemeInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface ThemeInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface ThemeQueryHelper extends JsonApiQueryHelper {
-}
+export interface ThemeQueryHelper extends JsonApiQueryHelper { }
 
-export interface ThemeModel extends Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> {
-}
+export interface ThemeModel extends Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> { }
 
 export const ThemeSchema = new Schema<ITheme, ThemeModel & JsonApiModel<ITheme>, ThemeInstanceMethods, ThemeQueryHelper>({
   title: {

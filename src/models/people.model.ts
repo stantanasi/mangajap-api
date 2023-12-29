@@ -20,14 +20,11 @@ export interface IPeople {
   updatedAt: Date;
 }
 
-export interface PeopleInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods {
-}
+export interface PeopleInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
 
-export interface PeopleQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
-}
+export interface PeopleQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
 
-export interface PeopleModel extends Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> {
-}
+export interface PeopleModel extends Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> { }
 
 export const PeopleSchema = new Schema<IPeople, PeopleModel & JsonApiModel<IPeople> & SearchModel<IPeople>, PeopleInstanceMethods, PeopleQueryHelper>({
   firstName: {

@@ -17,14 +17,11 @@ export interface IStaff {
   updatedAt: Date;
 }
 
-export interface StaffInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface StaffInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface StaffQueryHelper extends JsonApiQueryHelper {
-}
+export interface StaffQueryHelper extends JsonApiQueryHelper { }
 
-export interface StaffModel extends Model<IStaff, StaffQueryHelper, StaffInstanceMethods> {
-}
+export interface StaffModel extends Model<IStaff, StaffQueryHelper, StaffInstanceMethods> { }
 
 export const StaffSchema = new Schema<IStaff, StaffModel & JsonApiModel<IStaff>, StaffInstanceMethods, StaffQueryHelper>({
   role: {

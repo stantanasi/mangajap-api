@@ -17,14 +17,11 @@ export interface IReview {
   updatedAt: Date;
 }
 
-export interface ReviewInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface ReviewInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface ReviewQueryHelper extends JsonApiQueryHelper {
-}
+export interface ReviewQueryHelper extends JsonApiQueryHelper { }
 
-export interface ReviewModel extends Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> {
-}
+export interface ReviewModel extends Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> { }
 
 export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IReview>, ReviewInstanceMethods, ReviewQueryHelper>({
   content: {

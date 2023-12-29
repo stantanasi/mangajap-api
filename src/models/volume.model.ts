@@ -25,14 +25,11 @@ export interface IVolume {
   updatedAt: Date;
 }
 
-export interface VolumeInstanceMethods extends JsonApiInstanceMethods {
-}
+export interface VolumeInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface VolumeQueryHelper extends JsonApiQueryHelper {
-}
+export interface VolumeQueryHelper extends JsonApiQueryHelper { }
 
-export interface VolumeModel extends Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> {
-}
+export interface VolumeModel extends Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> { }
 
 export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolume>, VolumeInstanceMethods, VolumeQueryHelper>({
   titles: {

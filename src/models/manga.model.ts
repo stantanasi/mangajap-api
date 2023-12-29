@@ -42,8 +42,8 @@ export interface IManga {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: Types.ObjectId[] & IGenre[];
-  themes: Types.ObjectId[] & ITheme[];
+  genres: Types.ObjectId[] | IGenre[];
+  themes: Types.ObjectId[] | ITheme[];
   volumes?: IVolume[];
   chapters?: IChapter[];
   staff?: IStaff[];

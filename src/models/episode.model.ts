@@ -16,8 +16,8 @@ export interface IEpisode {
   episodeType: '' | 'oav';
   duration: number;
 
-  anime: Types.ObjectId & IAnime;
-  season: Types.ObjectId & ISeason;
+  anime: Types.ObjectId | IAnime;
+  season: Types.ObjectId | ISeason;
 
   createdAt: Date;
   updatedAt: Date;

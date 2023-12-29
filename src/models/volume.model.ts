@@ -18,7 +18,7 @@ export interface IVolume {
   startChapter: number | null;
   endChapter: number | null;
 
-  manga: Types.ObjectId & IManga;
+  manga: Types.ObjectId | IManga;
   chapters?: IChapter[];
 
   createdAt: Date;

@@ -10,7 +10,7 @@ export interface IRequest {
   isDone: boolean;
   userHasRead: boolean;
 
-  user: string & IUser;
+  user: string | IUser;
 
   createdAt: Date;
   updatedAt: Date;

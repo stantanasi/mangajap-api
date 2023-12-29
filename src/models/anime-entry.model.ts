@@ -14,8 +14,8 @@ export interface IAnimeEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: string & IUser;
-  anime: Types.ObjectId & IAnime;
+  user: string | IUser;
+  anime: Types.ObjectId | IAnime;
 
   createdAt: Date;
   updatedAt: Date;

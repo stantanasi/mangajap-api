@@ -9,9 +9,9 @@ export interface IReview {
 
   content: string;
 
-  user: string & IUser;
-  anime?: Types.ObjectId & IAnime;
-  manga?: Types.ObjectId & IManga;
+  user: string | IUser;
+  anime?: Types.ObjectId | IAnime;
+  manga?: Types.ObjectId | IManga;
 
   createdAt: Date;
   updatedAt: Date;

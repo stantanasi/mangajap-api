@@ -15,8 +15,8 @@ export interface IMangaEntry {
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: string & IUser;
-  manga: Types.ObjectId & IManga;
+  user: string | IUser;
+  manga: Types.ObjectId | IManga;
 
   createdAt: Date;
   updatedAt: Date;

@@ -5,8 +5,8 @@ import { IUser } from "./user.model";
 export interface IFollow {
   _id: Types.ObjectId;
 
-  follower: string & IUser;
-  followed: string & IUser;
+  follower: string | IUser;
+  followed: string | IUser;
 
   createdAt: Date;
   updatedAt: Date;

@@ -45,8 +45,8 @@ export interface IAnime {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: Types.ObjectId[] & IGenre[];
-  themes: Types.ObjectId[] & ITheme[];
+  genres: Types.ObjectId[] | IGenre[];
+  themes: Types.ObjectId[] | ITheme[];
   seasons?: ISeason[];
   episodes?: IEpisode[];
   staff?: IStaff[];

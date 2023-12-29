@@ -17,7 +17,7 @@ export interface ISeason {
   airDate: Date | null;
   episodeCount: number;
 
-  anime: Types.ObjectId & IAnime;
+  anime: Types.ObjectId | IAnime;
   episodes?: IEpisode[];
 
   createdAt: Date;

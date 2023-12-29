@@ -12,8 +12,8 @@ export interface IChapter {
   number: number;
   publishedAt: Date | null;
 
-  manga: Types.ObjectId & IManga;
-  volume: Types.ObjectId & IVolume | null;
+  manga: Types.ObjectId | IManga;
+  volume: Types.ObjectId | IVolume | null;
 
   createdAt: Date;
   updatedAt: Date;

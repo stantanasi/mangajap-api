@@ -9,9 +9,9 @@ export interface IStaff {
 
   role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
 
-  people: Types.ObjectId & IPeople;
-  anime?: Types.ObjectId & IAnime;
-  manga?: Types.ObjectId & IManga;
+  people: Types.ObjectId | IPeople;
+  anime?: Types.ObjectId | IAnime;
+  manga?: Types.ObjectId | IManga;
 
   createdAt: Date;
   updatedAt: Date;

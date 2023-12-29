@@ -8,8 +8,8 @@ export interface IFranchise {
 
   role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
 
-  source: Types.ObjectId & (IAnime | IManga);
-  destination: Types.ObjectId & (IAnime | IManga);
+  source: Types.ObjectId | (IAnime | IManga);
+  destination: Types.ObjectId | (IAnime | IManga);
 
   sourceModel: 'Anime' | 'Manga';
   destinationModel: 'Anime' | 'Manga';

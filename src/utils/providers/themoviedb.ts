@@ -1,6 +1,6 @@
 import axios from "axios";
 import Anime from "../../models/anime.model";
-import Episode from "../../models/episode.model";
+import Episode, { IEpisode } from "../../models/episode.model";
 import Season from "../../models/season.model";
 
 export default class TheMovieDB {
@@ -52,7 +52,7 @@ export default class TheMovieDB {
                 }, 0),
               airDate: episode.air_date ? new Date(episode.air_date) : null,
               duration: episode.runtime,
-            });
+            }) as IEpisode;
           });
         });
     }

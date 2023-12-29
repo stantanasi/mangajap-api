@@ -108,7 +108,7 @@ userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
         const token: DecodedIdToken | null = res.locals.token;
         if (token && (token.isAdmin || doc._id === token.uid)) {
           return doc
-            .delete();
+            .deleteOne();
         } else {
           throw new JsonApiError.PermissionDenied();
         }

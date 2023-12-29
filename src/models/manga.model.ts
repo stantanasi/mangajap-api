@@ -89,7 +89,7 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
   startDate: {
     type: Date,
     required: true,
-    transform: function (this, val) {
+    transform: function (this, val: Date | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     }
   },
@@ -97,7 +97,7 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
   endDate: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -266,11 +266,11 @@ MangaSchema.pre('findOne', async function () {
   if (!_id) return;
 
   await Manga.findOneAndUpdate(this.getFilter(), {
-    volumeCount: await Volume.count({
+    volumeCount: await Volume.countDocuments({
       manga: _id,
     }),
 
-    chapterCount: await Chapter.count({
+    chapterCount: await Chapter.countDocuments({
       manga: _id,
     }),
 
@@ -283,17 +283,17 @@ MangaSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.averageRating ?? null),
 
-    userCount: await MangaEntry.count({
+    userCount: await MangaEntry.countDocuments({
       manga: _id,
       isAdd: true,
     }),
 
-    favoritesCount: await MangaEntry.count({
+    favoritesCount: await MangaEntry.countDocuments({
       manga: _id,
       isFavorites: true,
     }),
 
-    reviewCount: await Review.count({
+    reviewCount: await Review.countDocuments({
       manga: _id,
     }),
 

@@ -85,7 +85,7 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
   birthday: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -98,7 +98,7 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
   avatar: {
     type: String,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: string | null | undefined) {
       return val ? {
         tiny: val,
         small: val,
@@ -245,15 +245,15 @@ UserSchema.pre('findOne', async function () {
   if (!_id) return;
 
   await User.findOneAndUpdate(this.getFilter(), {
-    followersCount: await Follow.count({
+    followersCount: await Follow.countDocuments({
       followed: _id
     }),
 
-    followingCount: await Follow.count({
+    followingCount: await Follow.countDocuments({
       follower: _id
     }),
 
-    followedMangaCount: await MangaEntry.count({
+    followedMangaCount: await MangaEntry.countDocuments({
       user: _id,
       isAdd: true,
     }),
@@ -276,7 +276,7 @@ UserSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.total),
 
-    followedAnimeCount: await AnimeEntry.count({
+    followedAnimeCount: await AnimeEntry.countDocuments({
       user: _id,
       isAdd: true,
     }),

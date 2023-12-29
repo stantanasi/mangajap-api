@@ -92,7 +92,7 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> 
   startDate: {
     type: Date,
     required: true,
-    transform: function (this, val) {
+    transform: function (this, val: Date | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     }
   },
@@ -100,7 +100,7 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> 
   endDate: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -284,11 +284,11 @@ AnimeSchema.pre('findOne', async function () {
   if (!_id) return;
 
   await Anime.findOneAndUpdate(this.getFilter(), {
-    seasonCount: await Season.count({
+    seasonCount: await Season.countDocuments({
       anime: _id,
     }),
 
-    episodeCount: await Episode.count({
+    episodeCount: await Episode.countDocuments({
       anime: _id,
     }),
 
@@ -301,17 +301,17 @@ AnimeSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.averageRating ?? null),
 
-    userCount: await AnimeEntry.count({
+    userCount: await AnimeEntry.countDocuments({
       anime: _id,
       isAdd: true,
     }),
 
-    favoritesCount: await AnimeEntry.count({
+    favoritesCount: await AnimeEntry.countDocuments({
       anime: _id,
       isFavorites: true,
     }),
 
-    reviewCount: await Review.count({
+    reviewCount: await Review.countDocuments({
       anime: _id,
     }),
 

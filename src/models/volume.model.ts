@@ -48,7 +48,7 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolu
   published: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -118,7 +118,7 @@ VolumeSchema.pre('findOne', async function () {
   if (!_id) return;
 
   await Volume.findOneAndUpdate(this.getFilter(), {
-    chapterCount: await Chapter.count({
+    chapterCount: await Chapter.countDocuments({
       volume: _id,
     }),
 

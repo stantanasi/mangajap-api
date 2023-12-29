@@ -58,7 +58,7 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
   airDate: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -116,7 +116,7 @@ SeasonSchema.pre('findOne', async function () {
       season: _id,
     }).sort({ number: 1 }).then((doc) => doc?.airDate ?? null),
 
-    episodeCount: await Episode.count({
+    episodeCount: await Episode.countDocuments({
       season: _id,
     }),
   });

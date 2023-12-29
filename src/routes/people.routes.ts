@@ -94,7 +94,7 @@ peopleRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .delete();
+          .deleteOne();
       });
 
     res.status(204).send();

@@ -56,7 +56,7 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
   airDate: {
     type: Date,
     default: null,
-    transform: function (this, val) {
+    transform: function (this, val: Date | null | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },

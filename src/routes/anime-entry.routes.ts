@@ -92,7 +92,7 @@ animeEntryRoutes.delete('/:id', async (req, res, next) => {
         const token: DecodedIdToken | null = res.locals.token;
         if (token && (token.isAdmin || doc.user === token.uid)) {
           return doc
-            .delete();
+            .deleteOne();
         } else {
           throw new JsonApiError.PermissionDenied();
         }

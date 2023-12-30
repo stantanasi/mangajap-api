@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const genreRoutes = express.Router();
 
-genreRoutes.get('/', async (req, res, next) => {
+genreRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Genre.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ genreRoutes.get('/', async (req, res, next) => {
   }
 });
 
-genreRoutes.post('/', isAdmin(), async (req, res, next) => {
+genreRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Genre.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ genreRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Genre.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ genreRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-genreRoutes.get('/:id', async (req, res, next) => {
+genreRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ genreRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-genreRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+genreRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Genre.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ genreRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Genre.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ genreRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-genreRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+genreRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Genre.findById(req.params.id)
       .orFail()
@@ -92,16 +92,16 @@ genreRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-genreRoutes.get('/:id/manga', async (req, res, next) => {
+genreRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
-      .getRelationship('manga')
+      .getRelationship("manga")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -111,16 +111,16 @@ genreRoutes.get('/:id/manga', async (req, res, next) => {
   }
 });
 
-genreRoutes.get('/:id/anime', async (req, res, next) => {
+genreRoutes.get("/:id/anime", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
-      .getRelationship('anime')
+      .getRelationship("anime")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 

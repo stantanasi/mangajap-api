@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const chapterRoutes = express.Router();
 
-chapterRoutes.get('/', async (req, res, next) => {
+chapterRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Chapter.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ chapterRoutes.get('/', async (req, res, next) => {
   }
 });
 
-chapterRoutes.post('/', isAdmin(), async (req, res, next) => {
+chapterRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Chapter.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ chapterRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Chapter.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ chapterRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-chapterRoutes.get('/:id', async (req, res, next) => {
+chapterRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ chapterRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-chapterRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+chapterRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Chapter.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ chapterRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Chapter.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ chapterRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-chapterRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+chapterRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Chapter.findById(req.params.id)
       .orFail()
@@ -92,13 +92,13 @@ chapterRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-chapterRoutes.get('/:id/manga', async (req, res, next) => {
+chapterRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
-      .getRelationship('manga')
+      .getRelationship("manga")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -107,13 +107,13 @@ chapterRoutes.get('/:id/manga', async (req, res, next) => {
   }
 });
 
-chapterRoutes.get('/:id/volume', async (req, res, next) => {
+chapterRoutes.get("/:id/volume", async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
-      .getRelationship('volume')
+      .getRelationship("volume")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

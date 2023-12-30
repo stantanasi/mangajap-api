@@ -1,7 +1,7 @@
-import { Schema, model, Model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IManga } from './manga.model';
-import { IVolume } from './volume.model';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { TManga } from "./manga.model";
+import { TVolume } from "./volume.model";
 
 export interface IChapter {
   _id: Types.ObjectId;
@@ -12,21 +12,18 @@ export interface IChapter {
   number: number;
   publishedAt: Date | null;
 
-  manga: Types.ObjectId & IManga;
-  volume: Types.ObjectId & IVolume | null;
+  manga: Types.ObjectId | TManga;
+  volume: Types.ObjectId | TVolume | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ChapterInstanceMethods extends Document, JsonApiInstanceMethods {
-}
+export interface ChapterInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface ChapterQueryHelper extends JsonApiQueryHelper {
-}
+export interface ChapterQueryHelper extends JsonApiQueryHelper { }
 
-export interface ChapterModel extends Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> {
-}
+export interface ChapterModel extends Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> { }
 
 export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IChapter>, ChapterInstanceMethods, ChapterQueryHelper>({
   titles: {
@@ -36,7 +33,7 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
 
   number: {
     type: Number,
-    required: true
+    required: true,
   },
 
   publishedAt: {
@@ -50,13 +47,13 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: 'Manga',
-    required: true
+    ref: "Manga",
+    required: true,
   },
 
   volume: {
     type: Schema.Types.ObjectId,
-    ref: 'Volume',
+    ref: "Volume",
     default: null,
   },
 }, {
@@ -70,14 +67,16 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
 
 ChapterSchema.index({
   number: 1,
-  manga: 1
+  manga: 1,
 }, { unique: true });
 
 
 ChapterSchema.plugin(MongooseJsonApi, {
-  type: 'chapters',
+  type: "chapters",
 });
 
 
-const Chapter = model<IChapter, ChapterModel & JsonApiModel<IChapter>>('Chapter', ChapterSchema);
+export type TChapter = HydratedDocument<IChapter, ChapterInstanceMethods, ChapterQueryHelper>;
+
+const Chapter = model<IChapter, ChapterModel & JsonApiModel<IChapter>>("Chapter", ChapterSchema);
 export default Chapter;

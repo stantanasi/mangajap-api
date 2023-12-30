@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const volumeRoutes = express.Router();
 
-volumeRoutes.get('/', async (req, res, next) => {
+volumeRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Volume.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ volumeRoutes.get('/', async (req, res, next) => {
   }
 });
 
-volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
+volumeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Volume.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Volume.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ volumeRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-volumeRoutes.get('/:id', async (req, res, next) => {
+volumeRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ volumeRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+volumeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Volume.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Volume.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ volumeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+volumeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Volume.findById(req.params.id)
       .orFail()
@@ -92,13 +92,13 @@ volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-volumeRoutes.get('/:id/manga', async (req, res, next) => {
+volumeRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
-      .getRelationship('manga')
+      .getRelationship("manga")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -107,16 +107,16 @@ volumeRoutes.get('/:id/manga', async (req, res, next) => {
   }
 });
 
-volumeRoutes.get('/:id/chapters', async (req, res, next) => {
+volumeRoutes.get("/:id/chapters", async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
-      .getRelationship('franchises')
+      .getRelationship("franchises")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 

@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import * as admin from "firebase-admin";
 import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, ref, uploadString } from "firebase/storage";
 
@@ -30,21 +30,21 @@ export const uploadFile = async (path: string, data: string | null): Promise<str
       .then(() => null)
       .catch(() => null);
   } else {
-    data = data.replace(/(\r\n|\n|\r)/gm, '');
+    data = data.replace(/(\r\n|\n|\r)/gm, "");
 
-    if (data.startsWith('data')) {
+    if (data.startsWith("data")) {
       return uploadString(
         storageRef,
         data,
-        'data_url',
-        { contentType: 'image/jpeg' },
+        "data_url",
+        { contentType: "image/jpeg" },
       ).then((result) => getDownloadURL(result.ref));
     } else {
       return uploadString(
         storageRef,
         data,
-        'base64',
-        { contentType: 'image/jpeg' },
+        "base64",
+        { contentType: "image/jpeg" },
       ).then((result) => getDownloadURL(result.ref));
     }
   }

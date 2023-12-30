@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const staffRoutes = express.Router();
 
-staffRoutes.get('/', async (req, res, next) => {
+staffRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Staff.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ staffRoutes.get('/', async (req, res, next) => {
   }
 });
 
-staffRoutes.post('/', isAdmin(), async (req, res, next) => {
+staffRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Staff.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ staffRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Staff.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ staffRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-staffRoutes.get('/:id', async (req, res, next) => {
+staffRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ staffRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+staffRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Staff.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Staff.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ staffRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+staffRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Staff.findById(req.params.id)
       .orFail()
@@ -92,13 +92,13 @@ staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-staffRoutes.get('/:id/people', async (req, res, next) => {
+staffRoutes.get("/:id/people", async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
-      .getRelationship('people')
+      .getRelationship("people")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -107,13 +107,13 @@ staffRoutes.get('/:id/people', async (req, res, next) => {
   }
 });
 
-staffRoutes.get('/:id/anime', async (req, res, next) => {
+staffRoutes.get("/:id/anime", async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
-      .getRelationship('anime')
+      .getRelationship("anime")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -122,13 +122,13 @@ staffRoutes.get('/:id/anime', async (req, res, next) => {
   }
 });
 
-staffRoutes.get('/:id/manga', async (req, res, next) => {
+staffRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
-      .getRelationship('manga')
+      .getRelationship("manga")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

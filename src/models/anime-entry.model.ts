@@ -1,83 +1,80 @@
-import { Schema, model, Model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IAnime } from "./anime.model";
-import { IUser } from "./user.model";
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { TAnime } from "./anime.model";
+import { TUser } from "./user.model";
 
 export interface IAnimeEntry {
   _id: Types.ObjectId;
 
   isAdd: boolean;
   isFavorites: boolean;
-  status: 'watching' | 'completed' | 'planned' | 'on_hold' | 'dropped';
+  status: "watching" | "completed" | "planned" | "on_hold" | "dropped";
   episodesWatch: number;
   rating: number | null;
   startedAt: Date | null;
   finishedAt: Date | null;
 
-  user: string & IUser;
-  anime: Types.ObjectId & IAnime;
+  user: string | TUser;
+  anime: Types.ObjectId | TAnime;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface AnimeEntryInstanceMethods extends Document, JsonApiInstanceMethods {
-}
+export interface AnimeEntryInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface AnimeEntryQueryHelper extends JsonApiQueryHelper {
-}
+export interface AnimeEntryQueryHelper extends JsonApiQueryHelper { }
 
-export interface AnimeEntryModel extends Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> {
-}
+export interface AnimeEntryModel extends Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> { }
 
 export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
   isAdd: {
     type: Boolean,
-    default: true
+    default: true,
   },
 
   isFavorites: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   status: {
     type: String,
-    default: 'watching',
-    enum: ['watching', 'completed', 'planned', 'on_hold', 'dropped']
+    default: "watching",
+    enum: ["watching", "completed", "planned", "on_hold", "dropped"],
   },
 
   episodesWatch: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   rating: {
     type: Number,
-    default: null
+    default: null,
   },
 
   startedAt: {
     type: Date,
-    default: new Date()
+    default: new Date(),
   },
 
   finishedAt: {
     type: Date,
-    default: null
+    default: null,
   },
 
 
   user: {
     type: String,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: 'Anime',
-    required: true
+    ref: "Anime",
+    required: true,
   },
 }, {
   id: false,
@@ -90,14 +87,16 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonAp
 
 AnimeEntrySchema.index({
   user: 1,
-  anime: 1
+  anime: 1,
 }, { unique: true });
 
 
 AnimeEntrySchema.plugin(MongooseJsonApi, {
-  type: 'anime-entries',
+  type: "anime-entries",
 });
 
 
-const AnimeEntry = model<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>>('AnimeEntry', AnimeEntrySchema);
+export type TAnimeEntry = HydratedDocument<IAnimeEntry, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>;
+
+const AnimeEntry = model<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>>("AnimeEntry", AnimeEntrySchema);
 export default AnimeEntry;

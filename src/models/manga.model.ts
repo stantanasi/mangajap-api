@@ -1,16 +1,16 @@
-import { Schema, model, Model, Types, Document } from 'mongoose';
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import slugify from "slugify";
-import { deleteFile, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
-import { IFranchise } from "./franchise.model";
-import { IGenre } from "./genre.model";
-import MangaEntry, { IMangaEntry } from "./manga-entry.model";
-import Review, { IReview } from "./review.model";
-import { IStaff } from "./staff.model";
-import { ITheme } from "./theme.model";
-import Volume, { IVolume } from "./volume.model";
-import Chapter, { IChapter } from './chapter.model';
+import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
+import Chapter, { TChapter } from "./chapter.model";
+import { TFranchise } from "./franchise.model";
+import { TGenre } from "./genre.model";
+import MangaEntry, { TMangaEntry } from "./manga-entry.model";
+import Review, { TReview } from "./review.model";
+import { TStaff } from "./staff.model";
+import { TTheme } from "./theme.model";
+import Volume, { TVolume } from "./volume.model";
 
 export interface IManga {
   _id: Types.ObjectId;
@@ -24,8 +24,8 @@ export interface IManga {
   startDate: Date;
   endDate: Date | null;
   origin: string;
-  mangaType: 'bd' | 'comics' | 'josei' | 'kodomo' | 'seijin' | 'seinen' | 'shojo' | 'shonen' | 'doujin' | 'novel' | 'oneshot' | 'webtoon';
-  status: 'publishing' | 'finished' | 'unreleased' | 'upcoming';
+  mangaType: "bd" | "comics" | "josei" | "kodomo" | "seijin" | "seinen" | "shojo" | "shonen" | "doujin" | "novel" | "oneshot" | "webtoon";
+  status: "publishing" | "finished" | "unreleased" | "upcoming";
   coverImage: string | null;
   bannerImage: string | null;
   links: {
@@ -42,27 +42,24 @@ export interface IManga {
   favoritesCount: number;
   reviewCount: number;
 
-  genres: Types.ObjectId[] & IGenre[];
-  themes: Types.ObjectId[] & ITheme[];
-  volumes?: IVolume[];
-  chapters?: IChapter[];
-  staff?: IStaff[];
-  reviews?: IReview[];
-  franchises?: IFranchise[];
-  'manga-entry'?: IMangaEntry | null;
+  genres: Types.ObjectId[] | TGenre[];
+  themes: Types.ObjectId[] | TTheme[];
+  volumes?: TVolume[];
+  chapters?: TChapter[];
+  staff?: TStaff[];
+  reviews?: TReview[];
+  franchises?: TFranchise[];
+  "manga-entry"?: TMangaEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface MangaInstanceMethods extends Document, JsonApiInstanceMethods, SearchInstanceMethods {
-}
+export interface MangaInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
 
-export interface MangaQueryHelper extends JsonApiQueryHelper, SearchQueryHelper {
-}
+export interface MangaQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
 
-export interface MangaModel extends Model<IManga, MangaQueryHelper, MangaInstanceMethods> {
-}
+export interface MangaModel extends Model<IManga, MangaQueryHelper, MangaInstanceMethods> { }
 
 export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>, MangaInstanceMethods, MangaQueryHelper>({
   title: {
@@ -83,7 +80,7 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
 
   synopsis: {
     type: String,
-    default: '',
+    default: "",
   },
 
   startDate: {
@@ -91,7 +88,7 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
     required: true,
     transform: function (this, val: Date | undefined) {
       return val?.toISOString().slice(0, 10) ?? val;
-    }
+    },
   },
 
   endDate: {
@@ -104,19 +101,19 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
 
   origin: {
     type: String,
-    default: '',
+    default: "",
   },
 
   mangaType: {
     type: String,
     required: true,
-    enum: ['bd', 'comics', 'josei', 'kodomo', 'seijin', 'seinen', 'shojo', 'shonen', 'doujin', 'novel', 'oneshot', 'webtoon'],
+    enum: ["bd", "comics", "josei", "kodomo", "seijin", "seinen", "shojo", "shonen", "doujin", "novel", "oneshot", "webtoon"],
   },
 
   status: {
     type: String,
     required: true,
-    enum: ['publishing', 'finished', 'unreleased', 'upcoming'],
+    enum: ["publishing", "finished", "unreleased", "upcoming"],
   },
 
   coverImage: {
@@ -137,55 +134,55 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
 
   volumeCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   chapterCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
 
   averageRating: {
     type: Number,
-    default: null
+    default: null,
   },
 
   ratingRank: {
     type: Number,
-    default: null
+    default: null,
   },
 
   popularity: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   userCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   favoritesCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   reviewCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
 
   genres: [{
     type: Schema.Types.ObjectId,
-    ref: 'Genre',
+    ref: "Genre",
     default: [],
   }],
 
   themes: [{
     type: Schema.Types.ObjectId,
-    ref: 'Theme',
+    ref: "Theme",
     default: [],
   }],
 }, {
@@ -197,63 +194,63 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
   toObject: { virtuals: true },
 });
 
-MangaSchema.virtual('volumes', {
-  ref: 'Volume',
-  localField: '_id',
-  foreignField: 'manga',
+MangaSchema.virtual("volumes", {
+  ref: "Volume",
+  localField: "_id",
+  foreignField: "manga",
   options: {
     sort: { number: 1 },
   },
 });
 
-MangaSchema.virtual('chapters', {
-  ref: 'Chapter',
-  localField: '_id',
-  foreignField: 'manga',
+MangaSchema.virtual("chapters", {
+  ref: "Chapter",
+  localField: "_id",
+  foreignField: "manga",
   options: {
     sort: { number: 1 },
   },
 });
 
-MangaSchema.virtual('staff', {
-  ref: 'Staff',
-  localField: '_id',
-  foreignField: 'manga'
+MangaSchema.virtual("staff", {
+  ref: "Staff",
+  localField: "_id",
+  foreignField: "manga",
 });
 
-MangaSchema.virtual('reviews', {
-  ref: 'Review',
-  localField: '_id',
-  foreignField: 'manga',
+MangaSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "manga",
   options: {
     sort: { updatedAt: -1 },
   },
 });
 
-MangaSchema.virtual('franchises', {
-  ref: 'Franchise',
-  localField: '_id',
-  foreignField: 'source'
+MangaSchema.virtual("franchises", {
+  ref: "Franchise",
+  localField: "_id",
+  foreignField: "source",
 });
 
-MangaSchema.virtual('manga-entry');
+MangaSchema.virtual("manga-entry");
 
 
-MangaSchema.pre<IManga & Document>('validate', async function () {
-  if (this.isModified('title')) {
+MangaSchema.pre<TManga>("validate", async function () {
+  if (this.isModified("title")) {
     this.slug = slugify(this.title);
   }
 });
 
-MangaSchema.pre<IManga & Document>('save', async function () {
-  if (this.isModified('coverImage')) {
+MangaSchema.pre<TManga>("save", async function () {
+  if (this.isModified("coverImage")) {
     this.coverImage = await uploadFile(
       `manga/${this._id}/images/cover.jpg`,
       this.coverImage,
     );
   }
 
-  if (this.isModified('bannerImage')) {
+  if (this.isModified("bannerImage")) {
     this.bannerImage = await uploadFile(
       `manga/${this._id}/images/banner.jpg`,
       this.bannerImage,
@@ -261,7 +258,7 @@ MangaSchema.pre<IManga & Document>('save', async function () {
   }
 });
 
-MangaSchema.pre('findOne', async function () {
+MangaSchema.pre("findOne", async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -278,7 +275,7 @@ MangaSchema.pre('findOne', async function () {
       .match({ manga: new Types.ObjectId(_id) })
       .group({
         _id: null,
-        averageRating: { $avg: '$rating' },
+        averageRating: { $avg: "$rating" },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.averageRating ?? null),
@@ -300,10 +297,10 @@ MangaSchema.pre('findOne', async function () {
     popularity: await Manga.aggregate()
       .match({ _id: new Types.ObjectId(_id) })
       .lookup({
-        from: 'mangaentries',
-        localField: '_id',
-        foreignField: 'manga',
-        as: 'entriesCount',
+        from: "mangaentries",
+        localField: "_id",
+        foreignField: "manga",
+        as: "entriesCount",
         pipeline: [
           {
             $match: {
@@ -314,13 +311,13 @@ MangaSchema.pre('findOne', async function () {
           },
         ],
       })
-      .addFields({ entriesCount: { $size: '$entriesCount' } })
+      .addFields({ entriesCount: { $size: "$entriesCount" } })
       .addFields({
         popularity: {
           $add: [
-            '$userCount', '$favoritesCount',
-            { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
-            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] }
+            "$userCount", "$favoritesCount",
+            { $multiply: ["$userCount", { $ifNull: ["$averageRating", 0] }] },
+            { $multiply: [2, "$entriesCount", { $ifNull: ["$averageRating", 0] }, { $add: ["$userCount", "$favoritesCount"] }] },
           ],
         },
       })
@@ -329,7 +326,7 @@ MangaSchema.pre('findOne', async function () {
   });
 });
 
-MangaSchema.pre<IManga & Document>('deleteOne', async function () {
+MangaSchema.pre<TManga>("deleteOne", async function () {
   if (this.coverImage) {
     await deleteFile(
       `manga/${this._id}/images/cover.jpg`,
@@ -345,20 +342,22 @@ MangaSchema.pre<IManga & Document>('deleteOne', async function () {
 
 
 MangaSchema.plugin(MongooseSearch, {
-  fields: ['title', 'titles'],
+  fields: ["title", "titles"],
 });
 
 MangaSchema.plugin(MongooseJsonApi, {
-  type: 'manga',
+  type: "manga",
   filter: {
     query: (query: string) => {
       return {
         $search: query,
       };
-    }
+    },
   },
 });
 
 
-const Manga = model<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>>('Manga', MangaSchema);
+export type TManga = HydratedDocument<IManga, MangaInstanceMethods, MangaQueryHelper>;
+
+const Manga = model<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>>("Manga", MangaSchema);
 export default Manga;

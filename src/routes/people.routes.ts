@@ -5,26 +5,26 @@ import { JsonApiQueryParams } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const peopleRoutes = express.Router();
 
-peopleRoutes.get('/', async (req, res, next) => {
+peopleRoutes.get("/", async (req, res, next) => {
   try {
     const query: JsonApiQueryParams = Object.assign({}, req.query);
-    if (query.sort?.split(',').includes('random')) {
+    if (query.sort?.split(",").includes("random")) {
       query.filter = query.filter || {};
       query.filter._id = (await People.aggregate()
         .sample(+(query.page?.limit ?? 10)))
         .map((people) => people._id)
-        .join(',');
+        .join(",");
 
-      query.sort = query.sort?.split(',').filter((sort) => sort !== 'random').join(',');
+      query.sort = query.sort?.split(",").filter((sort) => sort !== "random").join(",");
     }
 
     const response = await People.find()
       .withJsonApi(query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -34,7 +34,7 @@ peopleRoutes.get('/', async (req, res, next) => {
   }
 });
 
-peopleRoutes.post('/', isAdmin(), async (req, res, next) => {
+peopleRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await People.fromJsonApi(req.body)
       .save()
@@ -43,7 +43,7 @@ peopleRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await People.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -52,12 +52,12 @@ peopleRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-peopleRoutes.get('/:id', async (req, res, next) => {
+peopleRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -66,7 +66,7 @@ peopleRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-peopleRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+peopleRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await People.findById(req.params.id)
       .orFail()
@@ -79,7 +79,7 @@ peopleRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await People.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -88,7 +88,7 @@ peopleRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-peopleRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+peopleRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await People.findById(req.params.id)
       .orFail()
@@ -104,16 +104,16 @@ peopleRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-peopleRoutes.get('/:id/staff', async (req, res, next) => {
+peopleRoutes.get("/:id/staff", async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
-      .getRelationship('staff')
+      .getRelationship("staff")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -123,16 +123,16 @@ peopleRoutes.get('/:id/staff', async (req, res, next) => {
   }
 });
 
-peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
+peopleRoutes.get("/:id/manga-staff", async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
-      .getRelationship('manga-staff')
+      .getRelationship("manga-staff")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -142,16 +142,16 @@ peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
   }
 });
 
-peopleRoutes.get('/:id/anime-staff', async (req, res, next) => {
+peopleRoutes.get("/:id/anime-staff", async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
-      .getRelationship('anime-staff')
+      .getRelationship("anime-staff")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 

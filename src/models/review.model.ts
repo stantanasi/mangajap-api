@@ -1,54 +1,51 @@
-import { Schema, model, Model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IAnime } from "./anime.model";
-import { IManga } from "./manga.model";
-import { IUser } from "./user.model";
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { TAnime } from "./anime.model";
+import { TManga } from "./manga.model";
+import { TUser } from "./user.model";
 
 export interface IReview {
   _id: Types.ObjectId;
 
   content: string;
 
-  user: string & IUser;
-  anime?: Types.ObjectId & IAnime;
-  manga?: Types.ObjectId & IManga;
+  user: string | TUser;
+  anime?: Types.ObjectId | TAnime;
+  manga?: Types.ObjectId | TManga;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ReviewInstanceMethods extends Document, JsonApiInstanceMethods {
-}
+export interface ReviewInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface ReviewQueryHelper extends JsonApiQueryHelper {
-}
+export interface ReviewQueryHelper extends JsonApiQueryHelper { }
 
-export interface ReviewModel extends Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> {
-}
+export interface ReviewModel extends Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> { }
 
 export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IReview>, ReviewInstanceMethods, ReviewQueryHelper>({
   content: {
     type: String,
-    required: true
+    required: true,
   },
 
 
   user: {
     type: String,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: 'Anime',
-    default: undefined
+    ref: "Anime",
+    default: undefined,
   },
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: 'Manga',
-    default: undefined
+    ref: "Manga",
+    default: undefined,
   },
 }, {
   id: false,
@@ -61,9 +58,11 @@ export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IRevi
 
 
 ReviewSchema.plugin(MongooseJsonApi, {
-  type: 'reviews',
+  type: "reviews",
 });
 
 
-const Review = model<IReview, ReviewModel & JsonApiModel<IReview>>('Review', ReviewSchema);
+export type TReview = HydratedDocument<IReview, ReviewInstanceMethods, ReviewQueryHelper>;
+
+const Review = model<IReview, ReviewModel & JsonApiModel<IReview>>("Review", ReviewSchema);
 export default Review;

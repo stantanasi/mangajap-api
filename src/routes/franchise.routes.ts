@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const franchiseRoutes = express.Router();
 
-franchiseRoutes.get('/', async (req, res, next) => {
+franchiseRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Franchise.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ franchiseRoutes.get('/', async (req, res, next) => {
   }
 });
 
-franchiseRoutes.post('/', isAdmin(), async (req, res, next) => {
+franchiseRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Franchise.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ franchiseRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Franchise.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ franchiseRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-franchiseRoutes.get('/:id', async (req, res, next) => {
+franchiseRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ franchiseRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-franchiseRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+franchiseRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Franchise.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ franchiseRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Franchise.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ franchiseRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-franchiseRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+franchiseRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Franchise.findById(req.params.id)
       .orFail()
@@ -92,13 +92,13 @@ franchiseRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-franchiseRoutes.get('/:id/source', async (req, res, next) => {
+franchiseRoutes.get("/:id/source", async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
-      .getRelationship('source')
+      .getRelationship("source")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -107,13 +107,13 @@ franchiseRoutes.get('/:id/source', async (req, res, next) => {
   }
 });
 
-franchiseRoutes.get('/:id/destination', async (req, res, next) => {
+franchiseRoutes.get("/:id/destination", async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
-      .getRelationship('destination')
+      .getRelationship("destination")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

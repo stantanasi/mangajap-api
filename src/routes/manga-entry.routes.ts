@@ -7,15 +7,15 @@ import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const mangaEntryRoutes = express.Router();
 
-mangaEntryRoutes.get('/', async (req, res, next) => {
+mangaEntryRoutes.get("/", async (req, res, next) => {
   try {
     const response = await MangaEntry.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -25,7 +25,7 @@ mangaEntryRoutes.get('/', async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
+mangaEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const id = await MangaEntry.fromJsonApi(req.body)
       .save()
@@ -34,7 +34,7 @@ mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
     const response = await MangaEntry.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -43,12 +43,12 @@ mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.get('/:id', async (req, res, next) => {
+mangaEntryRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await MangaEntry.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -57,7 +57,7 @@ mangaEntryRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+mangaEntryRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     await MangaEntry.findById(req.params.id)
       .orFail()
@@ -75,7 +75,7 @@ mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     const response = await MangaEntry.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -84,7 +84,7 @@ mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+mangaEntryRoutes.delete("/:id", isLogin(), async (req, res, next) => {
   try {
     await MangaEntry.findById(req.params.id)
       .orFail()
@@ -105,13 +105,13 @@ mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 });
 
 
-mangaEntryRoutes.get('/:id/manga', async (req, res, next) => {
+mangaEntryRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await MangaEntry.findById(req.params.id)
-      .getRelationship('manga')
+      .getRelationship("manga")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -120,13 +120,13 @@ mangaEntryRoutes.get('/:id/manga', async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.get('/:id/user', async (req, res, next) => {
+mangaEntryRoutes.get("/:id/user", async (req, res, next) => {
   try {
     const response = await MangaEntry.findById(req.params.id)
-      .getRelationship('user')
+      .getRelationship("user")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

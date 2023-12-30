@@ -1,8 +1,8 @@
-import { Schema, model, Model, Types, Document } from 'mongoose';
-import { deleteFile, uploadFile } from '../firebase-app';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IAnime } from "./anime.model";
-import Episode, { IEpisode } from "./episode.model";
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { TAnime } from "./anime.model";
+import Episode, { TEpisode } from "./episode.model";
 
 export interface ISeason {
   _id: Types.ObjectId;
@@ -17,21 +17,18 @@ export interface ISeason {
   airDate: Date | null;
   episodeCount: number;
 
-  anime: Types.ObjectId & IAnime;
-  episodes?: IEpisode[];
+  anime: Types.ObjectId | TAnime;
+  episodes?: TEpisode[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface SeasonInstanceMethods extends Document, JsonApiInstanceMethods {
-}
+export interface SeasonInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface SeasonQueryHelper extends JsonApiQueryHelper {
-}
+export interface SeasonQueryHelper extends JsonApiQueryHelper { }
 
-export interface SeasonModel extends Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> {
-}
+export interface SeasonModel extends Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> { }
 
 export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeason>, SeasonInstanceMethods, SeasonQueryHelper>({
   titles: {
@@ -41,12 +38,12 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
 
   overview: {
     type: String,
-    default: '',
+    default: "",
   },
 
   number: {
     type: Number,
-    required: true
+    required: true,
   },
 
   posterImage: {
@@ -65,14 +62,14 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
 
   episodeCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: 'Anime',
-    required: true
+    ref: "Anime",
+    required: true,
   },
 }, {
   id: false,
@@ -83,10 +80,10 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeas
   toObject: { virtuals: true },
 });
 
-SeasonSchema.virtual('episodes', {
-  ref: 'Episode',
-  localField: '_id',
-  foreignField: 'season',
+SeasonSchema.virtual("episodes", {
+  ref: "Episode",
+  localField: "_id",
+  foreignField: "season",
   options: {
     sort: { number: 1 },
   },
@@ -94,12 +91,12 @@ SeasonSchema.virtual('episodes', {
 
 SeasonSchema.index({
   number: 1,
-  anime: 1
+  anime: 1,
 }, { unique: true });
 
 
-SeasonSchema.pre<ISeason & Document>('save', async function () {
-  if (this.isModified('posterImage')) {
+SeasonSchema.pre<TSeason>("save", async function () {
+  if (this.isModified("posterImage")) {
     this.posterImage = await uploadFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
       this.posterImage,
@@ -107,7 +104,7 @@ SeasonSchema.pre<ISeason & Document>('save', async function () {
   }
 });
 
-SeasonSchema.pre('findOne', async function () {
+SeasonSchema.pre("findOne", async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -122,7 +119,7 @@ SeasonSchema.pre('findOne', async function () {
   });
 });
 
-SeasonSchema.pre<ISeason & Document>('deleteOne', async function () {
+SeasonSchema.pre<TSeason>("deleteOne", async function () {
   if (this.posterImage) {
     await deleteFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
@@ -132,9 +129,11 @@ SeasonSchema.pre<ISeason & Document>('deleteOne', async function () {
 
 
 SeasonSchema.plugin(MongooseJsonApi, {
-  type: 'seasons',
+  type: "seasons",
 });
 
 
-const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>('Season', SeasonSchema);
+export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>;
+
+const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>("Season", SeasonSchema);
 export default Season;

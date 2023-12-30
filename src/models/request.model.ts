@@ -1,6 +1,6 @@
-import { Schema, model, Model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import { IUser } from "./user.model";
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { TUser } from "./user.model";
 
 export interface IRequest {
   _id: Types.ObjectId;
@@ -10,47 +10,44 @@ export interface IRequest {
   isDone: boolean;
   userHasRead: boolean;
 
-  user: string & IUser;
+  user: string | TUser;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface RequestInstanceMethods extends Document, JsonApiInstanceMethods {
-}
+export interface RequestInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface RequestQueryHelper extends JsonApiQueryHelper {
-}
+export interface RequestQueryHelper extends JsonApiQueryHelper { }
 
-export interface RequestModel extends Model<IRequest, RequestQueryHelper, RequestInstanceMethods> {
-}
+export interface RequestModel extends Model<IRequest, RequestQueryHelper, RequestInstanceMethods> { }
 
 export const RequestSchema = new Schema<IRequest, RequestModel & JsonApiModel<IRequest>, RequestInstanceMethods, RequestQueryHelper>({
   requestType: {
     type: String,
-    required: true
+    required: true,
   },
 
   data: {
     type: String,
-    required: true
+    required: true,
   },
 
   isDone: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   userHasRead: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
 
   user: {
     type: String,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
 }, {
   id: false,
@@ -63,9 +60,11 @@ export const RequestSchema = new Schema<IRequest, RequestModel & JsonApiModel<IR
 
 
 RequestSchema.plugin(MongooseJsonApi, {
-  type: 'requests',
+  type: "requests",
 });
 
 
-const Request = model<IRequest, RequestModel & JsonApiModel<IRequest>>('Request', RequestSchema);
+export type TRequest = HydratedDocument<IRequest, RequestInstanceMethods, RequestQueryHelper>;
+
+const Request = model<IRequest, RequestModel & JsonApiModel<IRequest>>("Request", RequestSchema);
 export default Request;

@@ -1,63 +1,60 @@
-import { Schema, model, Model, Types } from 'mongoose';
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '../utils/mongoose-jsonapi/mongoose-jsonapi';
-import Anime, { IAnime } from "./anime.model";
-import Manga, { IManga } from "./manga.model";
+import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import Anime, { TAnime } from "./anime.model";
+import Manga, { TManga } from "./manga.model";
 
 export interface IFranchise {
   _id: Types.ObjectId;
 
-  role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
+  role: "adaptation" | "alternative_setting" | "alternative_version" | "character" | "full_story" | "other" | "parent_story" | "prequel" | "sequel" | "side_story" | "spinoff" | "summary";
 
-  source: Types.ObjectId & (IAnime | IManga);
-  destination: Types.ObjectId & (IAnime | IManga);
+  source: Types.ObjectId | (TAnime | TManga);
+  destination: Types.ObjectId | (TAnime | TManga);
 
-  sourceModel: 'Anime' | 'Manga';
-  destinationModel: 'Anime' | 'Manga';
+  sourceModel: "Anime" | "Manga";
+  destinationModel: "Anime" | "Manga";
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface FranchiseInstanceMethods extends Document, JsonApiInstanceMethods {
-}
+export interface FranchiseInstanceMethods extends JsonApiInstanceMethods { }
 
-export interface FranchiseQueryHelper extends JsonApiQueryHelper {
-}
+export interface FranchiseQueryHelper extends JsonApiQueryHelper { }
 
-export interface FranchiseModel extends Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> {
-}
+export interface FranchiseModel extends Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> { }
 
 export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiModel<IFranchise>, FranchiseInstanceMethods, FranchiseQueryHelper>({
   role: {
     type: String,
     required: true,
-    enum: ['adaptation', 'alternative_setting', 'alternative_version', 'character', 'full_story', 'other', 'parent_story', 'prequel', 'sequel', 'side_story', 'spinoff', 'summary']
+    enum: ["adaptation", "alternative_setting", "alternative_version", "character", "full_story", "other", "parent_story", "prequel", "sequel", "side_story", "spinoff", "summary"],
   },
 
 
   source: {
     type: Schema.Types.ObjectId,
-    refPath: 'sourceModel',
-    required: true
+    refPath: "sourceModel",
+    required: true,
   },
 
   destination: {
     type: Schema.Types.ObjectId,
-    refPath: 'destinationModel',
-    required: true
+    refPath: "destinationModel",
+    required: true,
   },
 
 
   sourceModel: {
     type: String,
     required: true,
-    enum: ['Anime', 'Manga']
+    enum: ["Anime", "Manga"],
   },
 
   destinationModel: {
     type: String,
     required: true,
-    enum: ['Anime', 'Manga']
+    enum: ["Anime", "Manga"],
   },
 }, {
   id: false,
@@ -69,27 +66,29 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiMo
 });
 
 
-FranchiseSchema.pre<IFranchise & Document>('validate', async function () {
+FranchiseSchema.pre<TFranchise>("validate", async function () {
   if (!this.sourceModel && this.source) {
     if (await Anime.exists({ _id: this.source }))
-      this.sourceModel = 'Anime';
+      this.sourceModel = "Anime";
     else if (await Manga.exists({ _id: this.source }))
-      this.sourceModel = 'Manga';
+      this.sourceModel = "Manga";
   }
 
   if (!this.destinationModel && this.destination) {
     if (await Anime.exists({ _id: this.destination }))
-      this.destinationModel = 'Anime';
+      this.destinationModel = "Anime";
     else if (await Manga.exists({ _id: this.destination }))
-      this.destinationModel = 'Manga';
+      this.destinationModel = "Manga";
   }
 });
 
 
 FranchiseSchema.plugin(MongooseJsonApi, {
-  type: 'franchises',
+  type: "franchises",
 });
 
 
-const Franchise = model<IFranchise, FranchiseModel & JsonApiModel<IFranchise>>('Franchise', FranchiseSchema);
+export type TFranchise = HydratedDocument<IFranchise, FranchiseInstanceMethods, FranchiseQueryHelper>;
+
+const Franchise = model<IFranchise, FranchiseModel & JsonApiModel<IFranchise>>("Franchise", FranchiseSchema);
 export default Franchise;

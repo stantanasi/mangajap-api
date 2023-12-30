@@ -7,15 +7,15 @@ import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const followRoutes = express.Router();
 
-followRoutes.get('/', async (req, res, next) => {
+followRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Follow.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -25,7 +25,7 @@ followRoutes.get('/', async (req, res, next) => {
   }
 });
 
-followRoutes.post('/', isLogin(), async (req, res, next) => {
+followRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const id = await Follow.fromJsonApi(req.body)
       .save()
@@ -34,7 +34,7 @@ followRoutes.post('/', isLogin(), async (req, res, next) => {
     const response = await Follow.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -43,12 +43,12 @@ followRoutes.post('/', isLogin(), async (req, res, next) => {
   }
 });
 
-followRoutes.get('/:id', async (req, res, next) => {
+followRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Follow.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -57,7 +57,7 @@ followRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
+followRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     await Follow.findById(req.params.id)
       .orFail()
@@ -75,7 +75,7 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
     const response = await Follow.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -84,7 +84,7 @@ followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   }
 });
 
-followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
+followRoutes.delete("/:id", isLogin(), async (req, res, next) => {
   try {
     await Follow.findById(req.params.id)
       .orFail()
@@ -105,13 +105,13 @@ followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
 });
 
 
-followRoutes.get('/:id/follower', async (req, res, next) => {
+followRoutes.get("/:id/follower", async (req, res, next) => {
   try {
     const response = await Follow.findById(req.params.id)
-      .getRelationship('follower')
+      .getRelationship("follower")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -120,13 +120,13 @@ followRoutes.get('/:id/follower', async (req, res, next) => {
   }
 });
 
-followRoutes.get('/:id/followed', async (req, res, next) => {
+followRoutes.get("/:id/followed", async (req, res, next) => {
   try {
     const response = await Follow.findById(req.params.id)
-      .getRelationship('followed')
+      .getRelationship("followed")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

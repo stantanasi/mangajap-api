@@ -4,15 +4,15 @@ import { isAdmin } from "../utils/middlewares/middlewares";
 
 const episodeRoutes = express.Router();
 
-episodeRoutes.get('/', async (req, res, next) => {
+episodeRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Episode.find()
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -22,7 +22,7 @@ episodeRoutes.get('/', async (req, res, next) => {
   }
 });
 
-episodeRoutes.post('/', isAdmin(), async (req, res, next) => {
+episodeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
     const id = await Episode.fromJsonApi(req.body)
       .save()
@@ -31,7 +31,7 @@ episodeRoutes.post('/', isAdmin(), async (req, res, next) => {
     const response = await Episode.findById(id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -40,12 +40,12 @@ episodeRoutes.post('/', isAdmin(), async (req, res, next) => {
   }
 });
 
-episodeRoutes.get('/:id', async (req, res, next) => {
+episodeRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -54,7 +54,7 @@ episodeRoutes.get('/:id', async (req, res, next) => {
   }
 });
 
-episodeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
+episodeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Episode.findById(req.params.id)
       .orFail()
@@ -67,7 +67,7 @@ episodeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
     const response = await Episode.findById(req.params.id)
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -76,7 +76,7 @@ episodeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   }
 });
 
-episodeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
+episodeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
     await Episode.findById(req.params.id)
       .orFail()
@@ -92,13 +92,13 @@ episodeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
 });
 
 
-episodeRoutes.get('/:id/anime', async (req, res, next) => {
+episodeRoutes.get("/:id/anime", async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
-      .getRelationship('anime')
+      .getRelationship("anime")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);
@@ -107,13 +107,13 @@ episodeRoutes.get('/:id/anime', async (req, res, next) => {
   }
 });
 
-episodeRoutes.get('/:id/season', async (req, res, next) => {
+episodeRoutes.get("/:id/season", async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
-      .getRelationship('season')
+      .getRelationship("season")
       .withJsonApi(req.query)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: `${req.protocol}://${req.get("host")}`,
       });
 
     res.json(response);

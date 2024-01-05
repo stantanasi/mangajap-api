@@ -227,6 +227,12 @@ UserSchema.virtual("reviews", {
   foreignField: "user",
 });
 
+UserSchema.virtual("requests", {
+  ref: "Request",
+  localField: "_id",
+  foreignField: "user",
+});
+
 
 UserSchema.pre<TUser>("save", async function () {
   if (this.isModified("avatar")) {

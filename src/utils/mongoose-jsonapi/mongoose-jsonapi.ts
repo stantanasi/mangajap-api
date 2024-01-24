@@ -631,9 +631,17 @@ export class JsonApiErrors extends Error {
   }
 
   static from(err: Error): JsonApiErrors {
-    return new JsonApiErrors([
-      JsonApiError.from(err),
-    ]);
+    if (err instanceof MongooseError.ValidationError) {
+      return new JsonApiErrors(
+        Object.values(err.errors).map((err) => {
+          return JsonApiError.from(err);
+        })
+      );
+    } else {
+      return new JsonApiErrors([
+        JsonApiError.from(err),
+      ]);
+    }
   }
 
   toJSON(): JsonApiBody {
@@ -676,6 +684,11 @@ export class JsonApiError extends Error implements IJsonApiError {
           stack: err.stack,
         },
       });
+    } else if (err instanceof MongooseError.ValidatorError) {
+      return new JsonApiError.InvalidAttribute(
+        err.path,
+        err.message,
+      );
     } else {
       return new JsonApiError({
         status: "500",
@@ -737,6 +750,19 @@ export class JsonApiError extends Error implements IJsonApiError {
         status: "400",
         title: "Missing attribute",
         detail: `Missing required attribute: ${attribute}`,
+      })
+    }
+  }
+
+  static InvalidAttribute = class extends JsonApiError {
+    constructor(attribute: string, message: string) {
+      super({
+        status: "400",
+        title: "Invalid attribute",
+        detail: message,
+        source: {
+          pointer: `/data/attributes/${attribute}`
+        },
       })
     }
   }

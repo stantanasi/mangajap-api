@@ -4,7 +4,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { connect } from "mongoose";
 import cors from "cors";
 import { auth } from "./firebase-app";
-import { JsonApiError } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
+import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
 import { AnimeSchema } from "./models/anime.model";
 import { MangaSchema } from "./models/manga.model";
 import animeEntryRoutes from "./routes/anime-entry.routes";
@@ -112,11 +112,14 @@ app.all("*", (req, res) => {
 // Error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
-  if (err instanceof JsonApiError) {
-    res.status(+(err.status || 500)).json(err);
+  if (err instanceof JsonApiErrors) {
+    res.status(err.status).json(err);
+  } else if (err instanceof JsonApiError) {
+    const errors = new JsonApiErrors([err]);
+    res.status(errors.status).json(errors);
   } else {
-    const error = JsonApiError.from(err);
-    res.status(+(error.status || 500)).json(error);
+    const errors = JsonApiErrors.from(err);
+    res.status(errors.status).json(errors);
   }
 });
 

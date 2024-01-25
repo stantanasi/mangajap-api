@@ -58,7 +58,11 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
     this.populate(relationship);
 
     return this.transform((doc) => {
-      return doc?.get(relationship) ?? null;
+      if (doc === null) {
+        throw new JsonApiError.ResourceNotFoundError(this.getFilter()._id);
+      }
+
+      return doc.get(relationship) ?? null;
     });
   };
 
@@ -246,7 +250,7 @@ export default function MongooseJsonApi<DocType, M extends JsonApiModel<DocType>
 
   schema.query.toJsonApi = function (opts) {
     // Throw an error if no document has been found
-    if ((this as any).op === "findOne") {
+    if ((this as any).op === "findOne" && !this.getOptions().getRelationship) {
       this.orFail(() => {
         throw new JsonApiError.ResourceNotFoundError(this.getFilter()._id);
       });

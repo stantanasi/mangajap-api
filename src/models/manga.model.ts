@@ -12,6 +12,28 @@ import { TStaff } from "./staff.model";
 import { TTheme } from "./theme.model";
 import Volume, { TVolume } from "./volume.model";
 
+enum MangaType {
+  Bd = "bd",
+  Comics = "comics",
+  Josei = "josei",
+  Kodomo = "kodomo",
+  Seijin = "seijin",
+  Seinen = "seinen",
+  Shojo = "shojo",
+  Shonen = "shonen",
+  Doujin = "doujin",
+  Novel = "novel",
+  Oneshot = "oneshot",
+  Webtoon = "webtoon",
+}
+
+enum MangaStatus {
+  Publishing = "publishing",
+  Finished = "finished",
+  Unreleased = "unreleased",
+  Upcoming = "upcoming",
+}
+
 export interface IManga {
   _id: Types.ObjectId;
 
@@ -24,8 +46,8 @@ export interface IManga {
   startDate: Date;
   endDate: Date | null;
   origin: string;
-  mangaType: "bd" | "comics" | "josei" | "kodomo" | "seijin" | "seinen" | "shojo" | "shonen" | "doujin" | "novel" | "oneshot" | "webtoon";
-  status: "publishing" | "finished" | "unreleased" | "upcoming";
+  mangaType: MangaType;
+  status: MangaStatus;
   coverImage: string | null;
   bannerImage: string | null;
   links: {
@@ -107,13 +129,13 @@ export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> 
   mangaType: {
     type: String,
     required: true,
-    enum: ["bd", "comics", "josei", "kodomo", "seijin", "seinen", "shojo", "shonen", "doujin", "novel", "oneshot", "webtoon"],
+    enum: Object.values(MangaType),
   },
 
   status: {
     type: String,
     required: true,
-    enum: ["publishing", "finished", "unreleased", "upcoming"],
+    enum: Object.values(MangaStatus),
   },
 
   coverImage: {

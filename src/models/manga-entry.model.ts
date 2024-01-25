@@ -3,12 +3,20 @@ import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelp
 import { TManga } from "./manga.model";
 import { TUser } from "./user.model";
 
+enum MangaEntryStatus {
+  Reading = "reading",
+  Completed = "completed",
+  Planned = "planned",
+  OnHold = "on_hold",
+  Dropped = "dropped",
+}
+
 export interface IMangaEntry {
   _id: Types.ObjectId;
 
   isAdd: boolean;
   isFavorites: boolean;
-  status: "reading" | "completed" | "planned" | "on_hold" | "dropped";
+  status: MangaEntryStatus;
   volumesRead: number;
   chaptersRead: number;
   rating: number | null;
@@ -41,8 +49,8 @@ export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel & JsonAp
 
   status: {
     type: String,
-    default: "reading",
-    enum: ["reading", "completed", "planned", "on_hold", "dropped"],
+    default: MangaEntryStatus.Reading,
+    enum: Object.values(MangaEntryStatus),
   },
 
   volumesRead: {

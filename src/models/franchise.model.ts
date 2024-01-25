@@ -3,10 +3,25 @@ import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelp
 import Anime, { TAnime } from "./anime.model";
 import Manga, { TManga } from "./manga.model";
 
+enum FranchiseRole {
+  Adaptation = "adaptation",
+  AlternativeSetting = "alternative_setting",
+  AlternativeVersion = "alternative_version",
+  Character = "character",
+  FullStory = "full_story",
+  Other = "other",
+  ParentStory = "parent_story",
+  Prequel = "prequel",
+  Sequel = "sequel",
+  SideStory = "side_story",
+  Spinoff = "spinoff",
+  Summary = "summary",
+}
+
 export interface IFranchise {
   _id: Types.ObjectId;
 
-  role: "adaptation" | "alternative_setting" | "alternative_version" | "character" | "full_story" | "other" | "parent_story" | "prequel" | "sequel" | "side_story" | "spinoff" | "summary";
+  role: FranchiseRole;
 
   source: Types.ObjectId | (TAnime | TManga);
   destination: Types.ObjectId | (TAnime | TManga);
@@ -28,7 +43,7 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiMo
   role: {
     type: String,
     required: true,
-    enum: ["adaptation", "alternative_setting", "alternative_version", "character", "full_story", "other", "parent_story", "prequel", "sequel", "side_story", "spinoff", "summary"],
+    enum: Object.values(FranchiseRole),
   },
 
 

@@ -3,12 +3,20 @@ import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelp
 import { TAnime } from "./anime.model";
 import { TUser } from "./user.model";
 
+enum AnimeEntryStatus {
+  Watching = "watching",
+  Completed = "completed",
+  Planned = "planned",
+  OnHold = "on_hold",
+  Dropped = "dropped",
+}
+
 export interface IAnimeEntry {
   _id: Types.ObjectId;
 
   isAdd: boolean;
   isFavorites: boolean;
-  status: "watching" | "completed" | "planned" | "on_hold" | "dropped";
+  status: AnimeEntryStatus;
   episodesWatch: number;
   rating: number | null;
   startedAt: Date | null;
@@ -40,8 +48,8 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonAp
 
   status: {
     type: String,
-    default: "watching",
-    enum: ["watching", "completed", "planned", "on_hold", "dropped"],
+    default: AnimeEntryStatus.Watching,
+    enum: Object.values(AnimeEntryStatus),
   },
 
   episodesWatch: {

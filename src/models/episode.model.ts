@@ -3,6 +3,11 @@ import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelp
 import { TAnime } from "./anime.model";
 import { TSeason } from "./season.model";
 
+enum EpisodeType {
+  None = "",
+  Oav = "oav",
+}
+
 export interface IEpisode {
   _id: Types.ObjectId;
 
@@ -13,7 +18,7 @@ export interface IEpisode {
   relativeNumber: number;
   number: number;
   airDate: Date | null;
-  episodeType: "" | "oav";
+  episodeType: EpisodeType;
   duration: number;
 
   anime: Types.ObjectId | TAnime;
@@ -60,8 +65,8 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
 
   episodeType: {
     type: String,
-    default: "",
-    enum: ["", "oav"],
+    default: EpisodeType.None,
+    enum: Object.values(EpisodeType),
   },
 
   duration: {

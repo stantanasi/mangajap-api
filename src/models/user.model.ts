@@ -7,6 +7,12 @@ import Follow, { TFollow } from "./follow.model";
 import MangaEntry, { TMangaEntry } from "./manga-entry.model";
 import { TReview } from "./review.model";
 
+enum UserGender {
+  Men = "men",
+  Women = "women",
+  Other = "other",
+}
+
 export interface IUser {
   _id: string;
 
@@ -14,7 +20,7 @@ export interface IUser {
   firstName: string;
   lastName: string;
   about: string;
-  gender: "men" | "women" | "other" | null;
+  gender: UserGender | null;
   birthday: Date | null;
   country: string;
   avatar: string | null;
@@ -76,7 +82,7 @@ export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & Se
   gender: {
     type: String,
     default: null,
-    enum: ["men", "women", "other", null],
+    enum: [...Object.values(UserGender), null],
   },
 
   birthday: {

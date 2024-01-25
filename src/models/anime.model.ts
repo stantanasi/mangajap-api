@@ -12,6 +12,22 @@ import Season, { TSeason } from "./season.model";
 import { TStaff } from "./staff.model";
 import { TTheme } from "./theme.model";
 
+enum AnimeStatus {
+  Airing = "airing",
+  Finished = "finished",
+  Unreleased = "unreleased",
+  Upcoming = "upcoming",
+}
+
+enum AnimeType {
+  Tv = "tv",
+  Ova = "ova",
+  Ona = "ona",
+  Movie = "movie",
+  Music = "music",
+  Special = "special",
+}
+
 export interface IAnime {
   _id: Types.ObjectId;
 
@@ -24,8 +40,8 @@ export interface IAnime {
   startDate: Date;
   endDate: Date | null;
   origin: string;
-  animeType: "tv" | "ova" | "ona" | "movie" | "music" | "special";
-  status: "airing" | "finished" | "unreleased" | "upcoming";
+  animeType: AnimeType;
+  status: AnimeStatus;
   inProduction: boolean;
   youtubeVideoId: string;
   coverImage: string | null;
@@ -110,13 +126,13 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> 
   animeType: {
     type: String,
     required: true,
-    enum: ["tv", "ova", "ona", "movie", "music", "special"],
+    enum: Object.values(AnimeType),
   },
 
   status: {
     type: String,
     required: true,
-    enum: ["airing", "finished", "unreleased", "upcoming"],
+    enum: Object.values(AnimeStatus),
   },
 
   inProduction: {

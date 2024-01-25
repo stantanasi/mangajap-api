@@ -4,10 +4,20 @@ import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 import { TPeople } from "./people.model";
 
+enum StaffRole {
+  Author = "author", 
+  Illustrator = "illustrator", 
+  StoryAndArt = "story_and_art", 
+  Licensor = "licensor", 
+  Producer = "producer", 
+  Studio = "studio", 
+  OriginalCreator = "original_creator",
+}
+
 export interface IStaff {
   _id: Types.ObjectId;
 
-  role: "author" | "illustrator" | "story_and_art" | "licensor" | "producer" | "studio" | "original_creator";
+  role: StaffRole;
 
   people: Types.ObjectId | TPeople;
   anime?: Types.ObjectId | TAnime;
@@ -27,7 +37,7 @@ export const StaffSchema = new Schema<IStaff, StaffModel & JsonApiModel<IStaff>,
   role: {
     type: String,
     required: true,
-    enum: ["author", "illustrator", "story_and_art", "licensor", "producer", "studio", "original_creator"],
+    enum: Object.values(StaffRole),
   },
 
 

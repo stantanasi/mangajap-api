@@ -1,7 +1,6 @@
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import AnimeEntry from "../models/anime-entry.model";
-import { IUser } from "../models/user.model";
 import { isLogin } from "../utils/middlewares/middlewares";
 import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 

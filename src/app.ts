@@ -27,6 +27,7 @@ import staffRoutes from "./routes/staff.routes";
 import themeRoutes from "./routes/theme.routes";
 import userRoutes from "./routes/user.routes";
 import volumeRoutes from "./routes/volume.routes";
+import volumeEntryRoutes from "./routes/volume-entry.routes";
 
 const app = express();
 
@@ -128,6 +129,7 @@ app.use("/staff", staffRoutes);
 app.use("/themes", themeRoutes);
 app.use("/users", userRoutes);
 app.use("/volumes", volumeRoutes);
+app.use("/volume-entries", volumeEntryRoutes);
 
 app.all("*", (req, res) => {
   throw new JsonApiError.RouteNotFoundError(req.path);

@@ -6,11 +6,13 @@ import cors from "cors";
 import { auth } from "./firebase-app";
 import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
 import { AnimeSchema } from "./models/anime.model";
+import { EpisodeSchema } from "./models/episode.model";
 import { MangaSchema } from "./models/manga.model";
 import animeEntryRoutes from "./routes/anime-entry.routes";
 import animeRoutes from "./routes/anime.routes";
 import chapterRoutes from "./routes/chapter.routes";
 import episodeRoutes from "./routes/episode.routes";
+import episodeEntryRoutes from "./routes/episode-entry.routes";
 import followRoutes from "./routes/follow.routes";
 import franchiseRoutes from "./routes/franchise.routes";
 import genreRoutes from "./routes/genre.routes";
@@ -63,6 +65,16 @@ app.use(async (req, res, next) => {
           },
         });
 
+        EpisodeSchema.virtual("episode-entry", {
+          ref: "EpisodeEntry",
+          localField: "_id",
+          foreignField: "episode",
+          justOne: true,
+          match: {
+            user: token.uid,
+          },
+        });
+
         MangaSchema.virtual("manga-entry", {
           ref: "MangaEntry",
           localField: "_id",
@@ -91,6 +103,7 @@ app.use("/anime", animeRoutes);
 app.use("/anime-entries", animeEntryRoutes);
 app.use("/chapters", chapterRoutes);
 app.use("/episodes", episodeRoutes);
+app.use("/episode-entries", episodeEntryRoutes);
 app.use("/follows", followRoutes);
 app.use("/franchises", franchiseRoutes);
 app.use("/genres", genreRoutes);

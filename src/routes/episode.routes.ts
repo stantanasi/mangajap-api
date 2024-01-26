@@ -122,4 +122,19 @@ episodeRoutes.get("/:id/season", async (req, res, next) => {
   }
 });
 
+episodeRoutes.get("/:id/episode-entry", async (req, res, next) => {
+  try {
+    const response = await Episode.findById(req.params.id)
+      .getRelationship("episode-entry")
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get("host")}`,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default episodeRoutes

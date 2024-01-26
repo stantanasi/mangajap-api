@@ -95,6 +95,8 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IE
   toObject: { virtuals: true },
 });
 
+EpisodeSchema.virtual("episode-entry");
+
 EpisodeSchema.index({
   number: 1,
   anime: 1,

@@ -95,6 +95,8 @@ VolumeSchema.virtual("chapters", {
   },
 });
 
+VolumeSchema.virtual("volume-entry");
+
 VolumeSchema.index({
   number: 1,
   manga: 1,

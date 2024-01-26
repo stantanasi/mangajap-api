@@ -126,4 +126,19 @@ volumeRoutes.get("/:id/chapters", async (req, res, next) => {
   }
 });
 
+volumeRoutes.get("/:id/volume-entry", async (req, res, next) => {
+  try {
+    const response = await Volume.findById(req.params.id)
+      .getRelationship("volume-entry")
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get("host")}`,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default volumeRoutes

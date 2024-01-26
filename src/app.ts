@@ -8,6 +8,7 @@ import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-j
 import { AnimeSchema } from "./models/anime.model";
 import { EpisodeSchema } from "./models/episode.model";
 import { MangaSchema } from "./models/manga.model";
+import { VolumeSchema } from "./models/volume.model";
 import animeEntryRoutes from "./routes/anime-entry.routes";
 import animeRoutes from "./routes/anime.routes";
 import chapterRoutes from "./routes/chapter.routes";
@@ -26,6 +27,7 @@ import staffRoutes from "./routes/staff.routes";
 import themeRoutes from "./routes/theme.routes";
 import userRoutes from "./routes/user.routes";
 import volumeRoutes from "./routes/volume.routes";
+import volumeEntryRoutes from "./routes/volume-entry.routes";
 
 const app = express();
 
@@ -85,6 +87,16 @@ app.use(async (req, res, next) => {
           },
         });
 
+        VolumeSchema.virtual("volume-entry", {
+          ref: "VolumeEntry",
+          localField: "_id",
+          foreignField: "volume",
+          justOne: true,
+          match: {
+            user: token.uid,
+          },
+        });
+
         return token;
       })
       .catch(() => null);
@@ -117,6 +129,7 @@ app.use("/staff", staffRoutes);
 app.use("/themes", themeRoutes);
 app.use("/users", userRoutes);
 app.use("/volumes", volumeRoutes);
+app.use("/volume-entries", volumeEntryRoutes);
 
 app.all("*", (req, res) => {
   throw new JsonApiError.RouteNotFoundError(req.path);

@@ -122,4 +122,19 @@ chapterRoutes.get("/:id/volume", async (req, res, next) => {
   }
 });
 
+chapterRoutes.get("/:id/chapter-entry", async (req, res, next) => {
+  try {
+    const response = await Chapter.findById(req.params.id)
+      .getRelationship("chapter-entry")
+      .withJsonApi(req.query)
+      .toJsonApi({
+        baseUrl: `${req.protocol}://${req.get("host")}`,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default chapterRoutes

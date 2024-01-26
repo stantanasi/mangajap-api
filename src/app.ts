@@ -6,6 +6,7 @@ import cors from "cors";
 import { auth } from "./firebase-app";
 import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
 import { AnimeSchema } from "./models/anime.model";
+import { ChapterSchema } from "./models/chapter.model";
 import { EpisodeSchema } from "./models/episode.model";
 import { MangaSchema } from "./models/manga.model";
 import { VolumeSchema } from "./models/volume.model";
@@ -91,6 +92,16 @@ app.use(async (req, res, next) => {
           ref: "VolumeEntry",
           localField: "_id",
           foreignField: "volume",
+          justOne: true,
+          match: {
+            user: token.uid,
+          },
+        });
+
+        ChapterSchema.virtual("chapter-entry", {
+          ref: "ChapterEntry",
+          localField: "_id",
+          foreignField: "chapter",
           justOne: true,
           match: {
             user: token.uid,

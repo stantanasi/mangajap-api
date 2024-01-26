@@ -6,12 +6,14 @@ import cors from "cors";
 import { auth } from "./firebase-app";
 import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
 import { AnimeSchema } from "./models/anime.model";
+import { ChapterSchema } from "./models/chapter.model";
 import { EpisodeSchema } from "./models/episode.model";
 import { MangaSchema } from "./models/manga.model";
 import { VolumeSchema } from "./models/volume.model";
 import animeEntryRoutes from "./routes/anime-entry.routes";
 import animeRoutes from "./routes/anime.routes";
 import chapterRoutes from "./routes/chapter.routes";
+import chapterEntryRoutes from "./routes/chapter-entry.routes";
 import episodeRoutes from "./routes/episode.routes";
 import episodeEntryRoutes from "./routes/episode-entry.routes";
 import followRoutes from "./routes/follow.routes";
@@ -97,6 +99,16 @@ app.use(async (req, res, next) => {
           },
         });
 
+        ChapterSchema.virtual("chapter-entry", {
+          ref: "ChapterEntry",
+          localField: "_id",
+          foreignField: "chapter",
+          justOne: true,
+          match: {
+            user: token.uid,
+          },
+        });
+
         return token;
       })
       .catch(() => null);
@@ -114,6 +126,7 @@ app.get("/favicon.ico", (req, res) => res.status(204).send());
 app.use("/anime", animeRoutes);
 app.use("/anime-entries", animeEntryRoutes);
 app.use("/chapters", chapterRoutes);
+app.use("/chapter-entries", chapterEntryRoutes);
 app.use("/episodes", episodeRoutes);
 app.use("/episode-entries", episodeEntryRoutes);
 app.use("/follows", followRoutes);

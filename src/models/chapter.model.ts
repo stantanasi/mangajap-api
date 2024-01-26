@@ -65,6 +65,8 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IC
   toObject: { virtuals: true },
 });
 
+ChapterSchema.virtual("chapter-entry");
+
 ChapterSchema.index({
   number: 1,
   manga: 1,

@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express, { NextFunction, Request, Response } from "express";
+import * as functions from "firebase-functions";
 import { connect } from "mongoose";
 import cors from "cors";
 import { auth } from "./firebase-app";
@@ -162,7 +163,4 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-const port = +(process.env.PORT || 5000);
-app.listen(port, () => {
-  console.log(`Server is listening on ${port}`);
-});
+export const api = functions.https.onRequest(app);

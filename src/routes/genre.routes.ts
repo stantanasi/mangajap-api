@@ -95,7 +95,7 @@ genreRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 genreRoutes.get("/:id/manga", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
-      .getRelationship("manga")
+      .getRelationship("mangas")
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
@@ -114,7 +114,7 @@ genreRoutes.get("/:id/manga", async (req, res, next) => {
 genreRoutes.get("/:id/anime", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
-      .getRelationship("anime")
+      .getRelationship("animes")
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,

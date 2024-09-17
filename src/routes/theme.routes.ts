@@ -92,10 +92,10 @@ themeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-themeRoutes.get("/:id/manga", async (req, res, next) => {
+themeRoutes.get("/:id/mangas", async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
-      .getRelationship("manga")
+      .getRelationship("mangas")
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
@@ -111,10 +111,10 @@ themeRoutes.get("/:id/manga", async (req, res, next) => {
   }
 });
 
-themeRoutes.get("/:id/anime", async (req, res, next) => {
+themeRoutes.get("/:id/animes", async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
-      .getRelationship("anime")
+      .getRelationship("animes")
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,

@@ -110,7 +110,7 @@ volumeRoutes.get("/:id/manga", async (req, res, next) => {
 volumeRoutes.get("/:id/chapters", async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
-      .getRelationship("franchises")
+      .getRelationship("chapters")
       .withJsonApi(req.query)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,

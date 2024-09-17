@@ -1,8 +1,8 @@
+import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import Follow from "../models/follow.model";
 import { isLogin } from "../utils/middlewares/middlewares";
-import { JsonApiError } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const followRoutes = express.Router();
 

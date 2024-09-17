@@ -1,3 +1,4 @@
+import { JsonApiError, JsonApiErrors } from "@stantanasi/mongoose-jsonapi";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
@@ -30,7 +31,6 @@ import themeRoutes from "./routes/theme.routes";
 import userRoutes from "./routes/user.routes";
 import volumeEntryRoutes from "./routes/volume-entry.routes";
 import volumeRoutes from "./routes/volume.routes";
-import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const app = express();
 

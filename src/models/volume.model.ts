@@ -3,6 +3,7 @@ import { deleteFile, uploadFile } from "../firebase-app";
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 import Chapter, { TChapter } from "./chapter.model";
 import { TManga } from "./manga.model";
+import { TVolumeEntry } from "./volume-entry.model";
 
 export interface IVolume {
   _id: Types.ObjectId;
@@ -20,6 +21,7 @@ export interface IVolume {
 
   manga: Types.ObjectId | TManga;
   chapters?: TChapter[];
+  "volume-entry"?: TVolumeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;

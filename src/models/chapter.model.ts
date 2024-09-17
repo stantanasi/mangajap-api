@@ -1,5 +1,6 @@
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
+import { TChapterEntry } from "./chapter-entry.model";
 import { TManga } from "./manga.model";
 import { TVolume } from "./volume.model";
 
@@ -14,6 +15,7 @@ export interface IChapter {
 
   manga: Types.ObjectId | TManga;
   volume: Types.ObjectId | TVolume | null;
+  "chapter-entry"?: TChapterEntry | null;
 
   createdAt: Date;
   updatedAt: Date;

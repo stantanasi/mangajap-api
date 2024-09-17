@@ -5,6 +5,7 @@ import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper }
 import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
 import Follow, { TFollow } from "./follow.model";
 import MangaEntry, { TMangaEntry } from "./manga-entry.model";
+import { TRequest } from "./request.model";
 import { TReview } from "./review.model";
 
 enum UserGender {
@@ -41,6 +42,7 @@ export interface IUser {
   "anime-favorites"?: TAnimeEntry[];
   "manga-favorites"?: TMangaEntry[];
   reviews?: TReview[];
+  requests?: TRequest[];
 
   createdAt: Date;
   updatedAt: Date;

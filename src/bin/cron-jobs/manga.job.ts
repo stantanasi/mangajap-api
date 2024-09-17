@@ -57,7 +57,7 @@ import MangaDex from "../../utils/providers/mangadex";
           console.log(manga.title, "|", "Chapter", chapter.number, "|", "CREATE");
 
         } else if (chapter && (!chapter.volume && volume)) {
-          chapter.volume = volume._id;
+          chapter.volume = volume._id as any;
           await chapter.save();
           console.log(manga.title, "|", "Chapter", chapter.number, "|", "UPDATE");
         }

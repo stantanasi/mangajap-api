@@ -1,7 +1,7 @@
+import { JsonApiQueryParams } from "@stantanasi/mongoose-jsonapi";
 import express from "express";
 import People from "../models/people.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
-import { JsonApiQueryParams } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const peopleRoutes = express.Router();
 

@@ -17,13 +17,13 @@ export interface IVolumeEntry {
   updatedAt: Date;
 }
 
-export interface VolumeEntryInstanceMethods extends JsonApiInstanceMethods { }
+export type VolumeEntryInstanceMethods = JsonApiInstanceMethods
 
-export interface VolumeEntryQueryHelper extends JsonApiQueryHelper { }
+export type VolumeEntryQueryHelper = JsonApiQueryHelper
 
-export interface VolumeEntryModel extends Model<IVolumeEntry, VolumeEntryQueryHelper, VolumeEntryInstanceMethods> { }
+export type VolumeEntryModel = Model<IVolumeEntry, VolumeEntryQueryHelper, VolumeEntryInstanceMethods> & JsonApiModel<IVolumeEntry>
 
-export const VolumeEntrySchema = new Schema<IVolumeEntry, VolumeEntryModel & JsonApiModel<IVolumeEntry>, VolumeEntryInstanceMethods, VolumeEntryQueryHelper>({
+export const VolumeEntrySchema = new Schema<IVolumeEntry, VolumeEntryModel, VolumeEntryInstanceMethods, VolumeEntryQueryHelper>({
   readDate: {
     type: Date,
     default: new Date(),
@@ -73,5 +73,5 @@ VolumeEntrySchema.plugin(MongooseJsonApi, {
 
 export type TVolumeEntry = HydratedDocument<IVolumeEntry, VolumeEntryInstanceMethods, VolumeEntryQueryHelper>;
 
-const VolumeEntry = model<IVolumeEntry, VolumeEntryModel & JsonApiModel<IVolumeEntry>>("VolumeEntry", VolumeEntrySchema);
+const VolumeEntry = model<IVolumeEntry, VolumeEntryModel>("VolumeEntry", VolumeEntrySchema);
 export default VolumeEntry;

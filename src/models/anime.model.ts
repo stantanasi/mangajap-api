@@ -74,13 +74,13 @@ export interface IAnime {
   updatedAt: Date;
 }
 
-export interface AnimeInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
+export type AnimeInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
 
-export interface AnimeQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
+export type AnimeQueryHelper = JsonApiQueryHelper & SearchQueryHelper
 
-export interface AnimeModel extends Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> { }
+export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & JsonApiModel<IAnime> & SearchModel<IAnime>
 
-export const AnimeSchema = new Schema<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>, AnimeInstanceMethods, AnimeQueryHelper>({
+export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, AnimeQueryHelper>({
   title: {
     type: String,
     required: true,
@@ -393,5 +393,5 @@ AnimeSchema.plugin(MongooseJsonApi, {
 
 export type TAnime = HydratedDocument<IAnime, AnimeInstanceMethods, AnimeQueryHelper>;
 
-const Anime = model<IAnime, AnimeModel & JsonApiModel<IAnime> & SearchModel<IAnime>>("Anime", AnimeSchema);
+const Anime = model<IAnime, AnimeModel>("Anime", AnimeSchema);
 export default Anime;

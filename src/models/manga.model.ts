@@ -77,13 +77,13 @@ export interface IManga {
   updatedAt: Date;
 }
 
-export interface MangaInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
+export type MangaInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
 
-export interface MangaQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
+export type MangaQueryHelper = JsonApiQueryHelper & SearchQueryHelper
 
-export interface MangaModel extends Model<IManga, MangaQueryHelper, MangaInstanceMethods> { }
+export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & JsonApiModel<IManga> & SearchModel<IManga>
 
-export const MangaSchema = new Schema<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>, MangaInstanceMethods, MangaQueryHelper>({
+export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, MangaQueryHelper>({
   title: {
     type: String,
     required: true,
@@ -381,5 +381,5 @@ MangaSchema.plugin(MongooseJsonApi, {
 
 export type TManga = HydratedDocument<IManga, MangaInstanceMethods, MangaQueryHelper>;
 
-const Manga = model<IManga, MangaModel & JsonApiModel<IManga> & SearchModel<IManga>>("Manga", MangaSchema);
+const Manga = model<IManga, MangaModel>("Manga", MangaSchema);
 export default Manga;

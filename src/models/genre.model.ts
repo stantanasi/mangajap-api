@@ -16,13 +16,13 @@ export interface IGenre {
   updatedAt: Date;
 }
 
-export interface GenreInstanceMethods extends JsonApiInstanceMethods { }
+export type GenreInstanceMethods = JsonApiInstanceMethods
 
-export interface GenreQueryHelper extends JsonApiQueryHelper { }
+export type GenreQueryHelper = JsonApiQueryHelper
 
-export interface GenreModel extends Model<IGenre, GenreQueryHelper, GenreInstanceMethods> { }
+export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & JsonApiModel<IGenre>
 
-export const GenreSchema = new Schema<IGenre, GenreModel & JsonApiModel<IGenre>, GenreInstanceMethods, GenreQueryHelper>({
+export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, GenreQueryHelper>({
   title: {
     type: String,
     required: true,
@@ -61,5 +61,5 @@ GenreSchema.plugin(MongooseJsonApi, {
 
 export type TGenre = HydratedDocument<IGenre, GenreInstanceMethods, GenreQueryHelper>;
 
-const Genre = model<IGenre, GenreModel & JsonApiModel<IGenre>>("Genre", GenreSchema);
+const Genre = model<IGenre, GenreModel>("Genre", GenreSchema);
 export default Genre;

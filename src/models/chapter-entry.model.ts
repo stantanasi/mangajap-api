@@ -17,13 +17,13 @@ export interface IChapterEntry {
   updatedAt: Date;
 }
 
-export interface ChapterEntryInstanceMethods extends JsonApiInstanceMethods { }
+export type ChapterEntryInstanceMethods = JsonApiInstanceMethods
 
-export interface ChapterEntryQueryHelper extends JsonApiQueryHelper { }
+export type ChapterEntryQueryHelper = JsonApiQueryHelper
 
-export interface ChapterEntryModel extends Model<IChapterEntry, ChapterEntryQueryHelper, ChapterEntryInstanceMethods> { }
+export type ChapterEntryModel = Model<IChapterEntry, ChapterEntryQueryHelper, ChapterEntryInstanceMethods> & JsonApiModel<IChapterEntry>
 
-export const ChapterEntrySchema = new Schema<IChapterEntry, ChapterEntryModel & JsonApiModel<IChapterEntry>, ChapterEntryInstanceMethods, ChapterEntryQueryHelper>({
+export const ChapterEntrySchema = new Schema<IChapterEntry, ChapterEntryModel, ChapterEntryInstanceMethods, ChapterEntryQueryHelper>({
   readDate: {
     type: Date,
     default: new Date(),
@@ -73,5 +73,5 @@ ChapterEntrySchema.plugin(MongooseJsonApi, {
 
 export type TChapterEntry = HydratedDocument<IChapterEntry, ChapterEntryInstanceMethods, ChapterEntryQueryHelper>;
 
-const ChapterEntry = model<IChapterEntry, ChapterEntryModel & JsonApiModel<IChapterEntry>>("ChapterEntry", ChapterEntrySchema);
+const ChapterEntry = model<IChapterEntry, ChapterEntryModel>("ChapterEntry", ChapterEntrySchema);
 export default ChapterEntry;

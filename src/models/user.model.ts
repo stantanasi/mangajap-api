@@ -48,13 +48,13 @@ export interface IUser {
   updatedAt: Date;
 }
 
-export interface UserInstanceMethods extends JsonApiInstanceMethods, SearchInstanceMethods { }
+export type UserInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
 
-export interface UserQueryHelper extends JsonApiQueryHelper, SearchQueryHelper { }
+export type UserQueryHelper = JsonApiQueryHelper & SearchQueryHelper
 
-export interface UserModel extends Model<IUser, UserQueryHelper, UserInstanceMethods> { }
+export type UserModel = Model<IUser, UserQueryHelper, UserInstanceMethods> & JsonApiModel<IUser> & SearchModel<IUser>
 
-export const UserSchema = new Schema<IUser, UserModel & JsonApiModel<IUser> & SearchModel<IUser>, UserInstanceMethods, UserQueryHelper>({
+export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, UserQueryHelper>({
   _id: {
     type: String,
     required: true,
@@ -346,5 +346,5 @@ UserSchema.plugin(MongooseJsonApi, {
 
 export type TUser = HydratedDocument<IUser, UserInstanceMethods, UserQueryHelper>;
 
-const User = model<IUser, UserModel & JsonApiModel<IUser> & SearchModel<IUser>>("User", UserSchema);
+const User = model<IUser, UserModel>("User", UserSchema);
 export default User;

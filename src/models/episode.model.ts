@@ -30,13 +30,13 @@ export interface IEpisode {
   updatedAt: Date;
 }
 
-export interface EpisodeInstanceMethods extends JsonApiInstanceMethods { }
+export type EpisodeInstanceMethods = JsonApiInstanceMethods
 
-export interface EpisodeQueryHelper extends JsonApiQueryHelper { }
+export type EpisodeQueryHelper = JsonApiQueryHelper
 
-export interface EpisodeModel extends Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> { }
+export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & JsonApiModel<IEpisode>
 
-export const EpisodeSchema = new Schema<IEpisode, EpisodeModel & JsonApiModel<IEpisode>, EpisodeInstanceMethods, EpisodeQueryHelper>({
+export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceMethods, EpisodeQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -117,5 +117,5 @@ EpisodeSchema.plugin(MongooseJsonApi, {
 
 export type TEpisode = HydratedDocument<IEpisode, EpisodeInstanceMethods, EpisodeQueryHelper>;
 
-const Episode = model<IEpisode, EpisodeModel & JsonApiModel<IEpisode>>("Episode", EpisodeSchema);
+const Episode = model<IEpisode, EpisodeModel>("Episode", EpisodeSchema);
 export default Episode;

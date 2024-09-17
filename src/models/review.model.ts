@@ -17,13 +17,13 @@ export interface IReview {
   updatedAt: Date;
 }
 
-export interface ReviewInstanceMethods extends JsonApiInstanceMethods { }
+export type ReviewInstanceMethods = JsonApiInstanceMethods
 
-export interface ReviewQueryHelper extends JsonApiQueryHelper { }
+export type ReviewQueryHelper = JsonApiQueryHelper
 
-export interface ReviewModel extends Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> { }
+export type ReviewModel = Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> & JsonApiModel<IReview>
 
-export const ReviewSchema = new Schema<IReview, ReviewModel & JsonApiModel<IReview>, ReviewInstanceMethods, ReviewQueryHelper>({
+export const ReviewSchema = new Schema<IReview, ReviewModel, ReviewInstanceMethods, ReviewQueryHelper>({
   content: {
     type: String,
     required: true,
@@ -64,5 +64,5 @@ ReviewSchema.plugin(MongooseJsonApi, {
 
 export type TReview = HydratedDocument<IReview, ReviewInstanceMethods, ReviewQueryHelper>;
 
-const Review = model<IReview, ReviewModel & JsonApiModel<IReview>>("Review", ReviewSchema);
+const Review = model<IReview, ReviewModel>("Review", ReviewSchema);
 export default Review;

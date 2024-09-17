@@ -12,13 +12,13 @@ export interface IFollow {
   updatedAt: Date;
 }
 
-export interface FollowInstanceMethods extends JsonApiInstanceMethods { }
+export type FollowInstanceMethods = JsonApiInstanceMethods
 
-export interface FollowQueryHelper extends JsonApiQueryHelper { }
+export type FollowQueryHelper = JsonApiQueryHelper
 
-export interface FollowModel extends Model<IFollow, FollowQueryHelper, FollowInstanceMethods> { }
+export type FollowModel = Model<IFollow, FollowQueryHelper, FollowInstanceMethods> & JsonApiModel<IFollow>
 
-export const FollowSchema = new Schema<IFollow, FollowModel & JsonApiModel<IFollow>, FollowInstanceMethods, FollowQueryHelper>({
+export const FollowSchema = new Schema<IFollow, FollowModel, FollowInstanceMethods, FollowQueryHelper>({
   follower: {
     type: String,
     ref: "User",
@@ -52,5 +52,5 @@ FollowSchema.plugin(MongooseJsonApi, {
 
 export type TFollow = HydratedDocument<IFollow, FollowInstanceMethods, FollowQueryHelper>;
 
-const Follow = model<IFollow, FollowModel & JsonApiModel<IFollow>>("Follow", FollowSchema);
+const Follow = model<IFollow, FollowModel>("Follow", FollowSchema);
 export default Follow;

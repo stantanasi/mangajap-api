@@ -27,13 +27,13 @@ export interface IStaff {
   updatedAt: Date;
 }
 
-export interface StaffInstanceMethods extends JsonApiInstanceMethods { }
+export type StaffInstanceMethods = JsonApiInstanceMethods
 
-export interface StaffQueryHelper extends JsonApiQueryHelper { }
+export type StaffQueryHelper = JsonApiQueryHelper
 
-export interface StaffModel extends Model<IStaff, StaffQueryHelper, StaffInstanceMethods> { }
+export type StaffModel = Model<IStaff, StaffQueryHelper, StaffInstanceMethods> & JsonApiModel<IStaff>
 
-export const StaffSchema = new Schema<IStaff, StaffModel & JsonApiModel<IStaff>, StaffInstanceMethods, StaffQueryHelper>({
+export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, StaffQueryHelper>({
   role: {
     type: String,
     required: true,
@@ -75,5 +75,5 @@ StaffSchema.plugin(MongooseJsonApi, {
 
 export type TStaff = HydratedDocument<IStaff, StaffInstanceMethods, StaffQueryHelper>;
 
-const Staff = model<IStaff, StaffModel & JsonApiModel<IStaff>>("Staff", StaffSchema);
+const Staff = model<IStaff, StaffModel>("Staff", StaffSchema);
 export default Staff;

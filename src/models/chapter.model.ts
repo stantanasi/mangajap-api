@@ -21,13 +21,13 @@ export interface IChapter {
   updatedAt: Date;
 }
 
-export interface ChapterInstanceMethods extends JsonApiInstanceMethods { }
+export type ChapterInstanceMethods = JsonApiInstanceMethods
 
-export interface ChapterQueryHelper extends JsonApiQueryHelper { }
+export type ChapterQueryHelper = JsonApiQueryHelper
 
-export interface ChapterModel extends Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> { }
+export type ChapterModel = Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> & JsonApiModel<IChapter>
 
-export const ChapterSchema = new Schema<IChapter, ChapterModel & JsonApiModel<IChapter>, ChapterInstanceMethods, ChapterQueryHelper>({
+export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceMethods, ChapterQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -82,5 +82,5 @@ ChapterSchema.plugin(MongooseJsonApi, {
 
 export type TChapter = HydratedDocument<IChapter, ChapterInstanceMethods, ChapterQueryHelper>;
 
-const Chapter = model<IChapter, ChapterModel & JsonApiModel<IChapter>>("Chapter", ChapterSchema);
+const Chapter = model<IChapter, ChapterModel>("Chapter", ChapterSchema);
 export default Chapter;

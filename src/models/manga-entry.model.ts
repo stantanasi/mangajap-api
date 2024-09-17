@@ -30,13 +30,13 @@ export interface IMangaEntry {
   updatedAt: Date;
 }
 
-export interface MangaEntryInstanceMethods extends JsonApiInstanceMethods { }
+export type MangaEntryInstanceMethods = JsonApiInstanceMethods
 
-export interface MangaEntryQueryHelper extends JsonApiQueryHelper { }
+export type MangaEntryQueryHelper = JsonApiQueryHelper
 
-export interface MangaEntryModel extends Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> { }
+export type MangaEntryModel = Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> & JsonApiModel<IMangaEntry>
 
-export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>, MangaEntryInstanceMethods, MangaEntryQueryHelper>({
+export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEntryInstanceMethods, MangaEntryQueryHelper>({
   isAdd: {
     type: Boolean,
     default: false,
@@ -112,5 +112,5 @@ MangaEntrySchema.plugin(MongooseJsonApi, {
 
 export type TMangaEntry = HydratedDocument<IMangaEntry, MangaEntryInstanceMethods, MangaEntryQueryHelper>;
 
-const MangaEntry = model<IMangaEntry, MangaEntryModel & JsonApiModel<IMangaEntry>>("MangaEntry", MangaEntrySchema);
+const MangaEntry = model<IMangaEntry, MangaEntryModel>("MangaEntry", MangaEntrySchema);
 export default MangaEntry;

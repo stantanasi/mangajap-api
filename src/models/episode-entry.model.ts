@@ -17,13 +17,13 @@ export interface IEpisodeEntry {
   updatedAt: Date;
 }
 
-export interface EpisodeEntryInstanceMethods extends JsonApiInstanceMethods { }
+export type EpisodeEntryInstanceMethods = JsonApiInstanceMethods
 
-export interface EpisodeEntryQueryHelper extends JsonApiQueryHelper { }
+export type EpisodeEntryQueryHelper = JsonApiQueryHelper
 
-export interface EpisodeEntryModel extends Model<IEpisodeEntry, EpisodeEntryQueryHelper, EpisodeEntryInstanceMethods> { }
+export type EpisodeEntryModel = Model<IEpisodeEntry, EpisodeEntryQueryHelper, EpisodeEntryInstanceMethods> & JsonApiModel<IEpisodeEntry>
 
-export const EpisodeEntrySchema = new Schema<IEpisodeEntry, EpisodeEntryModel & JsonApiModel<IEpisodeEntry>, EpisodeEntryInstanceMethods, EpisodeEntryQueryHelper>({
+export const EpisodeEntrySchema = new Schema<IEpisodeEntry, EpisodeEntryModel, EpisodeEntryInstanceMethods, EpisodeEntryQueryHelper>({
   watchedDate: {
     type: Date,
     default: new Date(),
@@ -73,5 +73,5 @@ EpisodeEntrySchema.plugin(MongooseJsonApi, {
 
 export type TEpisodeEntry = HydratedDocument<IEpisodeEntry, EpisodeEntryInstanceMethods, EpisodeEntryQueryHelper>;
 
-const EpisodeEntry = model<IEpisodeEntry, EpisodeEntryModel & JsonApiModel<IEpisodeEntry>>("EpisodeEntry", EpisodeEntrySchema);
+const EpisodeEntry = model<IEpisodeEntry, EpisodeEntryModel>("EpisodeEntry", EpisodeEntrySchema);
 export default EpisodeEntry;

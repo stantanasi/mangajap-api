@@ -33,13 +33,13 @@ export interface IFranchise {
   updatedAt: Date;
 }
 
-export interface FranchiseInstanceMethods extends JsonApiInstanceMethods { }
+export type FranchiseInstanceMethods = JsonApiInstanceMethods
 
-export interface FranchiseQueryHelper extends JsonApiQueryHelper { }
+export type FranchiseQueryHelper = JsonApiQueryHelper
 
-export interface FranchiseModel extends Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> { }
+export type FranchiseModel = Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> & JsonApiModel<IFranchise>
 
-export const FranchiseSchema = new Schema<IFranchise, FranchiseModel & JsonApiModel<IFranchise>, FranchiseInstanceMethods, FranchiseQueryHelper>({
+export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseInstanceMethods, FranchiseQueryHelper>({
   role: {
     type: String,
     required: true,
@@ -105,5 +105,5 @@ FranchiseSchema.plugin(MongooseJsonApi, {
 
 export type TFranchise = HydratedDocument<IFranchise, FranchiseInstanceMethods, FranchiseQueryHelper>;
 
-const Franchise = model<IFranchise, FranchiseModel & JsonApiModel<IFranchise>>("Franchise", FranchiseSchema);
+const Franchise = model<IFranchise, FranchiseModel>("Franchise", FranchiseSchema);
 export default Franchise;

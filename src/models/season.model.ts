@@ -24,13 +24,13 @@ export interface ISeason {
   updatedAt: Date;
 }
 
-export interface SeasonInstanceMethods extends JsonApiInstanceMethods { }
+export type SeasonInstanceMethods = JsonApiInstanceMethods
 
-export interface SeasonQueryHelper extends JsonApiQueryHelper { }
+export type SeasonQueryHelper = JsonApiQueryHelper
 
-export interface SeasonModel extends Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> { }
+export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & JsonApiModel<ISeason>
 
-export const SeasonSchema = new Schema<ISeason, SeasonModel & JsonApiModel<ISeason>, SeasonInstanceMethods, SeasonQueryHelper>({
+export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -135,5 +135,5 @@ SeasonSchema.plugin(MongooseJsonApi, {
 
 export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>;
 
-const Season = model<ISeason, SeasonModel & JsonApiModel<ISeason>>("Season", SeasonSchema);
+const Season = model<ISeason, SeasonModel>("Season", SeasonSchema);
 export default Season;

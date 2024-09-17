@@ -16,13 +16,13 @@ export interface ITheme {
   updatedAt: Date;
 }
 
-export interface ThemeInstanceMethods extends JsonApiInstanceMethods { }
+export type ThemeInstanceMethods = JsonApiInstanceMethods
 
-export interface ThemeQueryHelper extends JsonApiQueryHelper { }
+export type ThemeQueryHelper = JsonApiQueryHelper
 
-export interface ThemeModel extends Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> { }
+export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & JsonApiModel<ITheme>
 
-export const ThemeSchema = new Schema<ITheme, ThemeModel & JsonApiModel<ITheme>, ThemeInstanceMethods, ThemeQueryHelper>({
+export const ThemeSchema = new Schema<ITheme, ThemeModel, ThemeInstanceMethods, ThemeQueryHelper>({
   title: {
     type: String,
     required: true,
@@ -61,5 +61,5 @@ ThemeSchema.plugin(MongooseJsonApi, {
 
 export type TTheme = HydratedDocument<ITheme, ThemeInstanceMethods, ThemeQueryHelper>;
 
-const Theme = model<ITheme, ThemeModel & JsonApiModel<ITheme>>("Theme", ThemeSchema);
+const Theme = model<ITheme, ThemeModel>("Theme", ThemeSchema);
 export default Theme;

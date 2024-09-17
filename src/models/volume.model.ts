@@ -27,13 +27,13 @@ export interface IVolume {
   updatedAt: Date;
 }
 
-export interface VolumeInstanceMethods extends JsonApiInstanceMethods { }
+export type VolumeInstanceMethods = JsonApiInstanceMethods
 
-export interface VolumeQueryHelper extends JsonApiQueryHelper { }
+export type VolumeQueryHelper = JsonApiQueryHelper
 
-export interface VolumeModel extends Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> { }
+export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & JsonApiModel<IVolume>
 
-export const VolumeSchema = new Schema<IVolume, VolumeModel & JsonApiModel<IVolume>, VolumeInstanceMethods, VolumeQueryHelper>({
+export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper>({
   titles: {
     type: Schema.Types.Mixed,
     default: {},
@@ -149,5 +149,5 @@ VolumeSchema.plugin(MongooseJsonApi, {
 
 export type TVolume = HydratedDocument<IVolume, VolumeInstanceMethods, VolumeQueryHelper>;
 
-const Volume = model<IVolume, VolumeModel & JsonApiModel<IVolume>>("Volume", VolumeSchema);
+const Volume = model<IVolume, VolumeModel>("Volume", VolumeSchema);
 export default Volume;

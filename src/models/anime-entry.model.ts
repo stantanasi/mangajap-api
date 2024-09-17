@@ -29,13 +29,13 @@ export interface IAnimeEntry {
   updatedAt: Date;
 }
 
-export interface AnimeEntryInstanceMethods extends JsonApiInstanceMethods { }
+export type AnimeEntryInstanceMethods = JsonApiInstanceMethods
 
-export interface AnimeEntryQueryHelper extends JsonApiQueryHelper { }
+export type AnimeEntryQueryHelper = JsonApiQueryHelper
 
-export interface AnimeEntryModel extends Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> { }
+export type AnimeEntryModel = Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> & JsonApiModel<IAnimeEntry>
 
-export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
+export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
   isAdd: {
     type: Boolean,
     default: true,
@@ -106,5 +106,5 @@ AnimeEntrySchema.plugin(MongooseJsonApi, {
 
 export type TAnimeEntry = HydratedDocument<IAnimeEntry, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>;
 
-const AnimeEntry = model<IAnimeEntry, AnimeEntryModel & JsonApiModel<IAnimeEntry>>("AnimeEntry", AnimeEntrySchema);
+const AnimeEntry = model<IAnimeEntry, AnimeEntryModel>("AnimeEntry", AnimeEntrySchema);
 export default AnimeEntry;

@@ -16,13 +16,13 @@ export interface IRequest {
   updatedAt: Date;
 }
 
-export interface RequestInstanceMethods extends JsonApiInstanceMethods { }
+export type RequestInstanceMethods = JsonApiInstanceMethods
 
-export interface RequestQueryHelper extends JsonApiQueryHelper { }
+export type RequestQueryHelper = JsonApiQueryHelper
 
-export interface RequestModel extends Model<IRequest, RequestQueryHelper, RequestInstanceMethods> { }
+export type RequestModel = Model<IRequest, RequestQueryHelper, RequestInstanceMethods> & JsonApiModel<IRequest>
 
-export const RequestSchema = new Schema<IRequest, RequestModel & JsonApiModel<IRequest>, RequestInstanceMethods, RequestQueryHelper>({
+export const RequestSchema = new Schema<IRequest, RequestModel, RequestInstanceMethods, RequestQueryHelper>({
   requestType: {
     type: String,
     required: true,
@@ -66,5 +66,5 @@ RequestSchema.plugin(MongooseJsonApi, {
 
 export type TRequest = HydratedDocument<IRequest, RequestInstanceMethods, RequestQueryHelper>;
 
-const Request = model<IRequest, RequestModel & JsonApiModel<IRequest>>("Request", RequestSchema);
+const Request = model<IRequest, RequestModel>("Request", RequestSchema);
 export default Request;

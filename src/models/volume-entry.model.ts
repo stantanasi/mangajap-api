@@ -1,7 +1,7 @@
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "../utils/mongoose-jsonapi/mongoose-jsonapi";
-import { TVolume } from "./volume.model";
 import { TUser } from "./user.model";
+import { TVolume } from "./volume.model";
 
 export interface IVolumeEntry {
   _id: Types.ObjectId;

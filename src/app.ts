@@ -1,11 +1,10 @@
+import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 import express, { NextFunction, Request, Response } from "express";
 import * as functions from "firebase-functions";
 import { connect } from "mongoose";
-import cors from "cors";
 import { auth } from "./firebase-app";
-import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
 import { AnimeSchema } from "./models/anime.model";
 import { ChapterSchema } from "./models/chapter.model";
 import { EpisodeSchema } from "./models/episode.model";
@@ -13,10 +12,10 @@ import { MangaSchema } from "./models/manga.model";
 import { VolumeSchema } from "./models/volume.model";
 import animeEntryRoutes from "./routes/anime-entry.routes";
 import animeRoutes from "./routes/anime.routes";
-import chapterRoutes from "./routes/chapter.routes";
 import chapterEntryRoutes from "./routes/chapter-entry.routes";
-import episodeRoutes from "./routes/episode.routes";
+import chapterRoutes from "./routes/chapter.routes";
 import episodeEntryRoutes from "./routes/episode-entry.routes";
+import episodeRoutes from "./routes/episode.routes";
 import followRoutes from "./routes/follow.routes";
 import franchiseRoutes from "./routes/franchise.routes";
 import genreRoutes from "./routes/genre.routes";
@@ -29,8 +28,9 @@ import seasonRoutes from "./routes/season.routes";
 import staffRoutes from "./routes/staff.routes";
 import themeRoutes from "./routes/theme.routes";
 import userRoutes from "./routes/user.routes";
-import volumeRoutes from "./routes/volume.routes";
 import volumeEntryRoutes from "./routes/volume-entry.routes";
+import volumeRoutes from "./routes/volume.routes";
+import { JsonApiError, JsonApiErrors } from "./utils/mongoose-jsonapi/mongoose-jsonapi";
 
 const app = express();
 

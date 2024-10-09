@@ -344,7 +344,7 @@ MangaSchema.pre("findOne", async function () {
         },
       })
       .then((docs) => docs[0])
-      .then((doc) => doc?.popularity | 0 ?? 0),
+      .then((doc) => doc?.popularity ?? 0),
   });
 });
 

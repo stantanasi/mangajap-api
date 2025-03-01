@@ -90,7 +90,7 @@ export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, User
   birthday: {
     type: Date,
     default: null,
-    transform: function (this, val: Date | null | undefined) {
+    transform: function (this, val: IUser['birthday']) {
       return val?.toISOString().slice(0, 10) ?? val;
     },
   },
@@ -103,15 +103,6 @@ export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, User
   avatar: {
     type: String,
     default: null,
-    transform: function (this, val: string | null | undefined) {
-      return val ? {
-        tiny: val,
-        small: val,
-        medium: val,
-        large: val,
-        original: val,
-      } : null;
-    },
   },
 
 

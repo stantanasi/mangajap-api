@@ -92,7 +92,7 @@ genreRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-genreRoutes.get("/:id/manga", async (req, res, next) => {
+genreRoutes.get("/:id/mangas", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
       .getRelationship("mangas")
@@ -111,7 +111,7 @@ genreRoutes.get("/:id/manga", async (req, res, next) => {
   }
 });
 
-genreRoutes.get("/:id/anime", async (req, res, next) => {
+genreRoutes.get("/:id/animes", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
       .getRelationship("animes")

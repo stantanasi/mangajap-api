@@ -5,12 +5,12 @@ import { TManga } from "./manga.model";
 import { TPeople } from "./people.model";
 
 enum StaffRole {
-  Author = "author", 
-  Illustrator = "illustrator", 
-  StoryAndArt = "story_and_art", 
-  Licensor = "licensor", 
-  Producer = "producer", 
-  Studio = "studio", 
+  Author = "author",
+  Illustrator = "illustrator",
+  StoryAndArt = "story_and_art",
+  Licensor = "licensor",
+  Producer = "producer",
+  Studio = "studio",
   OriginalCreator = "original_creator",
 }
 

@@ -20,7 +20,7 @@
     "url": "https://github.com/mangajap/mangajap-api.git"
   },
   "dependencies": {
-    "@stantanasi/mongoose-jsonapi": "^1.0.3",
+    "@stantanasi/mongoose-jsonapi": "^1.0.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/mysql": "^2.15.24",

@@ -1,7 +1,6 @@
 import {
-  Model,
   QueryWithHelpers,
-  Schema,
+  Schema
 } from "mongoose";
 
 export default function MongooseSearch<DocType extends { _id: any }, M extends SearchModel<DocType>>(
@@ -10,7 +9,7 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
     fields: string[];
   },
 ) {
-  const schema = _schema as Schema<DocType, M, SearchInstanceMethods, SearchQueryHelper>;
+  const schema = _schema as Schema<DocType, M, SearchInstanceMethods, SearchQueryHelper, {}, SearchModel<DocType>>;
 
   schema.pre<QueryWithHelpers<DocType[], DocType, SearchQueryHelper>>("find", async function () {
     const iterate = (obj: any): { key: string, value: any }[] => {
@@ -45,17 +44,21 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
     }
 
     const aggregate = this.model.aggregate()
-      .addFields(options.fields.filter((field) => schema.path(field).instance === "Mixed").reduce((acc, field) => {
-        return Object.assign(acc, {
-          [field]: {
-            $map: {
-              input: { $objectToArray: `$${field}` },
-              as: "value",
-              in: "$$value.v",
-            },
-          },
-        });
-      }, {} as any))
+      .addFields(
+        options.fields
+          .filter((field) => schema.path(field).instance === "Map")
+          .reduce((acc, field) => {
+            return Object.assign(acc, {
+              [field]: {
+                $map: {
+                  input: { $objectToArray: `$${field}` },
+                  as: "value",
+                  in: "$$value.v",
+                },
+              },
+            });
+          }, {} as any)
+      )
       .match({
         $or: options.fields
           .map((field) => [query].concat(query.split(" ")).filter((word) => !!word).map((word) => {
@@ -131,7 +134,7 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
 }
 
 
-export interface SearchModel<T> extends Model<T, SearchQueryHelper, SearchInstanceMethods> { }
+export interface SearchModel<DocType> { }
 
 export interface SearchInstanceMethods { }
 

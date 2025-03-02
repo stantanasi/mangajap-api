@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import Episode, { TEpisode } from "./episode.model";
 
@@ -22,11 +23,11 @@ export interface ISeason {
   updatedAt: Date;
 }
 
-export type SeasonInstanceMethods = JsonApiInstanceMethods
+export type SeasonInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type SeasonQueryHelper = JsonApiQueryHelper
+export type SeasonQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & JsonApiModel<ISeason>
+export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & MultiLanguageModel<ISeason> & JsonApiModel<ISeason>
 
 export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper>({
   number: {
@@ -131,6 +132,10 @@ SeasonSchema.pre<TSeason>("deleteOne", async function () {
   }
 });
 
+
+SeasonSchema.plugin(MongooseMultiLanguage, {
+  fields: ["title", "overview", "airDate", "poster"],
+});
 
 SeasonSchema.plugin(MongooseJsonApi, {
   type: "seasons",

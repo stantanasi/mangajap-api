@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TUser } from "./user.model";
 
@@ -29,11 +30,11 @@ export interface IAnimeEntry {
   updatedAt: Date;
 }
 
-export type AnimeEntryInstanceMethods = JsonApiInstanceMethods
+export type AnimeEntryInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type AnimeEntryQueryHelper = JsonApiQueryHelper
+export type AnimeEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type AnimeEntryModel = Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> & JsonApiModel<IAnimeEntry>
+export type AnimeEntryModel = Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> & MultiLanguageModel<IAnimeEntry> & JsonApiModel<IAnimeEntry>
 
 export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
   isAdd: {
@@ -98,6 +99,10 @@ AnimeEntrySchema.index({
   anime: 1,
 }, { unique: true });
 
+
+AnimeEntrySchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 AnimeEntrySchema.plugin(MongooseJsonApi, {
   type: "anime-entries",

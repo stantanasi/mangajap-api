@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TUser } from "./user.model";
 
 export interface IFollow {
@@ -12,11 +13,11 @@ export interface IFollow {
   updatedAt: Date;
 }
 
-export type FollowInstanceMethods = JsonApiInstanceMethods
+export type FollowInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type FollowQueryHelper = JsonApiQueryHelper
+export type FollowQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type FollowModel = Model<IFollow, FollowQueryHelper, FollowInstanceMethods> & JsonApiModel<IFollow>
+export type FollowModel = Model<IFollow, FollowQueryHelper, FollowInstanceMethods> & MultiLanguageModel<IFollow> & JsonApiModel<IFollow>
 
 export const FollowSchema = new Schema<IFollow, FollowModel, FollowInstanceMethods, FollowQueryHelper>({
   follower: {
@@ -44,6 +45,10 @@ FollowSchema.index({
   followed: 1,
 }, { unique: true });
 
+
+FollowSchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 FollowSchema.plugin(MongooseJsonApi, {
   type: "follows",

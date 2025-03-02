@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 
@@ -15,11 +16,11 @@ export interface ITheme {
   updatedAt: Date;
 }
 
-export type ThemeInstanceMethods = JsonApiInstanceMethods
+export type ThemeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type ThemeQueryHelper = JsonApiQueryHelper
+export type ThemeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & JsonApiModel<ITheme>
+export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & MultiLanguageModel<ITheme> & JsonApiModel<ITheme>
 
 export const ThemeSchema = new Schema<ITheme, ThemeModel, ThemeInstanceMethods, ThemeQueryHelper>({
   name: {
@@ -54,6 +55,10 @@ ThemeSchema.virtual("mangas", {
   foreignField: "themes",
 });
 
+
+ThemeSchema.plugin(MongooseMultiLanguage, {
+  fields: ["name"],
+});
 
 ThemeSchema.plugin(MongooseJsonApi, {
   type: "themes",

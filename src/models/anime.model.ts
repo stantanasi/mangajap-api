@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
 import Episode, { TEpisode } from "./episode.model";
@@ -67,11 +68,11 @@ export interface IAnime {
   updatedAt: Date;
 }
 
-export type AnimeInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
+export type AnimeInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods
 
-export type AnimeQueryHelper = JsonApiQueryHelper & SearchQueryHelper
+export type AnimeQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper
 
-export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & JsonApiModel<IAnime> & SearchModel<IAnime>
+export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & MultiLanguageModel<IAnime> & SearchModel<IAnime> & JsonApiModel<IAnime>
 
 export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, AnimeQueryHelper>({
   title: {
@@ -379,6 +380,10 @@ AnimeSchema.pre<TAnime>("deleteOne", async function () {
   }
 });
 
+
+AnimeSchema.plugin(MongooseMultiLanguage, {
+  fields: ["title", "overview", "startDate", "endDate", "poster", "banner"],
+});
 
 AnimeSchema.plugin(MongooseSearch, {
   fields: ["title"],

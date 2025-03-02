@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import Chapter, { TChapter } from "./chapter.model";
 import { TFranchise } from "./franchise.model";
@@ -70,11 +71,11 @@ export interface IManga {
   updatedAt: Date;
 }
 
-export type MangaInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
+export type MangaInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods;
 
-export type MangaQueryHelper = JsonApiQueryHelper & SearchQueryHelper
+export type MangaQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper;
 
-export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & JsonApiModel<IManga> & SearchModel<IManga>
+export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga>;
 
 export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, MangaQueryHelper>({
   title: {
@@ -367,6 +368,10 @@ MangaSchema.pre<TManga>("deleteOne", async function () {
   }
 });
 
+
+MangaSchema.plugin(MongooseMultiLanguage, {
+  fields: ["title", "overview", "startDate", "endDate", "poster", "banner"],
+});
 
 MangaSchema.plugin(MongooseSearch, {
   fields: ["title"],

@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import { TStaff } from "./staff.model";
 
@@ -18,11 +19,11 @@ export interface IPeople {
   updatedAt: Date;
 }
 
-export type PeopleInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
+export type PeopleInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods
 
-export type PeopleQueryHelper = JsonApiQueryHelper & SearchQueryHelper
+export type PeopleQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper
 
-export type PeopleModel = Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> & JsonApiModel<IPeople> & SearchModel<IPeople>
+export type PeopleModel = Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> & MultiLanguageModel<IPeople> & SearchModel<IPeople> & JsonApiModel<IPeople>
 
 export const PeopleSchema = new Schema<IPeople, PeopleModel, PeopleInstanceMethods, PeopleQueryHelper>({
   name: {
@@ -92,6 +93,10 @@ PeopleSchema.pre<TPeople>("deleteOne", async function () {
   }
 });
 
+
+PeopleSchema.plugin(MongooseMultiLanguage, {
+  fields: ["name"],
+});
 
 PeopleSchema.plugin(MongooseSearch, {
   fields: ["name"],

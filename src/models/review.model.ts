@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 import { TUser } from "./user.model";
@@ -17,11 +18,11 @@ export interface IReview {
   updatedAt: Date;
 }
 
-export type ReviewInstanceMethods = JsonApiInstanceMethods
+export type ReviewInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type ReviewQueryHelper = JsonApiQueryHelper
+export type ReviewQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type ReviewModel = Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> & JsonApiModel<IReview>
+export type ReviewModel = Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> & MultiLanguageModel<IReview> & JsonApiModel<IReview>
 
 export const ReviewSchema = new Schema<IReview, ReviewModel, ReviewInstanceMethods, ReviewQueryHelper>({
   content: {
@@ -56,6 +57,10 @@ export const ReviewSchema = new Schema<IReview, ReviewModel, ReviewInstanceMetho
   toObject: { virtuals: true },
 });
 
+
+ReviewSchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 ReviewSchema.plugin(MongooseJsonApi, {
   type: "reviews",

@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import Chapter, { TChapter } from "./chapter.model";
 import { TManga } from "./manga.model";
 import { TVolumeEntry } from "./volume-entry.model";
@@ -26,11 +27,11 @@ export interface IVolume {
   updatedAt: Date;
 }
 
-export type VolumeInstanceMethods = JsonApiInstanceMethods
+export type VolumeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type VolumeQueryHelper = JsonApiQueryHelper
+export type VolumeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & JsonApiModel<IVolume>
+export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & MultiLanguageModel<IVolume> & JsonApiModel<IVolume>
 
 export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper>({
   number: {
@@ -151,6 +152,10 @@ VolumeSchema.pre<TVolume>("deleteOne", async function () {
   }
 });
 
+
+VolumeSchema.plugin(MongooseMultiLanguage, {
+  fields: ["title", "overview", "publishedDate", "cover"],
+});
 
 VolumeSchema.plugin(MongooseJsonApi, {
   type: "volumes",

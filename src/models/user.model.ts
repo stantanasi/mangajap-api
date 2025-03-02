@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
 import Follow, { TFollow } from "./follow.model";
@@ -48,11 +49,11 @@ export interface IUser {
   updatedAt: Date;
 }
 
-export type UserInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
+export type UserInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods
 
-export type UserQueryHelper = JsonApiQueryHelper & SearchQueryHelper
+export type UserQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper
 
-export type UserModel = Model<IUser, UserQueryHelper, UserInstanceMethods> & JsonApiModel<IUser> & SearchModel<IUser>
+export type UserModel = Model<IUser, UserQueryHelper, UserInstanceMethods> & MultiLanguageModel<IUser> & SearchModel<IUser> & JsonApiModel<IUser>
 
 export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, UserQueryHelper>({
   _id: {
@@ -318,6 +319,10 @@ UserSchema.pre<TUser>("deleteOne", async function () {
   }
 });
 
+
+UserSchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 UserSchema.plugin(MongooseSearch, {
   fields: ["pseudo"],

@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 
@@ -15,11 +16,11 @@ export interface IGenre {
   updatedAt: Date;
 }
 
-export type GenreInstanceMethods = JsonApiInstanceMethods
+export type GenreInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type GenreQueryHelper = JsonApiQueryHelper
+export type GenreQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & JsonApiModel<IGenre>
+export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & MultiLanguageModel<IGenre> & JsonApiModel<IGenre>
 
 export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, GenreQueryHelper>({
   name: {
@@ -54,6 +55,10 @@ GenreSchema.virtual("mangas", {
   foreignField: "genres",
 });
 
+
+GenreSchema.plugin(MongooseMultiLanguage, {
+  fields: ["name"],
+});
 
 GenreSchema.plugin(MongooseJsonApi, {
   type: "genres",

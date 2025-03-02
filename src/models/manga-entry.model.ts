@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TManga } from "./manga.model";
 import { TUser } from "./user.model";
 
@@ -30,11 +31,11 @@ export interface IMangaEntry {
   updatedAt: Date;
 }
 
-export type MangaEntryInstanceMethods = JsonApiInstanceMethods
+export type MangaEntryInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type MangaEntryQueryHelper = JsonApiQueryHelper
+export type MangaEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type MangaEntryModel = Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> & JsonApiModel<IMangaEntry>
+export type MangaEntryModel = Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> & MultiLanguageModel<IMangaEntry> & JsonApiModel<IMangaEntry>
 
 export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEntryInstanceMethods, MangaEntryQueryHelper>({
   isAdd: {
@@ -104,6 +105,10 @@ MangaEntrySchema.index({
   manga: 1,
 }, { unique: true });
 
+
+MangaEntrySchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 MangaEntrySchema.plugin(MongooseJsonApi, {
   type: "manga-entries",

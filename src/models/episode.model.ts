@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TEpisodeEntry } from "./episode-entry.model";
 import { TSeason } from "./season.model";
@@ -29,11 +30,11 @@ export interface IEpisode {
   updatedAt: Date;
 }
 
-export type EpisodeInstanceMethods = JsonApiInstanceMethods
+export type EpisodeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type EpisodeQueryHelper = JsonApiQueryHelper
+export type EpisodeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & JsonApiModel<IEpisode>
+export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & MultiLanguageModel<IEpisode> & JsonApiModel<IEpisode>
 
 export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceMethods, EpisodeQueryHelper>({
   number: {
@@ -127,6 +128,10 @@ EpisodeSchema.pre<TEpisode>("deleteOne", async function () {
   }
 });
 
+
+EpisodeSchema.plugin(MongooseMultiLanguage, {
+  fields: ["title", "overview", "airDate", "poster"],
+});
 
 EpisodeSchema.plugin(MongooseJsonApi, {
   type: "episodes",

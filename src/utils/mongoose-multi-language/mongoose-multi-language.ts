@@ -1,5 +1,8 @@
 import {
-  Schema
+  HydratedDocument,
+  Schema,
+  SchemaType,
+  VirtualType
 } from "mongoose";
 
 const DEFAULT_LANGUAGE = "fr-FR";
@@ -9,6 +12,9 @@ export interface MultiLanguageQueryHelper {
 }
 
 export interface MultiLanguageInstanceMethods {
+  translate: (
+    language: string,
+  ) => this;
 }
 
 export interface MultiLanguageModel<DocType> {
@@ -52,4 +58,37 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
       return value;
     };
   });
+
+
+  schema.methods.translate = function (language) {
+    (this as any)._language = language;
+
+    Object.entries({
+      ...this.schema.paths,
+      ...this.schema.virtuals
+    } as {
+      [key: string]: SchemaType | VirtualType<HydratedDocument<any>>
+    }).map(([path, type]) => {
+      const isRelationship = (type: SchemaType | VirtualType<HydratedDocument<any>>): boolean => {
+        return !!(type as any).options?.ref ||
+          !!(type as any).options.type?.[0]?.ref ||
+          !!(type as any).options?.refPath ||
+          !!(type as any).options.type?.[0]?.refPath;
+      };
+
+      if (isRelationship(type) && this.populated(path)) {
+        const value = this.get(path) as MultiLanguageInstanceMethods | MultiLanguageInstanceMethods[] | null;
+
+        if (Array.isArray(value)) {
+          value.forEach((doc) => {
+            doc.translate(language);
+          });
+        } else if (value) {
+          value.translate(language);
+        }
+      }
+    });
+
+    return this;
+  };
 }

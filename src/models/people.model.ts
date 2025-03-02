@@ -7,10 +7,8 @@ import { TStaff } from "./staff.model";
 export interface IPeople {
   _id: Types.ObjectId;
 
-  firstName: string;
-  lastName: string;
-  pseudo: string;
-  image: string | null;
+  name: Map<string, string>;
+  portrait: string | null;
 
   staff?: TStaff[];
   "anime-staff"?: TStaff[];
@@ -27,22 +25,19 @@ export type PeopleQueryHelper = JsonApiQueryHelper & SearchQueryHelper
 export type PeopleModel = Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> & JsonApiModel<IPeople> & SearchModel<IPeople>
 
 export const PeopleSchema = new Schema<IPeople, PeopleModel, PeopleInstanceMethods, PeopleQueryHelper>({
-  firstName: {
-    type: String,
-    default: "",
+  name: {
+    type: Map,
+    of: String,
+    default: {},
+    validate: {
+      validator: function (value: IPeople['name']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid name',
+    },
   },
 
-  lastName: {
-    type: String,
-    default: "",
-  },
-
-  pseudo: {
-    type: String,
-    default: "",
-  },
-
-  image: {
+  portrait: {
     type: String,
     default: null,
   },
@@ -81,16 +76,16 @@ PeopleSchema.virtual("manga-staff", {
 
 
 PeopleSchema.pre<TPeople>("save", async function () {
-  if (this.isModified("image")) {
-    this.image = await uploadFile(
+  if (this.isModified("portrait")) {
+    this.portrait = await uploadFile(
       `peoples/${this._id}/images/profile.jpg`,
-      this.image,
+      this.portrait,
     );
   }
 });
 
 PeopleSchema.pre<TPeople>("deleteOne", async function () {
-  if (this.image) {
+  if (this.portrait) {
     await deleteFile(
       `peoples/${this._id}/images/profile.jpg`,
     );
@@ -99,7 +94,7 @@ PeopleSchema.pre<TPeople>("deleteOne", async function () {
 
 
 PeopleSchema.plugin(MongooseSearch, {
-  fields: ["firstName", "lastName", "pseudo"],
+  fields: ["name"],
 });
 
 PeopleSchema.plugin(MongooseJsonApi, {

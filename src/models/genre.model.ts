@@ -6,8 +6,7 @@ import { TManga } from "./manga.model";
 export interface IGenre {
   _id: Types.ObjectId;
 
-  title: string;
-  description: string;
+  name: Map<string, string>;
 
   animes?: TAnime[];
   mangas?: TManga[];
@@ -23,14 +22,16 @@ export type GenreQueryHelper = JsonApiQueryHelper
 export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & JsonApiModel<IGenre>
 
 export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, GenreQueryHelper>({
-  title: {
-    type: String,
-    required: true,
-  },
-
-  description: {
-    type: String,
-    default: "",
+  name: {
+    type: Map,
+    of: String,
+    default: {},
+    validate: {
+      validator: function (value: IGenre['name']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid name',
+    },
   },
 }, {
   id: false,

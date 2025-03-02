@@ -8,12 +8,11 @@ import { TVolumeEntry } from "./volume-entry.model";
 export interface IVolume {
   _id: Types.ObjectId;
 
-  titles: {
-    [language: string]: string;
-  };
   number: number;
-  published: Date | null;
-  coverImage: string | null;
+  title: Map<string, string>;
+  overview: Map<string, string>;
+  publishedDate: Map<string, Date>;
+  cover: Map<string, string | null>;
 
   chapterCount: number;
   startChapter: number | null;
@@ -34,27 +33,38 @@ export type VolumeQueryHelper = JsonApiQueryHelper
 export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & JsonApiModel<IVolume>
 
 export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper>({
-  titles: {
-    type: Schema.Types.Mixed,
-    default: {},
-  },
-
   number: {
     type: Number,
     required: true,
   },
 
-  published: {
-    type: Date,
-    default: null,
-    transform: function (this, val: Date | null | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+  title: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
+  overview: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
+  publishedDate: {
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IVolume['publishedDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
   },
 
-  coverImage: {
-    type: String,
-    default: null,
+  cover: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
 
@@ -106,11 +116,11 @@ VolumeSchema.index({
 
 
 VolumeSchema.pre<TVolume>("save", async function () {
-  if (this.isModified("coverImage")) {
-    this.coverImage = await uploadFile(
+  if (this.isModified("cover.fr-FR")) {
+    this.cover.set('fr-FR', await uploadFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
-      this.coverImage,
-    );
+      this.cover.get('fr-FR') ?? null,
+    ));
   }
 });
 
@@ -134,7 +144,7 @@ VolumeSchema.pre("findOne", async function () {
 });
 
 VolumeSchema.pre<TVolume>("deleteOne", async function () {
-  if (this.coverImage) {
+  if (this.cover.get('fr-FR')) {
     await deleteFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
     );

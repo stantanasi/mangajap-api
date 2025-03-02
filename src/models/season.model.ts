@@ -7,14 +7,12 @@ import Episode, { TEpisode } from "./episode.model";
 export interface ISeason {
   _id: Types.ObjectId;
 
-  titles: {
-    [language: string]: string;
-  };
-  overview: string;
   number: number;
-  posterImage: string | null;
+  title: Map<string, string>;
+  overview: Map<string, string>;
+  airDate: Map<string, Date>;
+  poster: Map<string, string | null>;
 
-  airDate: Date | null;
   episodeCount: number;
 
   anime: Types.ObjectId | TAnime;
@@ -31,34 +29,40 @@ export type SeasonQueryHelper = JsonApiQueryHelper
 export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & JsonApiModel<ISeason>
 
 export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper>({
-  titles: {
-    type: Schema.Types.Mixed,
-    default: {},
-  },
-
-  overview: {
-    type: String,
-    default: "",
-  },
-
   number: {
     type: Number,
     required: true,
   },
 
-  posterImage: {
-    type: String,
-    default: null,
+  title: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
+  overview: {
+    type: Map,
+    of: String,
+    default: {},
+  },
 
   airDate: {
-    type: Date,
-    default: null,
-    transform: function (this, val: Date | null | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: ISeason['airDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
   },
+
+  poster: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
 
   episodeCount: {
     type: Number,
@@ -96,11 +100,11 @@ SeasonSchema.index({
 
 
 SeasonSchema.pre<TSeason>("save", async function () {
-  if (this.isModified("posterImage")) {
-    this.posterImage = await uploadFile(
+  if (this.isModified("poster.fr-FR")) {
+    this.poster.set('fr-FR', await uploadFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
-      this.posterImage,
-    );
+      this.poster.get('fr-FR') ?? null,
+    ));
   }
 });
 
@@ -120,7 +124,7 @@ SeasonSchema.pre("findOne", async function () {
 });
 
 SeasonSchema.pre<TSeason>("deleteOne", async function () {
-  if (this.posterImage) {
+  if (this.poster.get('fr-FR')) {
     await deleteFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
     );

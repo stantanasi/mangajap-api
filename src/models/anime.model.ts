@@ -1,6 +1,5 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import slugify from "slugify";
 import { deleteFile, uploadFile } from "../firebase-app";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
@@ -31,24 +30,18 @@ enum AnimeType {
 export interface IAnime {
   _id: Types.ObjectId;
 
-  title: string;
-  titles: {
-    [language: string]: string;
-  };
-  slug: string;
-  synopsis: string;
-  startDate: Date;
-  endDate: Date | null;
-  origin: string;
+  title: Map<string, string>;
+  overview: Map<string, string>;
+  startDate: Map<string, Date>;
+  endDate: Map<string, Date | null>;
+  origin: string[];
   animeType: AnimeType;
   status: AnimeStatus;
   inProduction: boolean;
   youtubeVideoId: string;
-  coverImage: string | null;
-  bannerImage: string | null;
-  links: {
-    [site: string]: string;
-  };
+  poster: Map<string, string | null>;
+  banner: Map<string, string | null>;
+  links: Map<string, string>;
 
   seasonCount: number;
   episodeCount: number;
@@ -82,45 +75,60 @@ export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> &
 
 export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, AnimeQueryHelper>({
   title: {
-    type: String,
-    required: true,
-  },
-
-  titles: {
-    type: Schema.Types.Mixed,
+    type: Map,
+    of: String,
     default: {},
+    validate: {
+      validator: function (value: IAnime['title']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid title',
+    },
   },
 
-  slug: {
-    type: String,
-    required: true,
-    lowercase: true,
-  },
-
-  synopsis: {
-    type: String,
-    default: "",
+  overview: {
+    type: Map,
+    of: String,
+    default: {},
+    validate: {
+      validator: function (value: IAnime['overview']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid overview',
+    },
   },
 
   startDate: {
-    type: Date,
-    required: true,
-    transform: function (this, val: Date | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+    type: Map,
+    of: Date,
+    default: {},
+    validate: {
+      validator: function (value: IAnime['startDate']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid startDate',
+    },
+    transform: function (this, val: IAnime['startDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
   },
 
   endDate: {
-    type: Date,
-    default: null,
-    transform: function (this, val: Date | null | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IAnime['endDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
   },
 
   origin: {
-    type: String,
-    default: "",
+    type: [String],
+    default: [],
   },
 
   animeType: {
@@ -145,18 +153,21 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
     default: "",
   },
 
-  coverImage: {
-    type: String,
-    default: null,
+  poster: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
-  bannerImage: {
-    type: String,
-    default: null,
+  banner: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
   links: {
-    type: Schema.Types.Mixed,
+    type: Map,
+    of: String,
     default: {},
   },
 
@@ -270,25 +281,19 @@ AnimeSchema.virtual("franchises", {
 AnimeSchema.virtual("anime-entry");
 
 
-AnimeSchema.pre<TAnime>("validate", async function () {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title);
-  }
-});
-
 AnimeSchema.pre<TAnime>("save", async function () {
-  if (this.isModified("coverImage")) {
-    this.coverImage = await uploadFile(
+  if (this.isModified("poster.fr-FR")) {
+    this.poster.set('fr-FR', await uploadFile(
       `anime/${this._id}/images/cover.jpg`,
-      this.coverImage,
-    );
+      this.poster.get('fr-FR') ?? null,
+    ));
   }
 
-  if (this.isModified("bannerImage")) {
-    this.bannerImage = await uploadFile(
+  if (this.isModified("banner.fr-FR")) {
+    this.banner.set('fr-FR', await uploadFile(
       `anime/${this._id}/images/banner.jpg`,
-      this.bannerImage,
-    );
+      this.banner.get('fr-FR') ?? null,
+    ));
   }
 });
 
@@ -361,13 +366,13 @@ AnimeSchema.pre("findOne", async function () {
 });
 
 AnimeSchema.pre<TAnime>("deleteOne", async function () {
-  if (this.coverImage) {
+  if (this.poster.get('fr-FR')) {
     await deleteFile(
       `anime/${this._id}/images/cover.jpg`,
     );
   }
 
-  if (this.bannerImage) {
+  if (this.banner.get('fr-FR')) {
     await deleteFile(
       `anime/${this._id}/images/banner.jpg`,
     );
@@ -376,7 +381,7 @@ AnimeSchema.pre<TAnime>("deleteOne", async function () {
 
 
 AnimeSchema.plugin(MongooseSearch, {
-  fields: ["title", "titles"],
+  fields: ["title"],
 });
 
 AnimeSchema.plugin(MongooseJsonApi, {

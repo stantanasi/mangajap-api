@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import { deleteFile, uploadFile } from "../firebase-app";
 import { TAnime } from "./anime.model";
 import { TEpisodeEntry } from "./episode-entry.model";
 import { TSeason } from "./season.model";
@@ -12,15 +13,13 @@ enum EpisodeType {
 export interface IEpisode {
   _id: Types.ObjectId;
 
-  titles: {
-    [language: string]: string;
-  };
-  overview: string;
-  relativeNumber: number;
   number: number;
-  airDate: Date | null;
+  title: Map<string, string>;
+  overview: Map<string, string>;
+  airDate: Map<string, Date>;
+  runtime: number;
   episodeType: EpisodeType;
-  duration: number;
+  poster: Map<string, string | null>;
 
   anime: Types.ObjectId | TAnime;
   season: Types.ObjectId | TSeason;
@@ -37,43 +36,49 @@ export type EpisodeQueryHelper = JsonApiQueryHelper
 export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & JsonApiModel<IEpisode>
 
 export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceMethods, EpisodeQueryHelper>({
-  titles: {
-    type: Schema.Types.Mixed,
-    default: {},
-  },
-
-  overview: {
-    type: String,
-    default: "",
-  },
-
-  relativeNumber: {
-    type: Number,
-    required: true,
-  },
-
   number: {
     type: Number,
     required: true,
   },
 
+  title: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
+  overview: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
   airDate: {
-    type: Date,
-    default: null,
-    transform: function (this, val: Date | null | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IEpisode['airDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
+  },
+
+  runtime: {
+    type: Number,
+    default: 0,
   },
 
   episodeType: {
     type: String,
-    default: EpisodeType.None,
     enum: Object.values(EpisodeType),
+    default: EpisodeType.None,
   },
 
-  duration: {
-    type: Number,
-    default: 0,
+  poster: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
 
@@ -104,10 +109,23 @@ EpisodeSchema.index({
   anime: 1,
 }, { unique: true });
 
-EpisodeSchema.index({
-  relativeNumber: 1,
-  season: 1,
-}, { unique: true });
+
+EpisodeSchema.pre<TEpisode>("save", async function () {
+  if (this.isModified("poster.fr-FR")) {
+    this.poster.set('fr-FR', await uploadFile(
+      `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
+      this.poster.get('fr-FR') ?? null,
+    ));
+  }
+});
+
+EpisodeSchema.pre<TEpisode>("deleteOne", async function () {
+  if (this.poster.get('fr-FR')) {
+    await deleteFile(
+      `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
+    );
+  }
+});
 
 
 EpisodeSchema.plugin(MongooseJsonApi, {

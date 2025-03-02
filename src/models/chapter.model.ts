@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import { deleteFile, uploadFile } from "../firebase-app";
 import { TChapterEntry } from "./chapter-entry.model";
 import { TManga } from "./manga.model";
 import { TVolume } from "./volume.model";
@@ -7,11 +8,11 @@ import { TVolume } from "./volume.model";
 export interface IChapter {
   _id: Types.ObjectId;
 
-  titles: {
-    [language: string]: string;
-  };
   number: number;
-  publishedAt: Date | null;
+  title: Map<string, string>;
+  overview: Map<string, string>;
+  publishedDate: Map<string, Date>;
+  cover: Map<string, string | null>;
 
   manga: Types.ObjectId | TManga;
   volume: Types.ObjectId | TVolume | null;
@@ -28,22 +29,38 @@ export type ChapterQueryHelper = JsonApiQueryHelper
 export type ChapterModel = Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> & JsonApiModel<IChapter>
 
 export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceMethods, ChapterQueryHelper>({
-  titles: {
-    type: Schema.Types.Mixed,
-    default: {},
-  },
-
   number: {
     type: Number,
     required: true,
   },
 
-  publishedAt: {
-    type: Date,
-    default: null,
-    transform: function (this, val: Date | null | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+  title: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
+  overview: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
+  publishedDate: {
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IChapter['publishedDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
+  },
+
+  cover: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
 
@@ -73,6 +90,24 @@ ChapterSchema.index({
   number: 1,
   manga: 1,
 }, { unique: true });
+
+
+ChapterSchema.pre<TChapter>("save", async function () {
+  if (this.isModified("cover.fr-FR")) {
+    this.cover.set('fr-FR', await uploadFile(
+      `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
+      this.cover.get("fr-FR") ?? null,
+    ));
+  }
+});
+
+ChapterSchema.pre<TChapter>("deleteOne", async function () {
+  if (this.cover.get("fr-FR")) {
+    await deleteFile(
+      `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
+    );
+  }
+});
 
 
 ChapterSchema.plugin(MongooseJsonApi, {

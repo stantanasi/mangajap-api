@@ -20,6 +20,7 @@ peopleRoutes.get("/", async (req, res, next) => {
 
     const response = await People.find()
       .withJsonApi(query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -36,12 +37,15 @@ peopleRoutes.get("/", async (req, res, next) => {
 
 peopleRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
-    const id = await People.fromJsonApi(req.body)
+    const id = await People.fromJsonApi(req.body, {
+      assignAttribute: People.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await People.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -56,6 +60,7 @@ peopleRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -72,12 +77,15 @@ peopleRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .merge(People.fromJsonApi(req.body))
+          .merge(People.fromJsonApi(req.body, {
+            assignAttribute: People.fromLanguage(req.query.language),
+          }))
           .save();
       });
 
     const response = await People.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -109,6 +117,7 @@ peopleRoutes.get("/:id/staff", async (req, res, next) => {
     const response = await People.findById(req.params.id)
       .getRelationship("staff")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -128,6 +137,7 @@ peopleRoutes.get("/:id/manga-staff", async (req, res, next) => {
     const response = await People.findById(req.params.id)
       .getRelationship("manga-staff")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -147,6 +157,7 @@ peopleRoutes.get("/:id/anime-staff", async (req, res, next) => {
     const response = await People.findById(req.params.id)
       .getRelationship("anime-staff")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })

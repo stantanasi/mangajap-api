@@ -8,6 +8,7 @@ genreRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Genre.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -24,12 +25,15 @@ genreRoutes.get("/", async (req, res, next) => {
 
 genreRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
-    const id = await Genre.fromJsonApi(req.body)
+    const id = await Genre.fromJsonApi(req.body, {
+      assignAttribute: Genre.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await Genre.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -44,6 +48,7 @@ genreRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -60,12 +65,15 @@ genreRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .merge(Genre.fromJsonApi(req.body))
+          .merge(Genre.fromJsonApi(req.body, {
+            assignAttribute: Genre.fromLanguage(req.query.language),
+          }))
           .save();
       });
 
     const response = await Genre.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -97,6 +105,7 @@ genreRoutes.get("/:id/mangas", async (req, res, next) => {
     const response = await Genre.findById(req.params.id)
       .getRelationship("mangas")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -116,6 +125,7 @@ genreRoutes.get("/:id/animes", async (req, res, next) => {
     const response = await Genre.findById(req.params.id)
       .getRelationship("animes")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })

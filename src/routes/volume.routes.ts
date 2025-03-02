@@ -8,6 +8,7 @@ volumeRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Volume.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -24,12 +25,15 @@ volumeRoutes.get("/", async (req, res, next) => {
 
 volumeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
-    const id = await Volume.fromJsonApi(req.body)
+    const id = await Volume.fromJsonApi(req.body, {
+      assignAttribute: Volume.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await Volume.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -44,6 +48,7 @@ volumeRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -60,12 +65,15 @@ volumeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .merge(Volume.fromJsonApi(req.body))
+          .merge(Volume.fromJsonApi(req.body, {
+            assignAttribute: Volume.fromLanguage(req.query.language),
+          }))
           .save();
       });
 
     const response = await Volume.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -97,6 +105,7 @@ volumeRoutes.get("/:id/manga", async (req, res, next) => {
     const response = await Volume.findById(req.params.id)
       .getRelationship("manga")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -112,6 +121,7 @@ volumeRoutes.get("/:id/chapters", async (req, res, next) => {
     const response = await Volume.findById(req.params.id)
       .getRelationship("chapters")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -131,6 +141,7 @@ volumeRoutes.get("/:id/volume-entry", async (req, res, next) => {
     const response = await Volume.findById(req.params.id)
       .getRelationship("volume-entry")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

@@ -10,6 +10,7 @@ episodeEntryRoutes.get("/", async (req, res, next) => {
   try {
     const response = await EpisodeEntry.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -26,12 +27,15 @@ episodeEntryRoutes.get("/", async (req, res, next) => {
 
 episodeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
-    const id = await EpisodeEntry.fromJsonApi(req.body)
+    const id = await EpisodeEntry.fromJsonApi(req.body, {
+      assignAttribute: EpisodeEntry.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await EpisodeEntry.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -46,6 +50,7 @@ episodeEntryRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await EpisodeEntry.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -64,7 +69,9 @@ episodeEntryRoutes.patch("/:id", async (req, res, next) => {
         const token: DecodedIdToken | null = res.locals.token;
         if (token && (token.isAdmin || doc.user === token.uid)) {
           return doc
-            .merge(EpisodeEntry.fromJsonApi(req.body))
+            .merge(EpisodeEntry.fromJsonApi(req.body, {
+              assignAttribute: EpisodeEntry.fromLanguage(req.query.language),
+            }))
             .save();
         } else {
           throw new JsonApiError.PermissionDenied();
@@ -73,6 +80,7 @@ episodeEntryRoutes.patch("/:id", async (req, res, next) => {
 
     const response = await EpisodeEntry.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -109,6 +117,7 @@ episodeEntryRoutes.get("/:id/episode", async (req, res, next) => {
     const response = await EpisodeEntry.findById(req.params.id)
       .getRelationship("episode")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -124,6 +133,7 @@ episodeEntryRoutes.get("/:id/user", async (req, res, next) => {
     const response = await EpisodeEntry.findById(req.params.id)
       .getRelationship("user")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

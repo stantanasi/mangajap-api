@@ -10,6 +10,7 @@ chapterEntryRoutes.get("/", async (req, res, next) => {
   try {
     const response = await ChapterEntry.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -26,12 +27,15 @@ chapterEntryRoutes.get("/", async (req, res, next) => {
 
 chapterEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
-    const id = await ChapterEntry.fromJsonApi(req.body)
+    const id = await ChapterEntry.fromJsonApi(req.body, {
+      assignAttribute: ChapterEntry.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await ChapterEntry.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -46,6 +50,7 @@ chapterEntryRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await ChapterEntry.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -64,7 +69,9 @@ chapterEntryRoutes.patch("/:id", async (req, res, next) => {
         const token: DecodedIdToken | null = res.locals.token;
         if (token && (token.isAdmin || doc.user === token.uid)) {
           return doc
-            .merge(ChapterEntry.fromJsonApi(req.body))
+            .merge(ChapterEntry.fromJsonApi(req.body, {
+              assignAttribute: ChapterEntry.fromLanguage(req.query.language),
+            }))
             .save();
         } else {
           throw new JsonApiError.PermissionDenied();
@@ -73,6 +80,7 @@ chapterEntryRoutes.patch("/:id", async (req, res, next) => {
 
     const response = await ChapterEntry.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -109,6 +117,7 @@ chapterEntryRoutes.get("/:id/chapter", async (req, res, next) => {
     const response = await ChapterEntry.findById(req.params.id)
       .getRelationship("chapter")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -124,6 +133,7 @@ chapterEntryRoutes.get("/:id/user", async (req, res, next) => {
     const response = await ChapterEntry.findById(req.params.id)
       .getRelationship("user")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

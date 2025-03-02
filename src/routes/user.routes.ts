@@ -11,6 +11,7 @@ userRoutes.get("/", async (req, res, next) => {
   try {
     const response = await User.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -27,7 +28,9 @@ userRoutes.get("/", async (req, res, next) => {
 
 userRoutes.post("/", async (req, res, next) => {
   try {
-    const user = User.fromJsonApi(req.body);
+    const user = User.fromJsonApi(req.body, {
+      assignAttribute: User.fromLanguage(req.query.language),
+    });
 
     const attributes = req.body?.data?.attributes ?? {};
     for (const attribute of ["email", "password"]) {
@@ -49,6 +52,7 @@ userRoutes.post("/", async (req, res, next) => {
 
     const response = await User.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -63,6 +67,7 @@ userRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -81,7 +86,9 @@ userRoutes.patch("/:id", isLogin(), async (req, res, next) => {
         const token: DecodedIdToken | null = res.locals.token;
         if (token && (token.isAdmin || doc._id === token.uid)) {
           return doc
-            .merge(User.fromJsonApi(req.body))
+            .merge(User.fromJsonApi(req.body, {
+              assignAttribute: User.fromLanguage(req.query.language),
+            }))
             .save();
         } else {
           throw new JsonApiError.PermissionDenied();
@@ -90,6 +97,7 @@ userRoutes.patch("/:id", isLogin(), async (req, res, next) => {
 
     const response = await User.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -128,6 +136,7 @@ userRoutes.get("/:id/followers", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("followers")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -147,6 +156,7 @@ userRoutes.get("/:id/following", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("following")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -166,6 +176,7 @@ userRoutes.get("/:id/anime-library", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("anime-library")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -185,6 +196,7 @@ userRoutes.get("/:id/manga-library", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("manga-library")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -204,6 +216,7 @@ userRoutes.get("/:id/anime-favorites", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("anime-favorites")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -223,6 +236,7 @@ userRoutes.get("/:id/manga-favorites", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("manga-favorites")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -242,6 +256,7 @@ userRoutes.get("/:id/reviews", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("reviews")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -261,6 +276,7 @@ userRoutes.get("/:id/requests", async (req, res, next) => {
     const response = await User.findById(req.params.id)
       .getRelationship("requests")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })

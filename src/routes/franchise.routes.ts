@@ -8,6 +8,7 @@ franchiseRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Franchise.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -24,12 +25,15 @@ franchiseRoutes.get("/", async (req, res, next) => {
 
 franchiseRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
-    const id = await Franchise.fromJsonApi(req.body)
+    const id = await Franchise.fromJsonApi(req.body, {
+      assignAttribute: Franchise.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await Franchise.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -44,6 +48,7 @@ franchiseRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -60,12 +65,15 @@ franchiseRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .merge(Franchise.fromJsonApi(req.body))
+          .merge(Franchise.fromJsonApi(req.body, {
+            assignAttribute: Franchise.fromLanguage(req.query.language),
+          }))
           .save();
       });
 
     const response = await Franchise.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -97,6 +105,7 @@ franchiseRoutes.get("/:id/source", async (req, res, next) => {
     const response = await Franchise.findById(req.params.id)
       .getRelationship("source")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -112,6 +121,7 @@ franchiseRoutes.get("/:id/destination", async (req, res, next) => {
     const response = await Franchise.findById(req.params.id)
       .getRelationship("destination")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

@@ -8,6 +8,7 @@ themeRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Theme.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -24,12 +25,15 @@ themeRoutes.get("/", async (req, res, next) => {
 
 themeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
-    const id = await Theme.fromJsonApi(req.body)
+    const id = await Theme.fromJsonApi(req.body, {
+      assignAttribute: Theme.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await Theme.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -44,6 +48,7 @@ themeRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -60,12 +65,15 @@ themeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .merge(Theme.fromJsonApi(req.body))
+          .merge(Theme.fromJsonApi(req.body, {
+            assignAttribute: Theme.fromLanguage(req.query.language),
+          }))
           .save();
       });
 
     const response = await Theme.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -97,6 +105,7 @@ themeRoutes.get("/:id/mangas", async (req, res, next) => {
     const response = await Theme.findById(req.params.id)
       .getRelationship("mangas")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -116,6 +125,7 @@ themeRoutes.get("/:id/animes", async (req, res, next) => {
     const response = await Theme.findById(req.params.id)
       .getRelationship("animes")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })

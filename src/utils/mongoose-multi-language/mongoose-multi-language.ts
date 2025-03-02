@@ -1,5 +1,6 @@
 import {
   HydratedDocument,
+  QueryWithHelpers,
   Schema,
   SchemaType,
   VirtualType
@@ -9,6 +10,17 @@ const DEFAULT_LANGUAGE = "fr-FR";
 
 
 export interface MultiLanguageQueryHelper {
+  withLanguage: <
+    ResultType extends DocType | DocType[] | null,
+    DocType extends MultiLanguageInstanceMethods,
+    THelpers extends MultiLanguageQueryHelper,
+    TInstanceMethods extends MultiLanguageInstanceMethods,
+    RawDocType = DocType,
+    QueryOp = 'find',
+  >(
+    this: QueryWithHelpers<ResultType, DocType, THelpers, RawDocType, QueryOp, TInstanceMethods>,
+    language: any,
+  ) => this;
 }
 
 export interface MultiLanguageInstanceMethods {
@@ -59,6 +71,22 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
     };
   });
 
+
+  schema.query.withLanguage = function (this, language: undefined | string) {
+    language = language || DEFAULT_LANGUAGE;
+
+    return this.transform((docs) => {
+      if (Array.isArray(docs)) {
+        docs.forEach((doc) => {
+          doc.translate(language);
+        });
+      } else if (docs) {
+        docs.translate(language);
+      }
+
+      return docs;
+    });
+  };
 
   schema.methods.translate = function (language) {
     (this as any)._language = language;

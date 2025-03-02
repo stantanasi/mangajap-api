@@ -30,6 +30,9 @@ export interface MultiLanguageInstanceMethods {
 }
 
 export interface MultiLanguageModel<DocType> {
+  fromLanguage: (
+    language: any,
+  ) => ((doc: HydratedDocument<DocType>, path: string, value: any) => any);
 }
 
 
@@ -71,6 +74,18 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
     };
   });
 
+
+  schema.statics.fromLanguage = function (language) {
+    language = language || DEFAULT_LANGUAGE;
+
+    return (doc, path, value) => {
+      if (options.fields.includes(path)) {
+        doc.set(`${path}.${language}`, value);
+      } else {
+        doc.set(path, value);
+      };
+    };
+  };
 
   schema.query.withLanguage = function (this, language: undefined | string) {
     language = language || DEFAULT_LANGUAGE;

@@ -10,10 +10,10 @@ episodeRoutes.get("/", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -35,7 +35,7 @@ episodeRoutes.post("/", isAdmin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -50,7 +50,7 @@ episodeRoutes.get("/:id", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -75,7 +75,7 @@ episodeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -107,7 +107,7 @@ episodeRoutes.get("/:id/anime", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -123,7 +123,7 @@ episodeRoutes.get("/:id/season", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -139,7 +139,7 @@ episodeRoutes.get("/:id/episode-entry", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);

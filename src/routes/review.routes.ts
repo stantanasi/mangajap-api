@@ -12,10 +12,10 @@ reviewRoutes.get("/", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -37,7 +37,7 @@ reviewRoutes.post("/", isLogin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -52,7 +52,7 @@ reviewRoutes.get("/:id", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -82,7 +82,7 @@ reviewRoutes.patch("/:id", isLogin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -119,7 +119,7 @@ reviewRoutes.get("/:id/user", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -135,7 +135,7 @@ reviewRoutes.get("/:id/manga", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -151,7 +151,7 @@ reviewRoutes.get("/:id/anime", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);

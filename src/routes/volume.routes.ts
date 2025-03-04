@@ -10,10 +10,10 @@ volumeRoutes.get("/", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -35,7 +35,7 @@ volumeRoutes.post("/", isAdmin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -50,7 +50,7 @@ volumeRoutes.get("/:id", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -75,7 +75,7 @@ volumeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -107,7 +107,7 @@ volumeRoutes.get("/:id/manga", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -123,10 +123,10 @@ volumeRoutes.get("/:id/chapters", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -143,7 +143,7 @@ volumeRoutes.get("/:id/volume-entry", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);

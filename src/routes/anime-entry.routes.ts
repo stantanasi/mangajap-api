@@ -12,10 +12,10 @@ animeEntryRoutes.get("/", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -37,7 +37,7 @@ animeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -52,7 +52,7 @@ animeEntryRoutes.get("/:id", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -82,7 +82,7 @@ animeEntryRoutes.patch("/:id", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -119,7 +119,7 @@ animeEntryRoutes.get("/:id/anime", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -135,7 +135,7 @@ animeEntryRoutes.get("/:id/user", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);

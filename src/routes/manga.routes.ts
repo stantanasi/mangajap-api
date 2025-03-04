@@ -10,10 +10,10 @@ mangaRoutes.get("/", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -35,7 +35,7 @@ mangaRoutes.post("/", isAdmin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -50,7 +50,7 @@ mangaRoutes.get("/:id", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -75,7 +75,7 @@ mangaRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);
@@ -107,10 +107,10 @@ mangaRoutes.get("/:id/volumes", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -127,10 +127,10 @@ mangaRoutes.get("/:id/chapters", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -147,10 +147,10 @@ mangaRoutes.get("/:id/genres", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -167,10 +167,10 @@ mangaRoutes.get("/:id/themes", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -187,10 +187,10 @@ mangaRoutes.get("/:id/staff", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -207,10 +207,10 @@ mangaRoutes.get("/:id/reviews", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -227,10 +227,10 @@ mangaRoutes.get("/:id/franchises", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       })
       .paginate({
-        url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        url: `${process.env.API_URL}${req.originalUrl}`,
         query: req.query,
       });
 
@@ -247,7 +247,7 @@ mangaRoutes.get("/:id/manga-entry", async (req, res, next) => {
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
-        baseUrl: `${req.protocol}://${req.get("host")}`,
+        baseUrl: `${process.env.API_URL}`,
       });
 
     res.json(response);

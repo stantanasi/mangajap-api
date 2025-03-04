@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
+    "compile": "tsc --noEmit",
     "build": "tsc",
     "start": "start tsc --watch && firebase emulators:start --only functions",
     "cron-job:anime": "npm run build && node dist/bin/cron-jobs/anime.job.js",

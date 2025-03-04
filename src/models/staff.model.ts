@@ -1,16 +1,17 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 import { TPeople } from "./people.model";
 
 enum StaffRole {
-  Author = "author", 
-  Illustrator = "illustrator", 
-  StoryAndArt = "story_and_art", 
-  Licensor = "licensor", 
-  Producer = "producer", 
-  Studio = "studio", 
+  Author = "author",
+  Illustrator = "illustrator",
+  StoryAndArt = "story_and_art",
+  Licensor = "licensor",
+  Producer = "producer",
+  Studio = "studio",
   OriginalCreator = "original_creator",
 }
 
@@ -27,11 +28,11 @@ export interface IStaff {
   updatedAt: Date;
 }
 
-export type StaffInstanceMethods = JsonApiInstanceMethods
+export type StaffInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type StaffQueryHelper = JsonApiQueryHelper
+export type StaffQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type StaffModel = Model<IStaff, StaffQueryHelper, StaffInstanceMethods> & JsonApiModel<IStaff>
+export type StaffModel = Model<IStaff, StaffQueryHelper, StaffInstanceMethods> & MultiLanguageModel<IStaff> & JsonApiModel<IStaff>
 
 export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, StaffQueryHelper>({
   role: {
@@ -67,6 +68,10 @@ export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, 
   toObject: { virtuals: true },
 });
 
+
+StaffSchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 StaffSchema.plugin(MongooseJsonApi, {
   type: "staff",

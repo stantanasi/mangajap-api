@@ -10,6 +10,7 @@ followRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Follow.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -26,12 +27,15 @@ followRoutes.get("/", async (req, res, next) => {
 
 followRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
-    const id = await Follow.fromJsonApi(req.body)
+    const id = await Follow.fromJsonApi(req.body, {
+      assignAttribute: Follow.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await Follow.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -46,6 +50,7 @@ followRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Follow.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -64,7 +69,9 @@ followRoutes.patch("/:id", isLogin(), async (req, res, next) => {
         const token: DecodedIdToken | null = res.locals.token;
         if (token && (token.isAdmin || doc.follower === token.uid || doc.followed === token.uid)) {
           return doc
-            .merge(Follow.fromJsonApi(req.body))
+            .merge(Follow.fromJsonApi(req.body, {
+              assignAttribute: Follow.fromLanguage(req.query.language),
+            }))
             .save();
         } else {
           throw new JsonApiError.PermissionDenied();
@@ -73,6 +80,7 @@ followRoutes.patch("/:id", isLogin(), async (req, res, next) => {
 
     const response = await Follow.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -109,6 +117,7 @@ followRoutes.get("/:id/follower", async (req, res, next) => {
     const response = await Follow.findById(req.params.id)
       .getRelationship("follower")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -124,6 +133,7 @@ followRoutes.get("/:id/followed", async (req, res, next) => {
     const response = await Follow.findById(req.params.id)
       .getRelationship("followed")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

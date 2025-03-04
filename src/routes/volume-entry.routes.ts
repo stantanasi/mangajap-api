@@ -10,6 +10,7 @@ volumeEntryRoutes.get("/", async (req, res, next) => {
   try {
     const response = await VolumeEntry.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -26,12 +27,15 @@ volumeEntryRoutes.get("/", async (req, res, next) => {
 
 volumeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
-    const id = await VolumeEntry.fromJsonApi(req.body)
+    const id = await VolumeEntry.fromJsonApi(req.body, {
+      assignAttribute: VolumeEntry.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await VolumeEntry.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -46,6 +50,7 @@ volumeEntryRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await VolumeEntry.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -64,7 +69,9 @@ volumeEntryRoutes.patch("/:id", async (req, res, next) => {
         const token: DecodedIdToken | null = res.locals.token;
         if (token && (token.isAdmin || doc.user === token.uid)) {
           return doc
-            .merge(VolumeEntry.fromJsonApi(req.body))
+            .merge(VolumeEntry.fromJsonApi(req.body, {
+              assignAttribute: VolumeEntry.fromLanguage(req.query.language),
+            }))
             .save();
         } else {
           throw new JsonApiError.PermissionDenied();
@@ -73,6 +80,7 @@ volumeEntryRoutes.patch("/:id", async (req, res, next) => {
 
     const response = await VolumeEntry.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -109,6 +117,7 @@ volumeEntryRoutes.get("/:id/volume", async (req, res, next) => {
     const response = await VolumeEntry.findById(req.params.id)
       .getRelationship("volume")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -124,6 +133,7 @@ volumeEntryRoutes.get("/:id/user", async (req, res, next) => {
     const response = await VolumeEntry.findById(req.params.id)
       .getRelationship("user")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

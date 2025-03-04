@@ -1,7 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import slugify from "slugify";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import Chapter, { TChapter } from "./chapter.model";
 import { TFranchise } from "./franchise.model";
@@ -37,22 +37,16 @@ enum MangaStatus {
 export interface IManga {
   _id: Types.ObjectId;
 
-  title: string;
-  titles: {
-    [language: string]: string
-  };
-  slug: string;
-  synopsis: string;
-  startDate: Date;
-  endDate: Date | null;
-  origin: string;
+  title: Map<string, string>;
+  overview: Map<string, string>;
+  startDate: Map<string, Date>;
+  endDate: Map<string, Date | null>;
+  origin: string[];
   mangaType: MangaType;
   status: MangaStatus;
-  coverImage: string | null;
-  bannerImage: string | null;
-  links: {
-    [site: string]: string;
-  };
+  poster: Map<string, string | null>;
+  banner: Map<string, string | null>;
+  links: Map<string, string>;
 
   volumeCount: number;
   chapterCount: number;
@@ -77,53 +71,68 @@ export interface IManga {
   updatedAt: Date;
 }
 
-export type MangaInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
+export type MangaInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods;
 
-export type MangaQueryHelper = JsonApiQueryHelper & SearchQueryHelper
+export type MangaQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper;
 
-export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & JsonApiModel<IManga> & SearchModel<IManga>
+export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga>;
 
 export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, MangaQueryHelper>({
   title: {
-    type: String,
-    required: true,
-  },
-
-  titles: {
-    type: Schema.Types.Mixed,
+    type: Map,
+    of: String,
     default: {},
+    validate: {
+      validator: function (value: IManga['title']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid title',
+    },
   },
 
-  slug: {
-    type: String,
-    required: true,
-    lowercase: true,
-  },
-
-  synopsis: {
-    type: String,
-    default: "",
+  overview: {
+    type: Map,
+    of: String,
+    default: {},
+    validate: {
+      validator: function (value: IManga['overview']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid overview',
+    },
   },
 
   startDate: {
-    type: Date,
-    required: true,
-    transform: function (this, val: Date | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+    type: Map,
+    of: Date,
+    default: {},
+    validate: {
+      validator: function (value: IManga['startDate']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid startDate',
+    },
+    transform: function (this, val: IManga['startDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
   },
 
   endDate: {
-    type: Date,
-    default: null,
-    transform: function (this, val: Date | null | undefined) {
-      return val?.toISOString().slice(0, 10) ?? val;
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IManga['endDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
     },
   },
 
   origin: {
-    type: String,
-    default: "",
+    type: [String],
+    default: [],
   },
 
   mangaType: {
@@ -138,18 +147,21 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
     enum: Object.values(MangaStatus),
   },
 
-  coverImage: {
-    type: String,
-    default: null,
+  poster: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
-  bannerImage: {
-    type: String,
-    default: null,
+  banner: {
+    type: Map,
+    of: String,
+    default: {},
   },
 
   links: {
-    type: Schema.Types.Mixed,
+    type: Map,
+    of: String,
     default: {},
   },
 
@@ -258,25 +270,19 @@ MangaSchema.virtual("franchises", {
 MangaSchema.virtual("manga-entry");
 
 
-MangaSchema.pre<TManga>("validate", async function () {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title);
-  }
-});
-
 MangaSchema.pre<TManga>("save", async function () {
-  if (this.isModified("coverImage")) {
-    this.coverImage = await uploadFile(
+  if (this.isModified("poster.fr-FR")) {
+    this.poster.set('fr-FR', await uploadFile(
       `manga/${this._id}/images/cover.jpg`,
-      this.coverImage,
-    );
+      this.poster.get('fr-FR') ?? null,
+    ));
   }
 
-  if (this.isModified("bannerImage")) {
-    this.bannerImage = await uploadFile(
+  if (this.isModified("banner.fr-FR")) {
+    this.banner.set('fr-FR', await uploadFile(
       `manga/${this._id}/images/banner.jpg`,
-      this.bannerImage,
-    );
+      this.banner.get('fr-FR') ?? null,
+    ));
   }
 });
 
@@ -349,13 +355,13 @@ MangaSchema.pre("findOne", async function () {
 });
 
 MangaSchema.pre<TManga>("deleteOne", async function () {
-  if (this.coverImage) {
+  if (this.poster.get('fr-FR')) {
     await deleteFile(
       `manga/${this._id}/images/cover.jpg`,
     );
   }
 
-  if (this.bannerImage) {
+  if (this.banner.get('fr-FR')) {
     await deleteFile(
       `manga/${this._id}/images/banner.jpg`,
     );
@@ -363,8 +369,12 @@ MangaSchema.pre<TManga>("deleteOne", async function () {
 });
 
 
+MangaSchema.plugin(MongooseMultiLanguage, {
+  fields: ["title", "overview", "startDate", "endDate", "poster", "banner"],
+});
+
 MangaSchema.plugin(MongooseSearch, {
-  fields: ["title", "titles"],
+  fields: ["title"],
 });
 
 MangaSchema.plugin(MongooseJsonApi, {

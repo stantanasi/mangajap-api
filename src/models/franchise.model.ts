@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import Anime, { TAnime } from "./anime.model";
 import Manga, { TManga } from "./manga.model";
 
@@ -33,11 +34,11 @@ export interface IFranchise {
   updatedAt: Date;
 }
 
-export type FranchiseInstanceMethods = JsonApiInstanceMethods
+export type FranchiseInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type FranchiseQueryHelper = JsonApiQueryHelper
+export type FranchiseQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type FranchiseModel = Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> & JsonApiModel<IFranchise>
+export type FranchiseModel = Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> & MultiLanguageModel<IFranchise> & JsonApiModel<IFranchise>
 
 export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseInstanceMethods, FranchiseQueryHelper>({
   role: {
@@ -97,6 +98,10 @@ FranchiseSchema.pre<TFranchise>("validate", async function () {
   }
 });
 
+
+FranchiseSchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 FranchiseSchema.plugin(MongooseJsonApi, {
   type: "franchises",

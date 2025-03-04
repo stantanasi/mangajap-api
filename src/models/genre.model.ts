@@ -1,13 +1,13 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 
 export interface IGenre {
   _id: Types.ObjectId;
 
-  title: string;
-  description: string;
+  name: Map<string, string>;
 
   animes?: TAnime[];
   mangas?: TManga[];
@@ -16,21 +16,23 @@ export interface IGenre {
   updatedAt: Date;
 }
 
-export type GenreInstanceMethods = JsonApiInstanceMethods
+export type GenreInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type GenreQueryHelper = JsonApiQueryHelper
+export type GenreQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & JsonApiModel<IGenre>
+export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & MultiLanguageModel<IGenre> & JsonApiModel<IGenre>
 
 export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, GenreQueryHelper>({
-  title: {
-    type: String,
-    required: true,
-  },
-
-  description: {
-    type: String,
-    default: "",
+  name: {
+    type: Map,
+    of: String,
+    default: {},
+    validate: {
+      validator: function (value: IGenre['name']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid name',
+    },
   },
 }, {
   id: false,
@@ -53,6 +55,10 @@ GenreSchema.virtual("mangas", {
   foreignField: "genres",
 });
 
+
+GenreSchema.plugin(MongooseMultiLanguage, {
+  fields: ["name"],
+});
 
 GenreSchema.plugin(MongooseJsonApi, {
   type: "genres",

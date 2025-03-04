@@ -6,58 +6,58 @@ import Season from "../../models/season.model";
 export default class TheMovieDB {
 
   public static async findAnimeById(id: string) {
-    const anime = await axios.get<TheMovieDBTvShow>(`https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.THE_MOVIE_DB_KEY}&append_to_response=seasons&language=fr-FR`)
-      .then((res) => res.data)
-      .then((anime) => new Anime({
-        title: anime.original_name,
-        inProduction: anime.in_production,
+    // const anime = await axios.get<TheMovieDBTvShow>(`https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.THE_MOVIE_DB_KEY}&append_to_response=seasons&language=fr-FR`)
+    //   .then((res) => res.data)
+    //   .then((anime) => new Anime({
+    //     title: anime.original_name,
+    //     inProduction: anime.in_production,
 
-        seasons: anime.seasons
-          .filter((season) => season.season_number !== 0 && season.episode_count > 0)
-          .map((season) => new Season({
-            titles: {
-              fr: season.name !== `Saison ${season.season_number}` ? season.name : undefined,
-            },
-            posterImage: season.poster_path ? `https://image.tmdb.org/t/p/original${season.poster_path}` : null,
-            overview: season.overview,
-            number: season.season_number,
-            episodeCount: season.episode_count,
-          }))
-      }))
-      .catch(() => null);
+    //     seasons: anime.seasons
+    //       .filter((season) => season.season_number !== 0 && season.episode_count > 0)
+    //       .map((season) => new Season({
+    //         titles: {
+    //           fr: season.name !== `Saison ${season.season_number}` ? season.name : undefined,
+    //         },
+    //         posterImage: season.poster_path ? `https://image.tmdb.org/t/p/original${season.poster_path}` : null,
+    //         overview: season.overview,
+    //         number: season.season_number,
+    //         episodeCount: season.episode_count,
+    //       }))
+    //   }))
+    //   .catch(() => null);
 
-    if (!anime) return null;
+    // if (!anime) return null;
 
-    for (const season of (anime.seasons ?? [])) {
-      season.episodes = await axios.get<TheMovieDBSeason>(`https://api.themoviedb.org/3/tv/${id}/season/${season.number}?api_key=${process.env.THE_MOVIE_DB_KEY}&language=fr-FR`)
-        .then((res) => res.data)
-        .then((response) => {
-          return response.episodes.map((episode) => {
-            return new Episode({
-              titles: {
-                fr: episode.name,
-              },
-              overview: episode.overview,
-              relativeNumber: episode.episode_number,
-              number: anime.seasons
-                ?.filter((season) => season.number !== 0)
-                .reduce((acc, season) => {
-                  if (season.number < episode.season_number) {
-                    return acc + season.episodeCount;
-                  } else if (season.number === episode.season_number) {
-                    return acc + response.episodes.indexOf(episode) + 1;
-                  } else {
-                    return acc;
-                  }
-                }, 0),
-              airDate: episode.air_date ? new Date(episode.air_date) : null,
-              duration: episode.runtime,
-            });
-          });
-        });
-    }
+    // for (const season of (anime.seasons ?? [])) {
+    //   season.episodes = await axios.get<TheMovieDBSeason>(`https://api.themoviedb.org/3/tv/${id}/season/${season.number}?api_key=${process.env.THE_MOVIE_DB_KEY}&language=fr-FR`)
+    //     .then((res) => res.data)
+    //     .then((response) => {
+    //       return response.episodes.map((episode) => {
+    //         return new Episode({
+    //           titles: {
+    //             fr: episode.name,
+    //           },
+    //           overview: episode.overview,
+    //           relativeNumber: episode.episode_number,
+    //           number: anime.seasons
+    //             ?.filter((season) => season.number !== 0)
+    //             .reduce((acc, season) => {
+    //               if (season.number < episode.season_number) {
+    //                 return acc + season.episodeCount;
+    //               } else if (season.number === episode.season_number) {
+    //                 return acc + response.episodes.indexOf(episode) + 1;
+    //               } else {
+    //                 return acc;
+    //               }
+    //             }, 0),
+    //           airDate: episode.air_date ? new Date(episode.air_date) : null,
+    //           duration: episode.runtime,
+    //         });
+    //       });
+    //     });
+    // }
 
-    return anime;
+    // return anime;
   }
 }
 

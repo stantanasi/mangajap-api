@@ -122,7 +122,9 @@ app.use(async (req, res, next) => {
   }
 });
 
-app.get("/favicon.ico", (req, res) => res.status(204).send());
+app.get("/favicon.ico", (req, res) => {
+  res.status(204).send();
+});
 
 app.use("/anime", animeRoutes);
 app.use("/anime-entries", animeEntryRoutes);

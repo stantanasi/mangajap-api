@@ -1,13 +1,13 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
 import { TManga } from "./manga.model";
 
 export interface ITheme {
   _id: Types.ObjectId;
 
-  title: string;
-  description: string;
+  name: Map<string, string>;
 
   animes?: TAnime[];
   mangas?: TManga[];
@@ -16,21 +16,23 @@ export interface ITheme {
   updatedAt: Date;
 }
 
-export type ThemeInstanceMethods = JsonApiInstanceMethods
+export type ThemeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type ThemeQueryHelper = JsonApiQueryHelper
+export type ThemeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & JsonApiModel<ITheme>
+export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & MultiLanguageModel<ITheme> & JsonApiModel<ITheme>
 
 export const ThemeSchema = new Schema<ITheme, ThemeModel, ThemeInstanceMethods, ThemeQueryHelper>({
-  title: {
-    type: String,
-    required: true,
-  },
-
-  description: {
-    type: String,
-    default: "",
+  name: {
+    type: Map,
+    of: String,
+    default: {},
+    validate: {
+      validator: function (value: ITheme['name']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid name',
+    },
   },
 }, {
   id: false,
@@ -53,6 +55,10 @@ ThemeSchema.virtual("mangas", {
   foreignField: "themes",
 });
 
+
+ThemeSchema.plugin(MongooseMultiLanguage, {
+  fields: ["name"],
+});
 
 ThemeSchema.plugin(MongooseJsonApi, {
   type: "themes",

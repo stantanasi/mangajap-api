@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TUser } from "./user.model";
 
 export interface IRequest {
@@ -16,11 +17,11 @@ export interface IRequest {
   updatedAt: Date;
 }
 
-export type RequestInstanceMethods = JsonApiInstanceMethods
+export type RequestInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type RequestQueryHelper = JsonApiQueryHelper
+export type RequestQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type RequestModel = Model<IRequest, RequestQueryHelper, RequestInstanceMethods> & JsonApiModel<IRequest>
+export type RequestModel = Model<IRequest, RequestQueryHelper, RequestInstanceMethods> & MultiLanguageModel<IRequest> & JsonApiModel<IRequest>
 
 export const RequestSchema = new Schema<IRequest, RequestModel, RequestInstanceMethods, RequestQueryHelper>({
   requestType: {
@@ -58,6 +59,10 @@ export const RequestSchema = new Schema<IRequest, RequestModel, RequestInstanceM
   toObject: { virtuals: true },
 });
 
+
+RequestSchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 RequestSchema.plugin(MongooseJsonApi, {
   type: "requests",

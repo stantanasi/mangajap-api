@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TEpisode } from "./episode.model";
 import { TUser } from "./user.model";
 
@@ -17,11 +18,11 @@ export interface IEpisodeEntry {
   updatedAt: Date;
 }
 
-export type EpisodeEntryInstanceMethods = JsonApiInstanceMethods
+export type EpisodeEntryInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type EpisodeEntryQueryHelper = JsonApiQueryHelper
+export type EpisodeEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type EpisodeEntryModel = Model<IEpisodeEntry, EpisodeEntryQueryHelper, EpisodeEntryInstanceMethods> & JsonApiModel<IEpisodeEntry>
+export type EpisodeEntryModel = Model<IEpisodeEntry, EpisodeEntryQueryHelper, EpisodeEntryInstanceMethods> & MultiLanguageModel<IEpisodeEntry> & JsonApiModel<IEpisodeEntry>
 
 export const EpisodeEntrySchema = new Schema<IEpisodeEntry, EpisodeEntryModel, EpisodeEntryInstanceMethods, EpisodeEntryQueryHelper>({
   watchedDate: {
@@ -65,6 +66,10 @@ EpisodeEntrySchema.index({
   episode: 1,
 }, { unique: true });
 
+
+EpisodeEntrySchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 EpisodeEntrySchema.plugin(MongooseJsonApi, {
   type: "episode-entries",

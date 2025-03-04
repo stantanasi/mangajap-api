@@ -8,6 +8,7 @@ chapterRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Chapter.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -24,12 +25,15 @@ chapterRoutes.get("/", async (req, res, next) => {
 
 chapterRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
-    const id = await Chapter.fromJsonApi(req.body)
+    const id = await Chapter.fromJsonApi(req.body, {
+      assignAttribute: Chapter.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await Chapter.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -44,6 +48,7 @@ chapterRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -60,12 +65,15 @@ chapterRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .merge(Chapter.fromJsonApi(req.body))
+          .merge(Chapter.fromJsonApi(req.body, {
+            assignAttribute: Chapter.fromLanguage(req.query.language),
+          }))
           .save();
       });
 
     const response = await Chapter.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -97,6 +105,7 @@ chapterRoutes.get("/:id/manga", async (req, res, next) => {
     const response = await Chapter.findById(req.params.id)
       .getRelationship("manga")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -112,6 +121,7 @@ chapterRoutes.get("/:id/volume", async (req, res, next) => {
     const response = await Chapter.findById(req.params.id)
       .getRelationship("volume")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -127,6 +137,7 @@ chapterRoutes.get("/:id/chapter-entry", async (req, res, next) => {
     const response = await Chapter.findById(req.params.id)
       .getRelationship("chapter-entry")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

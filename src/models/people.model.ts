@@ -1,16 +1,15 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import { TStaff } from "./staff.model";
 
 export interface IPeople {
   _id: Types.ObjectId;
 
-  firstName: string;
-  lastName: string;
-  pseudo: string;
-  image: string | null;
+  name: Map<string, string>;
+  portrait: string | null;
 
   staff?: TStaff[];
   "anime-staff"?: TStaff[];
@@ -20,29 +19,26 @@ export interface IPeople {
   updatedAt: Date;
 }
 
-export type PeopleInstanceMethods = JsonApiInstanceMethods & SearchInstanceMethods
+export type PeopleInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods
 
-export type PeopleQueryHelper = JsonApiQueryHelper & SearchQueryHelper
+export type PeopleQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper
 
-export type PeopleModel = Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> & JsonApiModel<IPeople> & SearchModel<IPeople>
+export type PeopleModel = Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> & MultiLanguageModel<IPeople> & SearchModel<IPeople> & JsonApiModel<IPeople>
 
 export const PeopleSchema = new Schema<IPeople, PeopleModel, PeopleInstanceMethods, PeopleQueryHelper>({
-  firstName: {
-    type: String,
-    default: "",
+  name: {
+    type: Map,
+    of: String,
+    default: {},
+    validate: {
+      validator: function (value: IPeople['name']) {
+        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
+      },
+      message: 'Invalid name',
+    },
   },
 
-  lastName: {
-    type: String,
-    default: "",
-  },
-
-  pseudo: {
-    type: String,
-    default: "",
-  },
-
-  image: {
+  portrait: {
     type: String,
     default: null,
   },
@@ -81,16 +77,16 @@ PeopleSchema.virtual("manga-staff", {
 
 
 PeopleSchema.pre<TPeople>("save", async function () {
-  if (this.isModified("image")) {
-    this.image = await uploadFile(
+  if (this.isModified("portrait")) {
+    this.portrait = await uploadFile(
       `peoples/${this._id}/images/profile.jpg`,
-      this.image,
+      this.portrait,
     );
   }
 });
 
 PeopleSchema.pre<TPeople>("deleteOne", async function () {
-  if (this.image) {
+  if (this.portrait) {
     await deleteFile(
       `peoples/${this._id}/images/profile.jpg`,
     );
@@ -98,8 +94,12 @@ PeopleSchema.pre<TPeople>("deleteOne", async function () {
 });
 
 
+PeopleSchema.plugin(MongooseMultiLanguage, {
+  fields: ["name"],
+});
+
 PeopleSchema.plugin(MongooseSearch, {
-  fields: ["firstName", "lastName", "pseudo"],
+  fields: ["name"],
 });
 
 PeopleSchema.plugin(MongooseJsonApi, {

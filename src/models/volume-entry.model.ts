@@ -1,5 +1,6 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TUser } from "./user.model";
 import { TVolume } from "./volume.model";
 
@@ -17,11 +18,11 @@ export interface IVolumeEntry {
   updatedAt: Date;
 }
 
-export type VolumeEntryInstanceMethods = JsonApiInstanceMethods
+export type VolumeEntryInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
 
-export type VolumeEntryQueryHelper = JsonApiQueryHelper
+export type VolumeEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type VolumeEntryModel = Model<IVolumeEntry, VolumeEntryQueryHelper, VolumeEntryInstanceMethods> & JsonApiModel<IVolumeEntry>
+export type VolumeEntryModel = Model<IVolumeEntry, VolumeEntryQueryHelper, VolumeEntryInstanceMethods> & MultiLanguageModel<IVolumeEntry> & JsonApiModel<IVolumeEntry>
 
 export const VolumeEntrySchema = new Schema<IVolumeEntry, VolumeEntryModel, VolumeEntryInstanceMethods, VolumeEntryQueryHelper>({
   readDate: {
@@ -65,6 +66,10 @@ VolumeEntrySchema.index({
   volume: 1,
 }, { unique: true });
 
+
+VolumeEntrySchema.plugin(MongooseMultiLanguage, {
+  fields: [],
+});
 
 VolumeEntrySchema.plugin(MongooseJsonApi, {
   type: "volume-entries",

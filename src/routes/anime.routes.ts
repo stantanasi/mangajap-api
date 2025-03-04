@@ -8,6 +8,7 @@ animeRoutes.get("/", async (req, res, next) => {
   try {
     const response = await Anime.find()
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -24,12 +25,15 @@ animeRoutes.get("/", async (req, res, next) => {
 
 animeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
-    const id = await Anime.fromJsonApi(req.body)
+    const id = await Anime.fromJsonApi(req.body, {
+      assignAttribute: Anime.fromLanguage(req.query.language),
+    })
       .save()
       .then((doc) => doc._id);
 
     const response = await Anime.findById(id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -44,6 +48,7 @@ animeRoutes.get("/:id", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -60,12 +65,15 @@ animeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
       .orFail()
       .then((doc) => {
         return doc
-          .merge(Anime.fromJsonApi(req.body))
+          .merge(Anime.fromJsonApi(req.body, {
+            assignAttribute: Anime.fromLanguage(req.query.language),
+          }))
           .save();
       });
 
     const response = await Anime.findById(req.params.id)
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });
@@ -97,6 +105,7 @@ animeRoutes.get("/:id/seasons", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("seasons")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -116,6 +125,7 @@ animeRoutes.get("/:id/episodes", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("episodes")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -135,6 +145,7 @@ animeRoutes.get("/:id/genres", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("genres")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -154,6 +165,7 @@ animeRoutes.get("/:id/themes", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("themes")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -173,6 +185,7 @@ animeRoutes.get("/:id/staff", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("staff")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -192,6 +205,7 @@ animeRoutes.get("/:id/reviews", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("reviews")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -211,6 +225,7 @@ animeRoutes.get("/:id/franchises", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("franchises")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       })
@@ -230,6 +245,7 @@ animeRoutes.get("/:id/anime-entry", async (req, res, next) => {
     const response = await Anime.findById(req.params.id)
       .getRelationship("anime-entry")
       .withJsonApi(req.query)
+      .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${req.protocol}://${req.get("host")}`,
       });

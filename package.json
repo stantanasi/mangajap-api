@@ -4,11 +4,13 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
+    "compile": "tsc --noEmit",
     "build": "tsc",
-    "start": "start tsc --watch && firebase emulators:start --only functions", 
+    "start": "start tsc --watch && firebase emulators:start --only functions",
     "cron-job:anime": "npm run build && node dist/bin/cron-jobs/anime.job.js",
     "cron-job:manga": "npm run build && node dist/bin/cron-jobs/manga.job.js",
-    "deploy": "npm run build && firebase deploy --only functions"
+    "deploy": "npm run build && firebase deploy --only functions",
+    "prepare": "husky || true"
   },
   "engines": {
     "node": "20"
@@ -37,5 +39,8 @@
     "rxjs": "^7.8.1",
     "slugify": "^1.6.6",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }

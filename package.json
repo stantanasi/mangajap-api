@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && firebase emulators:start --only functions",
+    "start": "start tsc --watch && firebase emulators:start --only functions", 
     "cron-job:anime": "npm run build && node dist/bin/cron-jobs/anime.job.js",
     "cron-job:manga": "npm run build && node dist/bin/cron-jobs/manga.job.js",
     "deploy": "npm run build && firebase deploy --only functions"

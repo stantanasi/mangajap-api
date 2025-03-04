@@ -10,7 +10,7 @@
     "cron-job:anime": "npm run build && node dist/bin/cron-jobs/anime.job.js",
     "cron-job:manga": "npm run build && node dist/bin/cron-jobs/manga.job.js",
     "deploy": "npm run build && firebase deploy --only functions",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "engines": {
     "node": "20"

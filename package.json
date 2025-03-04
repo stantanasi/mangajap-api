@@ -9,7 +9,6 @@
     "start": "start tsc --watch && firebase emulators:start --only functions",
     "cron-job:anime": "npm run build && node dist/bin/cron-jobs/anime.job.js",
     "cron-job:manga": "npm run build && node dist/bin/cron-jobs/manga.job.js",
-    "deploy": "npm run build && firebase deploy --only functions",
     "prepare": "husky || true"
   },
   "engines": {
@@ -19,7 +18,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mangajap/mangajap-api.git"
+    "url": "https://github.com/stantanasi/mangajap-api.git"
   },
   "dependencies": {
     "@stantanasi/mongoose-jsonapi": "^1.0.8",

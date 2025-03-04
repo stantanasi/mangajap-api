@@ -19,12 +19,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Install dependencies
-        run: npm install
-
       - name: 'Create .env file'
         env:
           API_URL: ${{ secrets.API_URL }}
@@ -37,7 +31,15 @@ jobs:
           echo SERVICE_ACCOUNT=$SERVICE_ACCOUNT >> .env
           echo THE_MOVIE_DB_KEY=$THE_MOVIE_DB_KEY >> .env
 
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Install and Build
+        run: |
+          npm ci
+          npm run build
+
       - name: Deploy to Firebase
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: npm run deploy
+        run: firebase deploy --only functions

@@ -4,7 +4,12 @@ export default class TMDb {
 
   private client = axios.create();
 
-  constructor(apiKey: string) {
+  constructor(
+    apiKey: string,
+    options?: {
+      language?: string;
+    },
+  ) {
     this.client = axios.create({
       baseURL: 'https://api.themoviedb.org/3',
       headers: {
@@ -12,6 +17,7 @@ export default class TMDb {
       },
       params: {
         api_key: apiKey,
+        language: options?.language ?? 'en-US',
       },
     });
   }

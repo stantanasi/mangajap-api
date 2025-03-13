@@ -1,7 +1,8 @@
-import { JsonApiError, JsonApiErrors } from "@stantanasi/mongoose-jsonapi";
-import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
+
+import { JsonApiError, JsonApiErrors } from "@stantanasi/mongoose-jsonapi";
+import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import * as functions from "firebase-functions";
 import { connect } from "mongoose";

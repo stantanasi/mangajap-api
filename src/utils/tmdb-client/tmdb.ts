@@ -1,4 +1,5 @@
 import axios from "axios";
+import TvSeasons from "./endpoints/tv-seasons";
 import TvSeries from "./endpoints/tv-series";
 
 export default class TMDb {
@@ -25,5 +26,9 @@ export default class TMDb {
 
   get tvSeries(): TvSeries {
     return new TvSeries(this.client);
+  };
+
+  get tvSeasons(): TvSeasons {
+    return new TvSeasons(this.client);
   };
 }

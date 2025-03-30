@@ -79,4 +79,12 @@ export default class MangaEndpoint {
 
     return response.data
   }
+
+  async get(
+    id: string,
+  ): Promise<Response<Manga>> {
+    const response = await this.client.get<Response<Manga>>(`/manga/${id}`)
+
+    return response.data
+  }
 }

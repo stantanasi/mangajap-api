@@ -24,12 +24,12 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           MONGO_DB_URI: ${{ secrets.MONGO_DB_URI }}
           SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
-          THE_MOVIE_DB_KEY: ${{ secrets.THE_MOVIE_DB_KEY }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: |
           echo API_URL=$API_URL >> .env
           echo MONGO_DB_URI=$MONGO_DB_URI >> .env
           echo SERVICE_ACCOUNT=$SERVICE_ACCOUNT >> .env
-          echo THE_MOVIE_DB_KEY=$THE_MOVIE_DB_KEY >> .env
+          echo TMDB_API_KEY=$TMDB_API_KEY >> .env
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools

@@ -107,7 +107,7 @@ EpisodeSchema.virtual("episode-entry");
 
 EpisodeSchema.index({
   number: 1,
-  anime: 1,
+  season: 1,
 }, { unique: true });
 
 

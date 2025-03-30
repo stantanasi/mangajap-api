@@ -64,6 +64,24 @@ export type Manga = {
   }[]
 }
 
+export interface MangaVolumes {
+  result: "ok" | "error";
+  volumes: {
+    [volume: string]: {
+      volume: string;
+      count: number;
+      chapters: {
+        [chapters: string]: {
+          chapter: string;
+          id: string;
+          others: string[];
+          count: number;
+        };
+      };
+    };
+  }
+}
+
 export default class MangaEndpoint {
 
   private client: AxiosInstance
@@ -84,6 +102,14 @@ export default class MangaEndpoint {
     id: string,
   ): Promise<Response<Manga>> {
     const response = await this.client.get<Response<Manga>>(`/manga/${id}`)
+
+    return response.data
+  }
+
+  async aggregate(
+    id: string,
+  ): Promise<MangaVolumes> {
+    const response = await this.client.get<MangaVolumes>(`/manga/${id}/aggregate`)
 
     return response.data
   }

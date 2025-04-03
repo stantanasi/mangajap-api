@@ -1,4 +1,5 @@
 export default abstract class MangaService {
 
-  static async sync() { }
+  static async sync() {
+  }
 }

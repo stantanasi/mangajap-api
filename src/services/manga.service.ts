@@ -1,3 +1,4 @@
+import Chapter, { TChapter } from "../models/chapter.model";
 import Manga from "../models/manga.model";
 import Volume, { TVolume } from "../models/volume.model";
 import MangaDex from "../utils/mangadex-client";
@@ -9,7 +10,8 @@ abstract class MangaDexService {
     const mangadex = new MangaDex();
 
     const mangas = await Manga.find({ 'links.mangadex': { $exists: true } })
-      .populate<{ volumes: TVolume[] }>('volumes');
+      .populate<{ volumes: TVolume[] }>('volumes')
+      .populate<{ chapters: TChapter[] }>('chapters');
 
 
     // MANGAS
@@ -55,6 +57,35 @@ abstract class MangaDexService {
           manga.volumes.push(volume);
           console.log(manga.title.get('fr-FR'), "|", `V${volume.number}`, "|", "CREATE");
         } else if (volume) {
+        }
+
+
+        // CHAPTERS
+        for (const chapter_mangadex of Object.values(volume_mangadex.chapters)) {
+          let chapter = +chapter_mangadex.chapter && Number.isInteger(+chapter_mangadex.chapter)
+            ? manga.chapters.find((chapter) => chapter.number == +chapter_mangadex.chapter)
+            : null;
+
+          if (chapter === undefined) {
+            chapter = new Chapter({
+              number: +chapter_mangadex.chapter,
+
+              manga: manga,
+              volume: volume,
+            });
+
+            await chapter.save();
+            manga.chapters.push(chapter);
+            console.log(manga.title.get('fr-FR'), "|", `C${chapter.number}`, "|", "CREATE");
+          } else if (chapter) {
+            if (!chapter.get('volume') && volume) chapter.set('volume', volume);
+
+            if (chapter.isModified()) {
+              const directModifiedPaths = chapter.directModifiedPaths();
+              await chapter.save();
+              console.log(manga.title.get('fr-FR'), "|", `C${chapter.number}`, "|", "UPDATE", "|", directModifiedPaths);
+            }
+          }
         }
       }
 

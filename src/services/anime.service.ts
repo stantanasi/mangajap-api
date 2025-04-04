@@ -1,4 +1,5 @@
 import Anime from "../models/anime.model";
+import Episode from "../models/episode.model";
 import Season from "../models/season.model";
 import TMDb from "../utils/tmdb-client/tmdb";
 
@@ -12,6 +13,9 @@ abstract class TMDbService {
     const animes = await Anime.find({ 'links.themoviedb': { $exists: true } })
       .populate({
         path: 'seasons',
+        populate: {
+          path: 'episodes',
+        },
       });
 
 
@@ -77,6 +81,48 @@ abstract class TMDbService {
             const directModifiedPaths = season.directModifiedPaths();
             await season.save();
             console.log(anime.title.get('fr-FR'), "|", `S${season.number}`, "|", "UPDATE", "|", directModifiedPaths);
+          }
+        }
+
+
+        // EPISODES
+        for (const episode_tmdb of season_tmdb.episodes) {
+          let episode = season.episodes?.find((episode) => episode.number === episode_tmdb.episode_number)
+            || season.episodes?.[episode_tmdb.episode_number - 1];
+
+          if (!episode) {
+            episode = new Episode({
+              number: episode_tmdb.episode_number,
+              title: {
+                'fr-FR': episode_tmdb.name,
+              },
+              overview: {
+                'fr-FR': episode_tmdb.overview,
+              },
+              airDate: {
+                'fr-FR': episode_tmdb.air_date,
+              },
+              runtime: episode_tmdb.runtime,
+
+              anime: anime._id,
+              season: season._id,
+            });
+
+            await episode.save();
+            season.episodes!.push(episode);
+            console.log(anime.title.get('fr-FR'), "|", `S${season.number} E${episode.number}`, "|", "CREATE");
+          } else {
+            if (episode.number != episode_tmdb.episode_number) episode.set('number', episode_tmdb.episode_number);
+            if (!episode.get('title.fr-FR')) episode.set('title.fr-FR', episode_tmdb.name);
+            if (!episode.get('overview.fr-FR')) episode.set('overview.fr-FR', episode_tmdb.overview);
+            if (!episode.get('airDate.fr-FR')) episode.set('airDate.fr-FR', episode_tmdb.air_date);
+            if (!episode.get('runtime')) episode.set('runtime', episode_tmdb.runtime);
+
+            if (episode.isModified()) {
+              const directModifiedPaths = episode.directModifiedPaths();
+              await episode.save();
+              console.log(anime.title.get('fr-FR'), "|", `S${season.number} E${episode.number}`, "|", "UPDATE", "|", directModifiedPaths);
+            }
           }
         }
       }

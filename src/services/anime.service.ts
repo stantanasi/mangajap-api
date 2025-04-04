@@ -1,4 +1,5 @@
 import Anime from "../models/anime.model";
+import Season from "../models/season.model";
 import TMDb from "../utils/tmdb-client/tmdb";
 
 abstract class TMDbService {
@@ -8,7 +9,10 @@ abstract class TMDbService {
       language: 'fr-FR',
     });
 
-    const animes = await Anime.find({ 'links.themoviedb': { $exists: true } });
+    const animes = await Anime.find({ 'links.themoviedb': { $exists: true } })
+      .populate({
+        path: 'seasons',
+      });
 
 
     // ANIMES
@@ -37,6 +41,44 @@ abstract class TMDbService {
         const directModifiedPaths = anime.directModifiedPaths();
         await anime.save();
         console.log(anime.title.get('fr-FR'), "|", "UPDATE", directModifiedPaths);
+      }
+
+
+      // SEASONS
+      for (const season_tmdb of series_tmdb.seasons) {
+        let season = anime.seasons!.find((season) => season.number == season_tmdb.season_number);
+
+        if (!season) {
+          season = new Season({
+            number: season_tmdb.season_number,
+            title: {
+              'fr-FR': season_tmdb.name,
+            },
+            overview: {
+              'fr-FR': season_tmdb.overview,
+            },
+            airDate: {
+              'fr-FR': season_tmdb.air_date,
+            },
+
+            anime: anime._id,
+          });
+          season.episodes = [];
+
+          await season.save();
+          anime.seasons!.push(season);
+          console.log(anime.title.get('fr-FR'), "|", `S${season.number}`, "|", "CREATE");
+        } else {
+          if (!season.get('title.fr-FR')) season.set('title.fr-FR', season_tmdb.name);
+          if (!season.get('overview.fr-FR')) season.set('overview.fr-FR', season_tmdb.overview);
+          if (!season.get('airDate.fr-FR')) season.set('airDate.fr-FR', season_tmdb.air_date);
+
+          if (season.isModified()) {
+            const directModifiedPaths = season.directModifiedPaths();
+            await season.save();
+            console.log(anime.title.get('fr-FR'), "|", `S${season.number}`, "|", "UPDATE", "|", directModifiedPaths);
+          }
+        }
       }
     }
   }

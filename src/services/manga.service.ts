@@ -1,4 +1,5 @@
 import Manga from "../models/manga.model";
+import Volume, { TVolume } from "../models/volume.model";
 import MangaDex from "../utils/mangadex-client";
 import { delay } from "../utils/utils";
 
@@ -7,7 +8,8 @@ abstract class MangaDexService {
   static async sync() {
     const mangadex = new MangaDex();
 
-    const mangas = await Manga.find({ 'links.mangadex': { $exists: true } });
+    const mangas = await Manga.find({ 'links.mangadex': { $exists: true } })
+      .populate<{ volumes: TVolume[] }>('volumes');
 
 
     // MANGAS
@@ -30,6 +32,30 @@ abstract class MangaDexService {
         const directModifiedPaths = manga.directModifiedPaths();
         await manga.save();
         console.log(manga.title.get('fr-FR'), "|", "UPDATE", directModifiedPaths);
+      }
+
+
+      const volumes_mangadex = await mangadex.manga.aggregate(manga.links.get('mangadex')!)
+        .then((res) => res.volumes);
+
+      // VOLUMES
+      for (const volume_mangadex of Object.values(volumes_mangadex)) {
+        let volume = +volume_mangadex.volume && Number.isInteger(+volume_mangadex.volume)
+          ? manga.volumes.find((volume) => volume.number == +volume_mangadex.volume)
+          : null;
+
+        if (volume === undefined) {
+          volume = new Volume({
+            number: +volume_mangadex.volume,
+
+            manga: manga,
+          });
+
+          await volume.save();
+          manga.volumes.push(volume);
+          console.log(manga.title.get('fr-FR'), "|", `V${volume.number}`, "|", "CREATE");
+        } else if (volume) {
+        }
       }
 
       await delay(500);

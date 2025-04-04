@@ -5,6 +5,7 @@ import { JsonApiError, JsonApiErrors } from "@stantanasi/mongoose-jsonapi";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import * as functions from "firebase-functions";
+import { onSchedule } from "firebase-functions/scheduler";
 import { connect } from "mongoose";
 import { auth } from "./firebase-app";
 import { AnimeSchema } from "./models/anime.model";
@@ -32,6 +33,7 @@ import themeRoutes from "./routes/theme.routes";
 import userRoutes from "./routes/user.routes";
 import volumeEntryRoutes from "./routes/volume-entry.routes";
 import volumeRoutes from "./routes/volume.routes";
+import MangaService from "./services/manga.service";
 
 const app = express();
 
@@ -167,3 +169,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 export const api = functions.https.onRequest(app);
+
+export const sync = onSchedule('30 2 * * *', async (event) => {
+  await MangaService.sync();
+});

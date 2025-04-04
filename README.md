@@ -10,9 +10,9 @@
   </a>
   <br />
   <br />
-  <a href="https://github.com/mangajap/mangajap-api/issues">Report Bug</a>
+  <a href="https://github.com/stantanasi/mangajap-api/issues">Report Bug</a>
   ·
-  <a href="https://github.com/mangajap/mangajap-api/issues">Request Feature</a>
+  <a href="https://github.com/stantanasi/mangajap-api/issues">Request Feature</a>
 </p>
 
 <details>
@@ -64,7 +64,7 @@ With the MangaJap API you can do everything the client can do and much more.
 1. Clone the project to your local machine
 
 ```bash
-git clone https://github.com/mangajap/mangajap-api.git
+git clone https://github.com/stantanasi/mangajap-api.git
 ```
 
 2. Install the packages required
@@ -78,7 +78,7 @@ npm install
 Run the application
 
 ```bash
-npm run start:dev
+npm run start
 ```
 
 ## Contributing

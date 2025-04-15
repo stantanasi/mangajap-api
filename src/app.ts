@@ -172,6 +172,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 export const api = functions.https.onRequest(app);
 
 export const sync = onSchedule('30 2 * * *', async (event) => {
+  await connect(process.env.MONGO_DB_URI!);
+
   await AnimeService.sync();
   await MangaService.sync();
 });

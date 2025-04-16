@@ -271,24 +271,4 @@ userRoutes.get("/:id/reviews", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id/requests", async (req, res, next) => {
-  try {
-    const response = await User.findById(req.params.id)
-      .getRelationship("requests")
-      .withJsonApi(req.query)
-      .withLanguage(req.query.language)
-      .toJsonApi({
-        baseUrl: `${process.env.API_URL}`,
-      })
-      .paginate({
-        url: `${process.env.API_URL}${req.originalUrl}`,
-        query: req.query,
-      });
-
-    res.json(response);
-  } catch (err) {
-    next(err);
-  }
-});
-
 export default userRoutes

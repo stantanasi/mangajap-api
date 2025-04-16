@@ -17,7 +17,7 @@ export interface IEpisode {
   number: number;
   title: Map<string, string>;
   overview: Map<string, string>;
-  airDate: Map<string, Date>;
+  airDate: Map<string, Date | null>;
   runtime: number;
   episodeType: EpisodeType;
   poster: Map<string, string | null>;

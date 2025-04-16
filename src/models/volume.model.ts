@@ -12,7 +12,7 @@ export interface IVolume {
   number: number;
   title: Map<string, string>;
   overview: Map<string, string>;
-  publishedDate: Map<string, Date>;
+  publishedDate: Map<string, Date | null>;
   cover: Map<string, string | null>;
 
   chapterCount: number;

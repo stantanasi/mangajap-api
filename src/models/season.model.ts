@@ -11,7 +11,7 @@ export interface ISeason {
   number: number;
   title: Map<string, string>;
   overview: Map<string, string>;
-  airDate: Map<string, Date>;
+  airDate: Map<string, Date | null>;
   poster: Map<string, string | null>;
 
   episodeCount: number;

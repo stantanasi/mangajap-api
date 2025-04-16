@@ -18,9 +18,8 @@ export interface IUser {
   _id: string;
 
   pseudo: string;
-  firstName: string;
-  lastName: string;
-  about: string;
+  name: string;
+  bio: string;
   gender: UserGender | null;
   birthday: Date | null;
   country: string;
@@ -65,17 +64,12 @@ export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, User
     required: true,
   },
 
-  firstName: {
+  name: {
     type: String,
     default: "",
   },
 
-  lastName: {
-    type: String,
-    default: "",
-  },
-
-  about: {
+  bio: {
     type: String,
     default: "",
   },

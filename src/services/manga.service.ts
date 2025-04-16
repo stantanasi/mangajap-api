@@ -9,13 +9,14 @@ abstract class MangaDexService {
   static async sync() {
     const mangadex = new MangaDex();
 
-    const mangas = await Manga.find({ 'links.mangadex': { $exists: true } })
+    const cursor = Manga.find({ 'links.mangadex': { $exists: true } })
       .populate<{ volumes: TVolume[] }>('volumes')
-      .populate<{ chapters: TChapter[] }>('chapters');
+      .populate<{ chapters: TChapter[] }>('chapters')
+      .cursor();
 
 
     // MANGAS
-    for (const manga of mangas) {
+    for await (const manga of cursor) {
       const manga_mangadex = await mangadex.manga.get(manga.links.get('mangadex')!)
         .then((res) => res.data)
         .catch(() => null);

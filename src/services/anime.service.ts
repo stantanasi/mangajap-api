@@ -10,17 +10,18 @@ abstract class TMDbService {
       language: 'fr-FR',
     });
 
-    const animes = await Anime.find({ 'links.themoviedb': { $exists: true } })
+    const cursor = Anime.find({ 'links.themoviedb': { $exists: true } })
       .populate({
         path: 'seasons',
         populate: {
           path: 'episodes',
         },
-      });
+      })
+      .cursor();
 
 
     // ANIMES
-    for (const anime of animes) {
+    for await (const anime of cursor) {
       const series_tmdb = await tmdb.tvSeries.details(Number(anime.links.get('themoviedb')!))
         .then(async (series) => ({
           ...series,

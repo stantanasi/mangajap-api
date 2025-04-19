@@ -11,9 +11,9 @@ export interface ISeason {
   number: number;
   title: Map<string, string>;
   overview: Map<string, string>;
-  airDate: Map<string, Date | null>;
   poster: Map<string, string | null>;
 
+  airDate: Map<string, Date | null>;
   episodeCount: number;
 
   anime: Types.ObjectId | TAnime;
@@ -47,6 +47,13 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMetho
     default: {},
   },
 
+  poster: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
+
   airDate: {
     type: Map,
     of: Date,
@@ -57,13 +64,6 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMetho
       );
     },
   },
-
-  poster: {
-    type: Map,
-    of: String,
-    default: {},
-  },
-
 
   episodeCount: {
     type: Number,
@@ -116,7 +116,7 @@ SeasonSchema.pre("findOne", async function () {
   await Season.findOneAndUpdate(this.getFilter(), {
     airDate: await Episode.findOne({
       season: _id,
-    }).sort({ number: 1 }).then((doc) => doc?.airDate ?? null),
+    }).sort({ number: 1 }).then((doc) => doc?.airDate ?? {}),
 
     episodeCount: await Episode.countDocuments({
       season: _id,

@@ -2,7 +2,7 @@ import { JsonApiQueryParams } from "@stantanasi/mongoose-jsonapi";
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 import People from "../models/people.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
 
 const peopleRoutes = express.Router();
 
@@ -36,7 +36,7 @@ peopleRoutes.get("/", async (req, res, next) => {
   }
 });
 
-peopleRoutes.post("/", isAdmin(), async (req, res, next) => {
+peopleRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -74,7 +74,7 @@ peopleRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-peopleRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+peopleRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 

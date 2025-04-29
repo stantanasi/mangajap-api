@@ -1,7 +1,7 @@
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 import Manga from "../models/manga.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
 
 const mangaRoutes = express.Router();
 
@@ -24,7 +24,7 @@ mangaRoutes.get("/", async (req, res, next) => {
   }
 });
 
-mangaRoutes.post("/", isAdmin(), async (req, res, next) => {
+mangaRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -62,7 +62,7 @@ mangaRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-mangaRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+mangaRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 

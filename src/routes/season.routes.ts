@@ -1,7 +1,7 @@
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 import Season from "../models/season.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
 
 const seasonRoutes = express.Router();
 
@@ -24,7 +24,7 @@ seasonRoutes.get("/", async (req, res, next) => {
   }
 });
 
-seasonRoutes.post("/", isAdmin(), async (req, res, next) => {
+seasonRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -62,7 +62,7 @@ seasonRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-seasonRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+seasonRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 

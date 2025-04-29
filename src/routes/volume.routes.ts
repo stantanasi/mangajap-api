@@ -1,7 +1,7 @@
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 import Volume from "../models/volume.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
 
 const volumeRoutes = express.Router();
 
@@ -24,7 +24,7 @@ volumeRoutes.get("/", async (req, res, next) => {
   }
 });
 
-volumeRoutes.post("/", isAdmin(), async (req, res, next) => {
+volumeRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -62,7 +62,7 @@ volumeRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-volumeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+volumeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 

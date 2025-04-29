@@ -1,7 +1,7 @@
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 import Chapter from "../models/chapter.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
 
 const chapterRoutes = express.Router();
 
@@ -24,7 +24,7 @@ chapterRoutes.get("/", async (req, res, next) => {
   }
 });
 
-chapterRoutes.post("/", isAdmin(), async (req, res, next) => {
+chapterRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -62,7 +62,7 @@ chapterRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-chapterRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+chapterRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 

@@ -1,7 +1,7 @@
 import express from "express";
 import { DecodedIdToken } from "firebase-admin/auth";
 import Staff from "../models/staff.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
 
 const staffRoutes = express.Router();
 
@@ -24,7 +24,7 @@ staffRoutes.get("/", async (req, res, next) => {
   }
 });
 
-staffRoutes.post("/", isAdmin(), async (req, res, next) => {
+staffRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -62,7 +62,7 @@ staffRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-staffRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+staffRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 

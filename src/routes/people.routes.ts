@@ -1,5 +1,6 @@
 import { JsonApiQueryParams } from "@stantanasi/mongoose-jsonapi";
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/auth";
 import People from "../models/people.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 
@@ -37,10 +38,12 @@ peopleRoutes.get("/", async (req, res, next) => {
 
 peopleRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     const id = await People.fromJsonApi(req.body, {
       assignAttribute: People.fromLanguage(req.query.language),
     })
-      .save()
+      .save({ user: token.uid })
       .then((doc) => doc._id);
 
     const response = await People.findById(id)
@@ -73,6 +76,8 @@ peopleRoutes.get("/:id", async (req, res, next) => {
 
 peopleRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await People.findById(req.params.id)
       .orFail()
       .then((doc) => {
@@ -80,7 +85,7 @@ peopleRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
           .merge(People.fromJsonApi(req.body, {
             assignAttribute: People.fromLanguage(req.query.language),
           }))
-          .save();
+          .save({ user: token.uid });
       });
 
     const response = await People.findById(req.params.id)
@@ -98,11 +103,13 @@ peopleRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
 
 peopleRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await People.findById(req.params.id)
       .orFail()
       .then((doc) => {
         return doc
-          .deleteOne();
+          .deleteOne({ user: token.uid });
       });
 
     res.status(204).send();
@@ -156,6 +163,26 @@ peopleRoutes.get("/:id/anime-staff", async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
       .getRelationship("anime-staff")
+      .withJsonApi(req.query)
+      .withLanguage(req.query.language)
+      .toJsonApi({
+        baseUrl: `${process.env.API_URL}`,
+      })
+      .paginate({
+        url: `${process.env.API_URL}${req.originalUrl}`,
+        query: req.query,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+peopleRoutes.get("/:id/changes", async (req, res, next) => {
+  try {
+    const response = await People.findById(req.params.id)
+      .getRelationship("changes")
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

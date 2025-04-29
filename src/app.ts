@@ -15,6 +15,7 @@ import { MangaSchema } from "./models/manga.model";
 import { VolumeSchema } from "./models/volume.model";
 import animeEntryRoutes from "./routes/anime-entry.routes";
 import animeRoutes from "./routes/anime.routes";
+import changeRoutes from "./routes/change.routes";
 import chapterEntryRoutes from "./routes/chapter-entry.routes";
 import chapterRoutes from "./routes/chapter.routes";
 import episodeEntryRoutes from "./routes/episode-entry.routes";
@@ -131,6 +132,7 @@ app.get("/favicon.ico", (req, res) => {
 
 app.use("/anime", animeRoutes);
 app.use("/anime-entries", animeEntryRoutes);
+app.use("/changes", changeRoutes);
 app.use("/chapters", chapterRoutes);
 app.use("/chapter-entries", chapterEntryRoutes);
 app.use("/episodes", episodeRoutes);

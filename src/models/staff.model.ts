@@ -1,7 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
+import { TChange } from "./change.model";
 import { TManga } from "./manga.model";
 import { TPeople } from "./people.model";
 
@@ -23,16 +25,17 @@ export interface IStaff {
   people: Types.ObjectId | TPeople;
   anime?: Types.ObjectId | TAnime;
   manga?: Types.ObjectId | TManga;
+  changes?: TChange[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type StaffInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type StaffInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type StaffQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type StaffQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type StaffModel = Model<IStaff, StaffQueryHelper, StaffInstanceMethods> & MultiLanguageModel<IStaff> & JsonApiModel<IStaff>
+export type StaffModel = Model<IStaff, StaffQueryHelper, StaffInstanceMethods> & MultiLanguageModel<IStaff> & JsonApiModel<IStaff> & ChangeTrackingModel<IStaff>
 
 export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, StaffQueryHelper>({
   role: {
@@ -68,6 +71,12 @@ export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, 
   toObject: { virtuals: true },
 });
 
+StaffSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 
 StaffSchema.plugin(MongooseMultiLanguage, {
   fields: [],
@@ -76,6 +85,8 @@ StaffSchema.plugin(MongooseMultiLanguage, {
 StaffSchema.plugin(MongooseJsonApi, {
   type: "staff",
 });
+
+StaffSchema.plugin(MongooseChangeTracking);
 
 
 export type TStaff = HydratedDocument<IStaff, StaffInstanceMethods, StaffQueryHelper>;

@@ -1,6 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
+import { TAnime } from "./anime.model";
 import { TUser } from "./user.model";
 
 export interface IChange {
@@ -12,7 +13,7 @@ export interface IChange {
     after?: Record<string, any>;
   };
 
-  document: Types.ObjectId | HydratedDocument<any>;
+  document: Types.ObjectId | (TAnime);
   documentModel: string;
   user: string | TUser;
 
@@ -48,6 +49,7 @@ export const ChangeSchema = new Schema<IChange, ChangeModel, ChangeInstanceMetho
   documentModel: {
     type: String,
     required: true,
+    enum: ["Anime"],
   },
 
   user: {

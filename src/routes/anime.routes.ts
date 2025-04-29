@@ -1,4 +1,5 @@
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/auth";
 import Anime from "../models/anime.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 
@@ -25,10 +26,12 @@ animeRoutes.get("/", async (req, res, next) => {
 
 animeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     const id = await Anime.fromJsonApi(req.body, {
       assignAttribute: Anime.fromLanguage(req.query.language),
     })
-      .save()
+      .save({ user: token.uid })
       .then((doc) => doc._id);
 
     const response = await Anime.findById(id)
@@ -61,6 +64,8 @@ animeRoutes.get("/:id", async (req, res, next) => {
 
 animeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Anime.findById(req.params.id)
       .orFail()
       .then((doc) => {
@@ -68,7 +73,7 @@ animeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
           .merge(Anime.fromJsonApi(req.body, {
             assignAttribute: Anime.fromLanguage(req.query.language),
           }))
-          .save();
+          .save({ user: token.uid });
       });
 
     const response = await Anime.findById(req.params.id)
@@ -86,11 +91,13 @@ animeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
 
 animeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Anime.findById(req.params.id)
       .orFail()
       .then((doc) => {
         return doc
-          .deleteOne();
+          .deleteOne({ user: token.uid });
       });
 
     res.status(204).send();
@@ -224,6 +231,26 @@ animeRoutes.get("/:id/franchises", async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
       .getRelationship("franchises")
+      .withJsonApi(req.query)
+      .withLanguage(req.query.language)
+      .toJsonApi({
+        baseUrl: `${process.env.API_URL}`,
+      })
+      .paginate({
+        url: `${process.env.API_URL}${req.originalUrl}`,
+        query: req.query,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+animeRoutes.get("/:id/changes", async (req, res, next) => {
+  try {
+    const response = await Anime.findById(req.params.id)
+      .getRelationship("changes")
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

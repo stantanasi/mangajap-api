@@ -1,9 +1,11 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
 import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
+import { TChange } from "./change.model";
 import Episode, { TEpisode } from "./episode.model";
 import { TFranchise } from "./franchise.model";
 import { TGenre } from "./genre.model";
@@ -62,17 +64,18 @@ export interface IAnime {
   staff?: TStaff[];
   reviews?: TReview[];
   franchises?: TFranchise[];
+  changes?: TChange[];
   "anime-entry"?: TAnimeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type AnimeInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods
+export type AnimeInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type AnimeQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper
+export type AnimeQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & MultiLanguageModel<IAnime> & SearchModel<IAnime> & JsonApiModel<IAnime>
+export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & MultiLanguageModel<IAnime> & SearchModel<IAnime> & JsonApiModel<IAnime> & ChangeTrackingModel<IAnime>
 
 export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, AnimeQueryHelper>({
   title: {
@@ -279,6 +282,12 @@ AnimeSchema.virtual("franchises", {
   foreignField: "source",
 });
 
+AnimeSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 AnimeSchema.virtual("anime-entry");
 
 
@@ -399,6 +408,8 @@ AnimeSchema.plugin(MongooseJsonApi, {
     }
   },
 });
+
+AnimeSchema.plugin(MongooseChangeTracking);
 
 
 export type TAnime = HydratedDocument<IAnime, AnimeInstanceMethods, AnimeQueryHelper>;

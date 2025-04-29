@@ -1,4 +1,5 @@
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/auth";
 import Manga from "../models/manga.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 
@@ -25,10 +26,12 @@ mangaRoutes.get("/", async (req, res, next) => {
 
 mangaRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     const id = await Manga.fromJsonApi(req.body, {
       assignAttribute: Manga.fromLanguage(req.query.language),
     })
-      .save()
+      .save({ user: token.uid })
       .then((doc) => doc._id);
 
     const response = await Manga.findById(id)
@@ -61,6 +64,8 @@ mangaRoutes.get("/:id", async (req, res, next) => {
 
 mangaRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Manga.findById(req.params.id)
       .orFail()
       .then((doc) => {
@@ -68,7 +73,7 @@ mangaRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
           .merge(Manga.fromJsonApi(req.body, {
             assignAttribute: Manga.fromLanguage(req.query.language),
           }))
-          .save();
+          .save({ user: token.uid });
       });
 
     const response = await Manga.findById(req.params.id)
@@ -86,11 +91,13 @@ mangaRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
 
 mangaRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Manga.findById(req.params.id)
       .orFail()
       .then((doc) => {
         return doc
-          .deleteOne();
+          .deleteOne({ user: token.uid });
       });
 
     res.status(204).send();
@@ -224,6 +231,26 @@ mangaRoutes.get("/:id/franchises", async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
       .getRelationship("franchises")
+      .withJsonApi(req.query)
+      .withLanguage(req.query.language)
+      .toJsonApi({
+        baseUrl: `${process.env.API_URL}`,
+      })
+      .paginate({
+        url: `${process.env.API_URL}${req.originalUrl}`,
+        query: req.query,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+mangaRoutes.get("/:id/changes", async (req, res, next) => {
+  try {
+    const response = await Manga.findById(req.params.id)
+      .getRelationship("changes")
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

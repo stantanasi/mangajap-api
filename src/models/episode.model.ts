@@ -1,8 +1,10 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
+import { TChange } from "./change.model";
 import { TEpisodeEntry } from "./episode-entry.model";
 import { TSeason } from "./season.model";
 
@@ -24,17 +26,18 @@ export interface IEpisode {
 
   anime: Types.ObjectId | TAnime;
   season: Types.ObjectId | TSeason;
+  changes?: TChange[];
   "episode-entry"?: TEpisodeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type EpisodeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type EpisodeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type EpisodeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type EpisodeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & MultiLanguageModel<IEpisode> & JsonApiModel<IEpisode>
+export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & MultiLanguageModel<IEpisode> & JsonApiModel<IEpisode> & ChangeTrackingModel<IEpisode>
 
 export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceMethods, EpisodeQueryHelper>({
   number: {
@@ -103,6 +106,12 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceM
   toObject: { virtuals: true },
 });
 
+EpisodeSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 EpisodeSchema.virtual("episode-entry");
 
 EpisodeSchema.index({
@@ -136,6 +145,8 @@ EpisodeSchema.plugin(MongooseMultiLanguage, {
 EpisodeSchema.plugin(MongooseJsonApi, {
   type: "episodes",
 });
+
+EpisodeSchema.plugin(MongooseChangeTracking);
 
 
 export type TEpisode = HydratedDocument<IEpisode, EpisodeInstanceMethods, EpisodeQueryHelper>;

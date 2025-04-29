@@ -1,7 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
+import { TChange } from "./change.model";
 import { TChapterEntry } from "./chapter-entry.model";
 import { TManga } from "./manga.model";
 import { TVolume } from "./volume.model";
@@ -17,17 +19,18 @@ export interface IChapter {
 
   manga: Types.ObjectId | TManga;
   volume: Types.ObjectId | TVolume | null;
+  changes?: TChange[];
   "chapter-entry"?: TChapterEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type ChapterInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type ChapterInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type ChapterQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type ChapterQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type ChapterModel = Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> & MultiLanguageModel<IChapter> & JsonApiModel<IChapter>
+export type ChapterModel = Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> & MultiLanguageModel<IChapter> & JsonApiModel<IChapter> & ChangeTrackingModel<IChapter>
 
 export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceMethods, ChapterQueryHelper>({
   number: {
@@ -85,6 +88,12 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceM
   toObject: { virtuals: true },
 });
 
+ChapterSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 ChapterSchema.virtual("chapter-entry");
 
 ChapterSchema.index({
@@ -118,6 +127,8 @@ ChapterSchema.plugin(MongooseMultiLanguage, {
 ChapterSchema.plugin(MongooseJsonApi, {
   type: "chapters",
 });
+
+ChapterSchema.plugin(MongooseChangeTracking);
 
 
 export type TChapter = HydratedDocument<IChapter, ChapterInstanceMethods, ChapterQueryHelper>;

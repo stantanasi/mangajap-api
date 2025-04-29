@@ -25,13 +25,12 @@ export interface IFranchise {
   _id: Types.ObjectId;
 
   role: FranchiseRole;
+  sourceModel: "Anime" | "Manga";
+  destinationModel: "Anime" | "Manga";
 
   source: Types.ObjectId | (TAnime | TManga);
   destination: Types.ObjectId | (TAnime | TManga);
   changes?: TChange[];
-
-  sourceModel: "Anime" | "Manga";
-  destinationModel: "Anime" | "Manga";
 
   createdAt: Date;
   updatedAt: Date;
@@ -50,6 +49,18 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseI
     enum: Object.values(FranchiseRole),
   },
 
+  sourceModel: {
+    type: String,
+    required: true,
+    enum: ["Anime", "Manga"],
+  },
+
+  destinationModel: {
+    type: String,
+    required: true,
+    enum: ["Anime", "Manga"],
+  },
+
 
   source: {
     type: Schema.Types.ObjectId,
@@ -61,19 +72,6 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseI
     type: Schema.Types.ObjectId,
     refPath: "destinationModel",
     required: true,
-  },
-
-
-  sourceModel: {
-    type: String,
-    required: true,
-    enum: ["Anime", "Manga"],
-  },
-
-  destinationModel: {
-    type: String,
-    required: true,
-    enum: ["Anime", "Manga"],
   },
 }, {
   id: false,

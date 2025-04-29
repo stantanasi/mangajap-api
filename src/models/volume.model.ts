@@ -1,7 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
+import { TChange } from "./change.model";
 import Chapter, { TChapter } from "./chapter.model";
 import { TManga } from "./manga.model";
 import { TVolumeEntry } from "./volume-entry.model";
@@ -21,17 +23,18 @@ export interface IVolume {
 
   manga: Types.ObjectId | TManga;
   chapters?: TChapter[];
+  changes?: TChange[];
   "volume-entry"?: TVolumeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type VolumeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type VolumeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type VolumeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type VolumeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & MultiLanguageModel<IVolume> & JsonApiModel<IVolume>
+export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & MultiLanguageModel<IVolume> & JsonApiModel<IVolume> & ChangeTrackingModel<IVolume>
 
 export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper>({
   number: {
@@ -108,6 +111,12 @@ VolumeSchema.virtual("chapters", {
   },
 });
 
+VolumeSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 VolumeSchema.virtual("volume-entry");
 
 VolumeSchema.index({
@@ -160,6 +169,8 @@ VolumeSchema.plugin(MongooseMultiLanguage, {
 VolumeSchema.plugin(MongooseJsonApi, {
   type: "volumes",
 });
+
+VolumeSchema.plugin(MongooseChangeTracking);
 
 
 export type TVolume = HydratedDocument<IVolume, VolumeInstanceMethods, VolumeQueryHelper>;

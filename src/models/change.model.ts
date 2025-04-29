@@ -5,6 +5,7 @@ import { TAnime } from "./anime.model";
 import { TChapter } from "./chapter.model";
 import { TEpisode } from "./episode.model";
 import { TFranchise } from "./franchise.model";
+import { TGenre } from "./genre.model";
 import { TUser } from "./user.model";
 
 export interface IChange {
@@ -16,7 +17,7 @@ export interface IChange {
     after?: Record<string, any>;
   };
 
-  document: Types.ObjectId | (TAnime | TChapter | TEpisode | TFranchise);
+  document: Types.ObjectId | (TAnime | TChapter | TEpisode | TFranchise | TGenre);
   documentModel: string;
   user: string | TUser;
 
@@ -52,7 +53,7 @@ export const ChangeSchema = new Schema<IChange, ChangeModel, ChangeInstanceMetho
   documentModel: {
     type: String,
     required: true,
-    enum: ["Anime", "Chapter", "Episode", "Franchise"],
+    enum: ["Anime", "Chapter", "Episode", "Franchise", "Genre"],
   },
 
   user: {

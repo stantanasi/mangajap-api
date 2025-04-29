@@ -1,7 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
+import { TChange } from "./change.model";
 import { TManga } from "./manga.model";
 
 export interface ITheme {
@@ -11,16 +13,17 @@ export interface ITheme {
 
   animes?: TAnime[];
   mangas?: TManga[];
+  changes?: TChange[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type ThemeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type ThemeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type ThemeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type ThemeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & MultiLanguageModel<ITheme> & JsonApiModel<ITheme>
+export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & MultiLanguageModel<ITheme> & JsonApiModel<ITheme> & ChangeTrackingModel<ITheme>
 
 export const ThemeSchema = new Schema<ITheme, ThemeModel, ThemeInstanceMethods, ThemeQueryHelper>({
   name: {
@@ -55,6 +58,12 @@ ThemeSchema.virtual("mangas", {
   foreignField: "themes",
 });
 
+ThemeSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 
 ThemeSchema.plugin(MongooseMultiLanguage, {
   fields: ["name"],
@@ -63,6 +72,8 @@ ThemeSchema.plugin(MongooseMultiLanguage, {
 ThemeSchema.plugin(MongooseJsonApi, {
   type: "themes",
 });
+
+ThemeSchema.plugin(MongooseChangeTracking);
 
 
 export type TTheme = HydratedDocument<ITheme, ThemeInstanceMethods, ThemeQueryHelper>;

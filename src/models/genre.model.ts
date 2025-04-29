@@ -1,7 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
+import { TChange } from "./change.model";
 import { TManga } from "./manga.model";
 
 export interface IGenre {
@@ -11,16 +13,17 @@ export interface IGenre {
 
   animes?: TAnime[];
   mangas?: TManga[];
+  changes?: TChange[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type GenreInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type GenreInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type GenreQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type GenreQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & MultiLanguageModel<IGenre> & JsonApiModel<IGenre>
+export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & MultiLanguageModel<IGenre> & JsonApiModel<IGenre> & ChangeTrackingModel<IGenre>
 
 export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, GenreQueryHelper>({
   name: {
@@ -55,6 +58,12 @@ GenreSchema.virtual("mangas", {
   foreignField: "genres",
 });
 
+GenreSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 
 GenreSchema.plugin(MongooseMultiLanguage, {
   fields: ["name"],
@@ -63,6 +72,8 @@ GenreSchema.plugin(MongooseMultiLanguage, {
 GenreSchema.plugin(MongooseJsonApi, {
   type: "genres",
 });
+
+GenreSchema.plugin(MongooseChangeTracking);
 
 
 export type TGenre = HydratedDocument<IGenre, GenreInstanceMethods, GenreQueryHelper>;

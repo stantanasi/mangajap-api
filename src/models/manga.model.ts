@@ -1,8 +1,10 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
+import { TChange } from "./change.model";
 import Chapter, { TChapter } from "./chapter.model";
 import { TFranchise } from "./franchise.model";
 import { TGenre } from "./genre.model";
@@ -65,17 +67,18 @@ export interface IManga {
   staff?: TStaff[];
   reviews?: TReview[];
   franchises?: TFranchise[];
+  changes?: TChange[];
   "manga-entry"?: TMangaEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type MangaInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods;
+export type MangaInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods;
 
-export type MangaQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper;
+export type MangaQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper;
 
-export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga>;
+export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga> & ChangeTrackingModel<IManga>;
 
 export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, MangaQueryHelper>({
   title: {
@@ -267,6 +270,12 @@ MangaSchema.virtual("franchises", {
   foreignField: "source",
 });
 
+MangaSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 MangaSchema.virtual("manga-entry");
 
 
@@ -387,6 +396,8 @@ MangaSchema.plugin(MongooseJsonApi, {
     },
   },
 });
+
+MangaSchema.plugin(MongooseChangeTracking);
 
 
 export type TManga = HydratedDocument<IManga, MangaInstanceMethods, MangaQueryHelper>;

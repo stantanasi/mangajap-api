@@ -1,6 +1,7 @@
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/auth";
 import Chapter from "../models/chapter.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
 
 const chapterRoutes = express.Router();
 
@@ -23,12 +24,14 @@ chapterRoutes.get("/", async (req, res, next) => {
   }
 });
 
-chapterRoutes.post("/", isAdmin(), async (req, res, next) => {
+chapterRoutes.post("/", isLogin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     const id = await Chapter.fromJsonApi(req.body, {
       assignAttribute: Chapter.fromLanguage(req.query.language),
     })
-      .save()
+      .save({ user: token.uid })
       .then((doc) => doc._id);
 
     const response = await Chapter.findById(id)
@@ -59,8 +62,10 @@ chapterRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-chapterRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+chapterRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Chapter.findById(req.params.id)
       .orFail()
       .then((doc) => {
@@ -68,7 +73,7 @@ chapterRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
           .merge(Chapter.fromJsonApi(req.body, {
             assignAttribute: Chapter.fromLanguage(req.query.language),
           }))
-          .save();
+          .save({ user: token.uid });
       });
 
     const response = await Chapter.findById(req.params.id)
@@ -86,11 +91,13 @@ chapterRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
 
 chapterRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Chapter.findById(req.params.id)
       .orFail()
       .then((doc) => {
         return doc
-          .deleteOne();
+          .deleteOne({ user: token.uid });
       });
 
     res.status(204).send();
@@ -124,6 +131,26 @@ chapterRoutes.get("/:id/volume", async (req, res, next) => {
       .withLanguage(req.query.language)
       .toJsonApi({
         baseUrl: `${process.env.API_URL}`,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+chapterRoutes.get("/:id/changes", async (req, res, next) => {
+  try {
+    const response = await Chapter.findById(req.params.id)
+      .getRelationship("changes")
+      .withJsonApi(req.query)
+      .withLanguage(req.query.language)
+      .toJsonApi({
+        baseUrl: `${process.env.API_URL}`,
+      })
+      .paginate({
+        url: `${process.env.API_URL}${req.originalUrl}`,
+        query: req.query,
       });
 
     res.json(response);

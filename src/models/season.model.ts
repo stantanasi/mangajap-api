@@ -1,8 +1,10 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
 import { deleteFile, uploadFile } from "../firebase-app";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import { TAnime } from "./anime.model";
+import { TChange } from "./change.model";
 import Episode, { TEpisode } from "./episode.model";
 
 export interface ISeason {
@@ -18,16 +20,17 @@ export interface ISeason {
 
   anime: Types.ObjectId | TAnime;
   episodes?: TEpisode[];
+  changes?: TChange[];
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type SeasonInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type SeasonInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type SeasonQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type SeasonQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & MultiLanguageModel<ISeason> & JsonApiModel<ISeason>
+export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & MultiLanguageModel<ISeason> & JsonApiModel<ISeason> & ChangeTrackingModel<ISeason>
 
 export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper>({
   number: {
@@ -94,6 +97,12 @@ SeasonSchema.virtual("episodes", {
   },
 });
 
+SeasonSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 SeasonSchema.index({
   number: 1,
   anime: 1,
@@ -140,6 +149,8 @@ SeasonSchema.plugin(MongooseMultiLanguage, {
 SeasonSchema.plugin(MongooseJsonApi, {
   type: "seasons",
 });
+
+SeasonSchema.plugin(MongooseChangeTracking);
 
 
 export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>;

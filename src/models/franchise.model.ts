@@ -1,7 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
 import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
 import Anime, { TAnime } from "./anime.model";
+import { TChange } from "./change.model";
 import Manga, { TManga } from "./manga.model";
 
 enum FranchiseRole {
@@ -26,6 +28,7 @@ export interface IFranchise {
 
   source: Types.ObjectId | (TAnime | TManga);
   destination: Types.ObjectId | (TAnime | TManga);
+  changes?: TChange[];
 
   sourceModel: "Anime" | "Manga";
   destinationModel: "Anime" | "Manga";
@@ -34,11 +37,11 @@ export interface IFranchise {
   updatedAt: Date;
 }
 
-export type FranchiseInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods
+export type FranchiseInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstanceMethods & ChangeTrackingInstanceMethods
 
-export type FranchiseQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
+export type FranchiseQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type FranchiseModel = Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> & MultiLanguageModel<IFranchise> & JsonApiModel<IFranchise>
+export type FranchiseModel = Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> & MultiLanguageModel<IFranchise> & JsonApiModel<IFranchise> & ChangeTrackingModel<IFranchise>
 
 export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseInstanceMethods, FranchiseQueryHelper>({
   role: {
@@ -81,6 +84,12 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseI
   toObject: { virtuals: true },
 });
 
+FranchiseSchema.virtual("changes", {
+  ref: "Change",
+  localField: "_id",
+  foreignField: "document",
+});
+
 
 FranchiseSchema.pre<TFranchise>("validate", async function () {
   if (!this.sourceModel && this.source) {
@@ -106,6 +115,8 @@ FranchiseSchema.plugin(MongooseMultiLanguage, {
 FranchiseSchema.plugin(MongooseJsonApi, {
   type: "franchises",
 });
+
+FranchiseSchema.plugin(MongooseChangeTracking);
 
 
 export type TFranchise = HydratedDocument<IFranchise, FranchiseInstanceMethods, FranchiseQueryHelper>;

@@ -10,6 +10,7 @@ import { TManga } from "./manga.model";
 import { TPeople } from "./people.model";
 import { TSeason } from "./season.model";
 import { TStaff } from "./staff.model";
+import { TTheme } from "./theme.model";
 import { TUser } from "./user.model";
 
 export interface IChange {
@@ -21,7 +22,7 @@ export interface IChange {
     after?: Record<string, any>;
   };
 
-  document: Types.ObjectId | (TAnime | TChapter | TEpisode | TFranchise | TGenre | TManga | TPeople | TSeason | TStaff);
+  document: Types.ObjectId | (TAnime | TChapter | TEpisode | TFranchise | TGenre | TManga | TPeople | TSeason | TStaff | TTheme);
   documentModel: string;
   user: string | TUser;
 
@@ -57,7 +58,7 @@ export const ChangeSchema = new Schema<IChange, ChangeModel, ChangeInstanceMetho
   documentModel: {
     type: String,
     required: true,
-    enum: ["Anime", "Chapter", "Episode", "Franchise", "Genre", "Manga", "People", "Season", "Staff"],
+    enum: ["Anime", "Chapter", "Episode", "Franchise", "Genre", "Manga", "People", "Season", "Staff", "Theme"],
   },
 
   user: {

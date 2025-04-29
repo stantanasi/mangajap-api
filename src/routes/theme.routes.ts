@@ -1,4 +1,5 @@
 import express from "express";
+import { DecodedIdToken } from "firebase-admin/auth";
 import Theme from "../models/theme.model";
 import { isAdmin } from "../utils/middlewares/middlewares";
 
@@ -25,10 +26,12 @@ themeRoutes.get("/", async (req, res, next) => {
 
 themeRoutes.post("/", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     const id = await Theme.fromJsonApi(req.body, {
       assignAttribute: Theme.fromLanguage(req.query.language),
     })
-      .save()
+      .save({ user: token.uid })
       .then((doc) => doc._id);
 
     const response = await Theme.findById(id)
@@ -61,6 +64,8 @@ themeRoutes.get("/:id", async (req, res, next) => {
 
 themeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Theme.findById(req.params.id)
       .orFail()
       .then((doc) => {
@@ -68,7 +73,7 @@ themeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
           .merge(Theme.fromJsonApi(req.body, {
             assignAttribute: Theme.fromLanguage(req.query.language),
           }))
-          .save();
+          .save({ user: token.uid });
       });
 
     const response = await Theme.findById(req.params.id)
@@ -86,11 +91,13 @@ themeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
 
 themeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
   try {
+    const token: DecodedIdToken = res.locals.token;
+
     await Theme.findById(req.params.id)
       .orFail()
       .then((doc) => {
         return doc
-          .deleteOne();
+          .deleteOne({ user: token.uid });
       });
 
     res.status(204).send();
@@ -124,6 +131,26 @@ themeRoutes.get("/:id/animes", async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
       .getRelationship("animes")
+      .withJsonApi(req.query)
+      .withLanguage(req.query.language)
+      .toJsonApi({
+        baseUrl: `${process.env.API_URL}`,
+      })
+      .paginate({
+        url: `${process.env.API_URL}${req.originalUrl}`,
+        query: req.query,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+themeRoutes.get("/:id/changes", async (req, res, next) => {
+  try {
+    const response = await Theme.findById(req.params.id)
+      .getRelationship("changes")
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

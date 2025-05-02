@@ -53,18 +53,16 @@ const LANGUAGES: Record<string, string> = {
   si: "si-LK"
 };
 
-const getLanguage = (language: string | undefined): string => {
-  if (!language) return DEFAULT_LANGUAGE;
-
+const getLanguage = (language: string): string => {
   if (/^[a-z]{2}-[A-Z]{2}$/.test(language)) {
     return language;
   }
 
   if (/^[a-z]{2}$/.test(language)) {
-    return LANGUAGES[language] || DEFAULT_LANGUAGE;
+    return LANGUAGES[language] ?? language;
   }
 
-  return DEFAULT_LANGUAGE;
+  return language;
 }
 
 
@@ -83,8 +81,10 @@ export interface MultiLanguageQueryHelper {
 }
 
 export interface MultiLanguageInstanceMethods {
+  _languages: string[];
+
   translate: (
-    language: string,
+    language: string | undefined,
   ) => this;
 }
 
@@ -106,23 +106,22 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
   options.fields.forEach((path) => {
     const transform = schema.path(path).options.transform;
 
-    schema.path(path).options.transform = function (this, value: any) {
+    schema.path(path).options.transform = function (this: HydratedDocument<DocType, MultiLanguageInstanceMethods, MultiLanguageQueryHelper>, value: any) {
       value = transform ? transform.call(this, value) : value;
 
-      const language = this._language;
-      if (!language) {
-        return value;
-      }
+      const languages = this._languages;
+      if (!languages) return value;
 
       if (typeof value === "object") {
-        let translation;
-        if (value instanceof Map) {
-          translation = value.get(language) ?? value.get(DEFAULT_LANGUAGE);
-        } else {
-          translation = value[language] ?? value[DEFAULT_LANGUAGE];
-        }
+        const translations = value instanceof Map
+          ? languages.map((language) => value.get(language))
+          : languages.map((language) => value[language]);
 
-        return translation ?? null;
+        const translation = translations.find((val) => val !== undefined)
+          ?? translations[0]
+          ?? null;
+
+        return translation;
       }
 
       return value;
@@ -131,7 +130,9 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
 
 
   schema.statics.fromLanguage = function (language: string | undefined) {
-    language = getLanguage(language);
+    language = language
+      ? getLanguage(language)
+      : DEFAULT_LANGUAGE;
 
     return (doc, path, value) => {
       if (options.fields.includes(path)) {
@@ -143,8 +144,6 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
   };
 
   schema.query.withLanguage = function (this, language: string | undefined) {
-    language = getLanguage(language);
-
     return this.transform((docs) => {
       if (Array.isArray(docs)) {
         docs.forEach((doc) => {
@@ -159,7 +158,8 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
   };
 
   schema.methods.translate = function (language) {
-    (this as any)._language = getLanguage(language);
+    this._languages = language?.split(',').map((language) => getLanguage(language))
+      ?? [DEFAULT_LANGUAGE];
 
     Object.entries({
       ...this.schema.paths,

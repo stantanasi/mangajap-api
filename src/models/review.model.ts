@@ -1,7 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TAnime } from './anime.model';
+import Anime, { TAnime } from './anime.model';
 import { TManga } from './manga.model';
 import { TUser } from './user.model';
 
@@ -55,6 +55,19 @@ export const ReviewSchema = new Schema<IReview, ReviewModel, ReviewInstanceMetho
   minimize: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
+});
+
+
+ReviewSchema.post('save', async function () {
+  if (this.anime) {
+    await Anime.updateReviewCount(this.anime._id);
+  }
+});
+
+ReviewSchema.post('deleteOne', { document: true, query: false }, async function () {
+  if (this.anime) {
+    await Anime.updateReviewCount(this.anime._id);
+  }
 });
 
 

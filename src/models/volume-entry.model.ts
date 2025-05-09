@@ -1,8 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TUser } from './user.model';
-import { TVolume } from './volume.model';
+import MangaEntry from './manga-entry.model';
+import User, { TUser } from './user.model';
+import Volume, { TVolume } from './volume.model';
 
 export interface IVolumeEntry {
   _id: Types.ObjectId;
@@ -65,6 +66,37 @@ VolumeEntrySchema.index({
   user: 1,
   volume: 1,
 }, { unique: true });
+
+
+VolumeEntrySchema.post('save', async function () {
+  await User.updateVolumesRead(typeof this.user === 'string' ? this.user : this.user._id);
+
+  const volume = await Volume.findById(this.volume._id).select('manga').lean();
+  if (!volume) return
+
+  const mangaEntry = await MangaEntry.findOne({
+    user: this.user,
+    manga: volume.manga,
+  }).select('_id').lean();
+  if (!mangaEntry) return
+
+  await MangaEntry.updateVolumesRead(mangaEntry._id);
+});
+
+VolumeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateVolumesRead(typeof this.user === 'string' ? this.user : this.user._id);
+
+  const volume = await Volume.findById(this.volume._id).select('manga').lean();
+  if (!volume) return
+
+  const mangaEntry = await MangaEntry.findOne({
+    user: this.user,
+    manga: volume.manga,
+  }).select('_id').lean();
+  if (!mangaEntry) return
+
+  await MangaEntry.updateVolumesRead(mangaEntry._id);
+});
 
 
 VolumeEntrySchema.plugin(MongooseMultiLanguage, {

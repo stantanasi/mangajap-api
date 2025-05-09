@@ -1,8 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TEpisode } from './episode.model';
-import { TUser } from './user.model';
+import AnimeEntry from './anime-entry.model';
+import Episode, { TEpisode } from './episode.model';
+import User, { TUser } from './user.model';
 
 export interface IEpisodeEntry {
   _id: Types.ObjectId;
@@ -65,6 +66,37 @@ EpisodeEntrySchema.index({
   user: 1,
   episode: 1,
 }, { unique: true });
+
+
+EpisodeEntrySchema.post('save', async function () {
+  await User.updateEpisodesWatch(typeof this.user === 'string' ? this.user : this.user._id);
+
+  const episode = await Episode.findById(this.episode._id).select('anime').lean();
+  if (!episode) return
+
+  const animeEntry = await AnimeEntry.findOne({
+    user: this.user,
+    anime: episode.anime,
+  }).select('_id').lean();
+  if (!animeEntry) return
+
+  await AnimeEntry.updateEpisodesWatch(animeEntry._id);
+});
+
+EpisodeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateEpisodesWatch(typeof this.user === 'string' ? this.user : this.user._id);
+
+  const episode = await Episode.findById(this.episode._id).select('anime').lean();
+  if (!episode) return
+
+  const animeEntry = await AnimeEntry.findOne({
+    user: this.user,
+    anime: episode.anime,
+  }).select('_id').lean();
+  if (!animeEntry) return
+
+  await AnimeEntry.updateEpisodesWatch(animeEntry._id);
+});
 
 
 EpisodeEntrySchema.plugin(MongooseMultiLanguage, {

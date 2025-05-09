@@ -1,8 +1,9 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TChapter } from './chapter.model';
-import { TUser } from './user.model';
+import Chapter, { TChapter } from './chapter.model';
+import MangaEntry from './manga-entry.model';
+import User, { TUser } from './user.model';
 
 export interface IChapterEntry {
   _id: Types.ObjectId;
@@ -65,6 +66,37 @@ ChapterEntrySchema.index({
   user: 1,
   chapter: 1,
 }, { unique: true });
+
+
+ChapterEntrySchema.post('save', async function () {
+  await User.updateChaptersRead(typeof this.user === 'string' ? this.user : this.user._id);
+
+  const chapter = await Chapter.findById(this.chapter._id).select('manga').lean();
+  if (!chapter) return
+
+  const mangaEntry = await MangaEntry.findOne({
+    user: this.user,
+    manga: chapter.manga,
+  }).select('_id').lean();
+  if (!mangaEntry) return
+
+  await MangaEntry.updateChaptersRead(mangaEntry._id);
+});
+
+ChapterEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateChaptersRead(typeof this.user === 'string' ? this.user : this.user._id);
+
+  const chapter = await Chapter.findById(this.chapter._id).select('manga').lean();
+  if (!chapter) return
+
+  const mangaEntry = await MangaEntry.findOne({
+    user: this.user,
+    manga: chapter.manga,
+  }).select('_id').lean();
+  if (!mangaEntry) return
+
+  await MangaEntry.updateChaptersRead(mangaEntry._id);
+});
 
 
 ChapterEntrySchema.plugin(MongooseMultiLanguage, {

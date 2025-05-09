@@ -53,7 +53,23 @@ export type UserInstanceMethods = MultiLanguageInstanceMethods & SearchInstanceM
 
 export type UserQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper
 
-export type UserModel = Model<IUser, UserQueryHelper, UserInstanceMethods> & MultiLanguageModel<IUser> & SearchModel<IUser> & JsonApiModel<IUser>
+export type UserModel = Model<IUser, UserQueryHelper, UserInstanceMethods> & MultiLanguageModel<IUser> & SearchModel<IUser> & JsonApiModel<IUser> & {
+  updateFollowersCount: (_id: string) => Promise<void>;
+
+  updateFollowingCount: (_id: string) => Promise<void>;
+
+  updateFollowedMangaCount: (_id: string) => Promise<void>;
+
+  updateVolumesRead: (_id: string) => Promise<void>;
+
+  updateChaptersRead: (_id: string) => Promise<void>;
+
+  updateFollowedAnimeCount: (_id: string) => Promise<void>;
+
+  updateEpisodesWatch: (_id: string) => Promise<void>;
+
+  updateTimeSpentOnAnime: (_id: string) => Promise<void>;
+}
 
 export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, UserQueryHelper, {}, UserModel>({
   _id: {
@@ -229,50 +245,66 @@ UserSchema.virtual('requests', {
 });
 
 
-UserSchema.pre<TUser>('save', async function () {
-  if (this.isModified('avatar')) {
-    this.avatar = await uploadFile(
-      `users/${this._id}/images/profile.jpg`,
-      this.avatar,
-    );
-  }
-});
-
-UserSchema.pre('findOne', async function () {
-  const _id = this.getFilter()._id;
-  if (!_id) return;
-
-  await User.findOneAndUpdate(this.getFilter(), {
+UserSchema.statics.updateFollowersCount = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     followersCount: await Follow.countDocuments({
-      followed: _id
+      followed: _id,
     }),
+  });
+};
 
+UserSchema.statics.updateFollowingCount = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     followingCount: await Follow.countDocuments({
-      follower: _id
+      follower: _id,
     }),
+  });
+};
 
+UserSchema.statics.updateFollowedMangaCount = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     followedMangaCount: await MangaEntry.countDocuments({
       user: _id,
       isAdd: true,
     }),
+  });
+};
 
+UserSchema.statics.updateVolumesRead = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     volumesRead: await VolumeEntry.countDocuments({
       user: _id,
     }),
+  });
+};
 
+UserSchema.statics.updateChaptersRead = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     chaptersRead: await ChapterEntry.countDocuments({
       user: _id,
     }),
+  });
+};
 
+UserSchema.statics.updateFollowedAnimeCount = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     followedAnimeCount: await AnimeEntry.countDocuments({
       user: _id,
       isAdd: true,
     }),
+  });
+};
 
+UserSchema.statics.updateEpisodesWatch = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     episodesWatch: await EpisodeEntry.countDocuments({
       user: _id,
     }),
+  });
+};
 
+UserSchema.statics.updateTimeSpentOnAnime = async function (_id) {
+  await User.findByIdAndUpdate(_id, {
     timeSpentOnAnime: await AnimeEntry.aggregate()
       .match({ user: _id })
       .lookup({
@@ -289,6 +321,16 @@ UserSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.timeSpentOnAnime),
   });
+};
+
+
+UserSchema.pre<TUser>('save', async function () {
+  if (this.isModified('avatar')) {
+    this.avatar = await uploadFile(
+      `users/${this._id}/images/profile.jpg`,
+      this.avatar,
+    );
+  }
 });
 
 UserSchema.pre<TUser>('deleteOne', async function () {

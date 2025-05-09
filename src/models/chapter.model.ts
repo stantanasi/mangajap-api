@@ -5,8 +5,8 @@ import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingMo
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import { TChange } from './change.model';
 import { TChapterEntry } from './chapter-entry.model';
-import { TManga } from './manga.model';
-import { TVolume } from './volume.model';
+import Manga, { TManga } from './manga.model';
+import Volume, { TVolume } from './volume.model';
 
 export interface IChapter {
   _id: Types.ObjectId;
@@ -116,6 +116,26 @@ ChapterSchema.pre<TChapter>('deleteOne', async function () {
     await deleteFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
     );
+  }
+});
+
+ChapterSchema.post('save', async function () {
+  await Manga.updateChapterCount(this.manga._id);
+
+  if (this.volume) {
+    await Volume.updateChapterCount(this.volume._id);
+    await Volume.updateStartChapter(this.volume._id);
+    await Volume.updateEndChapter(this.volume._id);
+  }
+});
+
+ChapterSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await Manga.updateChapterCount(this.manga._id);
+
+  if (this.volume) {
+    await Volume.updateChapterCount(this.volume._id);
+    await Volume.updateStartChapter(this.volume._id);
+    await Volume.updateEndChapter(this.volume._id);
   }
 });
 

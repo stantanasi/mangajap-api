@@ -3,10 +3,10 @@ import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TAnime } from './anime.model';
+import Anime, { TAnime } from './anime.model';
 import { TChange } from './change.model';
 import { TEpisodeEntry } from './episode-entry.model';
-import { TSeason } from './season.model';
+import Season, { TSeason } from './season.model';
 
 enum EpisodeType {
   None = '',
@@ -135,6 +135,20 @@ EpisodeSchema.pre<TEpisode>('deleteOne', async function () {
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
     );
   }
+});
+
+EpisodeSchema.post('save', async function () {
+  await Anime.updateEpisodeCount(this.anime._id);
+
+  await Season.updateAirDate(this.season._id);
+  await Season.updateEpisodeCount(this.season._id);
+});
+
+EpisodeSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await Anime.updateEpisodeCount(this.anime._id);
+
+  await Season.updateAirDate(this.season._id);
+  await Season.updateEpisodeCount(this.season._id);
 });
 
 

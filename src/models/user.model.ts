@@ -5,6 +5,7 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { TAnimeEntry } from './anime-entry.model';
 import ChapterEntry from './chapter-entry.model';
+import EpisodeEntry from './episode-entry.model';
 import Follow, { TFollow } from './follow.model';
 import MangaEntry, { TMangaEntry } from './manga-entry.model';
 import { TReview } from './review.model';
@@ -268,14 +269,9 @@ UserSchema.pre('findOne', async function () {
       isAdd: true,
     }),
 
-    episodesWatch: await AnimeEntry.aggregate()
-      .match({ user: _id })
-      .group({
-        _id: null,
-        total: { $sum: '$episodesWatch' }
-      })
-      .then((docs) => docs[0])
-      .then((doc) => doc?.total),
+    episodesWatch: await EpisodeEntry.countDocuments({
+      user: _id,
+    }),
 
     timeSpentOnAnime: await AnimeEntry.aggregate()
       .match({ user: _id })

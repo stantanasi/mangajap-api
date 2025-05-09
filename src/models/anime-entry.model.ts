@@ -18,8 +18,9 @@ export interface IAnimeEntry {
   isAdd: boolean;
   isFavorites: boolean;
   status: AnimeEntryStatus;
-  episodesWatch: number;
   rating: number | null;
+
+  episodesWatch: number;
   startedAt: Date | null;
   finishedAt: Date | null;
 
@@ -34,7 +35,9 @@ export type AnimeEntryInstanceMethods = MultiLanguageInstanceMethods & JsonApiIn
 
 export type AnimeEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type AnimeEntryModel = Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> & MultiLanguageModel<IAnimeEntry> & JsonApiModel<IAnimeEntry>
+export type AnimeEntryModel = Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> & MultiLanguageModel<IAnimeEntry> & JsonApiModel<IAnimeEntry> & {
+  updateEpisodesWatch: (_id: Types.ObjectId) => Promise<void>;
+}
 
 export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEntryInstanceMethods, AnimeEntryQueryHelper, {}, AnimeEntryModel>({
   isAdd: {
@@ -53,14 +56,15 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEn
     enum: Object.values(AnimeEntryStatus),
   },
 
-  episodesWatch: {
-    type: Number,
-    default: 0,
-  },
-
   rating: {
     type: Number,
     default: null,
+  },
+
+
+  episodesWatch: {
+    type: Number,
+    default: 0,
   },
 
   startedAt: {
@@ -98,6 +102,59 @@ AnimeEntrySchema.index({
   user: 1,
   anime: 1,
 }, { unique: true });
+
+
+AnimeEntrySchema.statics.updateEpisodesWatch = async function (_id) {
+  await AnimeEntry.findByIdAndUpdate(_id, {
+    episodesWatch: await AnimeEntry.aggregate()
+      .match({ _id: _id })
+      .lookup({
+        from: 'animes',
+        localField: 'anime',
+        foreignField: '_id',
+        as: 'anime',
+        let: { user: '$user' },
+        pipeline: [
+          {
+            $lookup: {
+              from: 'episodes',
+              localField: '_id',
+              foreignField: 'anime',
+              as: 'episodes',
+              let: { user: '$$user' },
+              pipeline: [
+                {
+                  $lookup: {
+                    from: 'episodeentries',
+                    localField: '_id',
+                    foreignField: 'episode',
+                    as: 'episode-entry',
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $eq: ['$user', '$$user']
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      })
+      .unwind({ path: '$anime' })
+      .unwind({ path: '$anime.episodes' })
+      .unwind({ path: '$anime.episodes.episode-entry' })
+      .group({
+        _id: null,
+        count: { $sum: 1 },
+      })
+      .then((result) => result[0].count),
+  });
+};
 
 
 AnimeEntrySchema.post('save', async function () {

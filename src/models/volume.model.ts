@@ -5,7 +5,7 @@ import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingMo
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import { TChange } from './change.model';
 import Chapter, { TChapter } from './chapter.model';
-import { TManga } from './manga.model';
+import Manga, { TManga } from './manga.model';
 import { TVolumeEntry } from './volume-entry.model';
 
 export interface IVolume {
@@ -159,6 +159,14 @@ VolumeSchema.pre<TVolume>('deleteOne', async function () {
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
     );
   }
+});
+
+VolumeSchema.post('save', async function () {
+  await Manga.updateVolumeCount(this.manga._id);
+});
+
+VolumeSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await Manga.updateVolumeCount(this.manga._id);
 });
 
 

@@ -41,7 +41,7 @@ export interface IManga {
 
   title: Map<string, string>;
   overview: Map<string, string>;
-  startDate: Map<string, Date>;
+  startDate: Map<string, Date | null>;
   endDate: Map<string, Date | null>;
   origin: string[];
   mangaType: MangaType;
@@ -121,12 +121,6 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
     type: Map,
     of: Date,
     default: {},
-    validate: {
-      validator: function (value: IManga['startDate']) {
-        return value.size > 0 && Array.from(value.values()).every((v) => !!v);
-      },
-      message: 'Invalid startDate',
-    },
     transform: function (this, val: IManga['startDate']) {
       return Object.fromEntries(
         Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])

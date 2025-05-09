@@ -1,7 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TUser } from './user.model';
+import User, { TUser } from './user.model';
 
 export interface IFollow {
   _id: Types.ObjectId;
@@ -44,6 +44,17 @@ FollowSchema.index({
   follower: 1,
   followed: 1,
 }, { unique: true });
+
+
+FollowSchema.post('save', async function () {
+  await User.updateFollowersCount(typeof this.followed === 'string' ? this.followed : this.followed._id);
+  await User.updateFollowingCount(typeof this.follower === 'string' ? this.follower : this.follower._id);
+});
+
+FollowSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateFollowersCount(typeof this.followed === 'string' ? this.followed : this.followed._id);
+  await User.updateFollowingCount(typeof this.follower === 'string' ? this.follower : this.follower._id);
+});
 
 
 FollowSchema.plugin(MongooseMultiLanguage, {

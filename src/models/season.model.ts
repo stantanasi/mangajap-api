@@ -30,7 +30,11 @@ export type SeasonInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstan
 
 export type SeasonQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & MultiLanguageModel<ISeason> & JsonApiModel<ISeason> & ChangeTrackingModel<ISeason>
+export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & MultiLanguageModel<ISeason> & JsonApiModel<ISeason> & ChangeTrackingModel<ISeason> & {
+  updateAirDate: (_id: Types.ObjectId) => Promise<void>;
+
+  updateEpisodeCount: (_id: Types.ObjectId) => Promise<void>;
+}
 
 export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper, {}, SeasonModel>({
   number: {
@@ -109,6 +113,23 @@ SeasonSchema.index({
 }, { unique: true });
 
 
+SeasonSchema.statics.updateAirDate = async function (_id) {
+  await Season.findByIdAndUpdate(_id, {
+    airDate: await Episode.findOne({
+      season: _id,
+    }).sort({ number: 1 }).then((doc) => doc?.airDate ?? {}),
+  });
+};
+
+SeasonSchema.statics.updateEpisodeCount = async function (_id) {
+  await Season.findByIdAndUpdate(_id, {
+    episodeCount: await Episode.countDocuments({
+      season: _id,
+    }),
+  });
+};
+
+
 SeasonSchema.pre<TSeason>('save', async function () {
   if (this.isModified('poster.fr-FR')) {
     this.poster.set('fr-FR', await uploadFile(
@@ -116,21 +137,6 @@ SeasonSchema.pre<TSeason>('save', async function () {
       this.poster.get('fr-FR') ?? null,
     ));
   }
-});
-
-SeasonSchema.pre('findOne', async function () {
-  const _id = this.getFilter()._id;
-  if (!_id) return;
-
-  await Season.findOneAndUpdate(this.getFilter(), {
-    airDate: await Episode.findOne({
-      season: _id,
-    }).sort({ number: 1 }).then((doc) => doc?.airDate ?? {}),
-
-    episodeCount: await Episode.countDocuments({
-      season: _id,
-    }),
-  });
 });
 
 SeasonSchema.pre<TSeason>('deleteOne', async function () {

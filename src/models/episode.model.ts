@@ -6,7 +6,7 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import Anime, { TAnime } from './anime.model';
 import { TChange } from './change.model';
 import { TEpisodeEntry } from './episode-entry.model';
-import { TSeason } from './season.model';
+import Season, { TSeason } from './season.model';
 
 enum EpisodeType {
   None = '',
@@ -139,10 +139,16 @@ EpisodeSchema.pre<TEpisode>('deleteOne', async function () {
 
 EpisodeSchema.post('save', async function () {
   await Anime.updateEpisodeCount(this.anime._id);
+
+  await Season.updateAirDate(this.season._id);
+  await Season.updateEpisodeCount(this.season._id);
 });
 
 EpisodeSchema.post('deleteOne', { document: true, query: false }, async function () {
   await Anime.updateEpisodeCount(this.anime._id);
+
+  await Season.updateAirDate(this.season._id);
+  await Season.updateEpisodeCount(this.season._id);
 });
 
 

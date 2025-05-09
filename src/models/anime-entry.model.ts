@@ -2,7 +2,7 @@ import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelp
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import Anime, { TAnime } from './anime.model';
-import { TUser } from './user.model';
+import User, { TUser } from './user.model';
 
 enum AnimeEntryStatus {
   Watching = 'watching',
@@ -101,6 +101,9 @@ AnimeEntrySchema.index({
 
 
 AnimeEntrySchema.post('save', async function () {
+  await User.updateFollowedAnimeCount(typeof this.user === 'string' ? this.user : this.user._id);
+  await User.updateTimeSpentOnAnime(typeof this.user === 'string' ? this.user : this.user._id);
+
   await Anime.updateAverageRating(this.anime._id);
   await Anime.updateUserCount(this.anime._id);
   await Anime.updateFavoritesCount(this.anime._id);
@@ -108,6 +111,9 @@ AnimeEntrySchema.post('save', async function () {
 });
 
 AnimeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateFollowedAnimeCount(typeof this.user === 'string' ? this.user : this.user._id);
+  await User.updateTimeSpentOnAnime(typeof this.user === 'string' ? this.user : this.user._id);
+
   await Anime.updateAverageRating(this.anime._id);
   await Anime.updateUserCount(this.anime._id);
   await Anime.updateFavoritesCount(this.anime._id);

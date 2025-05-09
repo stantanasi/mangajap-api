@@ -2,7 +2,7 @@ import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelp
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import { TEpisode } from './episode.model';
-import { TUser } from './user.model';
+import User, { TUser } from './user.model';
 
 export interface IEpisodeEntry {
   _id: Types.ObjectId;
@@ -65,6 +65,15 @@ EpisodeEntrySchema.index({
   user: 1,
   episode: 1,
 }, { unique: true });
+
+
+EpisodeEntrySchema.post('save', async function () {
+  await User.updateEpisodesWatch(typeof this.user === 'string' ? this.user : this.user._id);
+});
+
+EpisodeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateEpisodesWatch(typeof this.user === 'string' ? this.user : this.user._id);
+});
 
 
 EpisodeEntrySchema.plugin(MongooseMultiLanguage, {

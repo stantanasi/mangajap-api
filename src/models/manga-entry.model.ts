@@ -2,7 +2,7 @@ import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelp
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import Manga, { TManga } from './manga.model';
-import { TUser } from './user.model';
+import User, { TUser } from './user.model';
 
 enum MangaEntryStatus {
   Reading = 'reading',
@@ -107,6 +107,8 @@ MangaEntrySchema.index({
 
 
 MangaEntrySchema.post('save', async function () {
+  await User.updateFollowedMangaCount(typeof this.user === 'string' ? this.user : this.user._id);
+
   await Manga.updateAverageRating(this.manga._id);
   await Manga.updateUserCount(this.manga._id);
   await Manga.updateFavoritesCount(this.manga._id);
@@ -114,6 +116,8 @@ MangaEntrySchema.post('save', async function () {
 });
 
 MangaEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateFollowedMangaCount(typeof this.user === 'string' ? this.user : this.user._id);
+
   await Manga.updateAverageRating(this.manga._id);
   await Manga.updateUserCount(this.manga._id);
   await Manga.updateFavoritesCount(this.manga._id);

@@ -1,7 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TAnime } from './anime.model';
+import Anime, { TAnime } from './anime.model';
 import { TUser } from './user.model';
 
 enum AnimeEntryStatus {
@@ -98,6 +98,21 @@ AnimeEntrySchema.index({
   user: 1,
   anime: 1,
 }, { unique: true });
+
+
+AnimeEntrySchema.post('save', async function () {
+  await Anime.updateAverageRating(this.anime._id);
+  await Anime.updateUserCount(this.anime._id);
+  await Anime.updateFavoritesCount(this.anime._id);
+  await Anime.updatePopularity(this.anime._id);
+});
+
+AnimeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await Anime.updateAverageRating(this.anime._id);
+  await Anime.updateUserCount(this.anime._id);
+  await Anime.updateFavoritesCount(this.anime._id);
+  await Anime.updatePopularity(this.anime._id);
+});
 
 
 AnimeEntrySchema.plugin(MongooseMultiLanguage, {

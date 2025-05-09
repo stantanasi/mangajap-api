@@ -4,9 +4,11 @@ import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
 import AnimeEntry, { TAnimeEntry } from './anime-entry.model';
+import ChapterEntry from './chapter-entry.model';
 import Follow, { TFollow } from './follow.model';
 import MangaEntry, { TMangaEntry } from './manga-entry.model';
 import { TReview } from './review.model';
+import VolumeEntry from './volume-entry.model';
 
 enum UserGender {
   Men = 'men',
@@ -253,23 +255,13 @@ UserSchema.pre('findOne', async function () {
       isAdd: true,
     }),
 
-    volumesRead: await MangaEntry.aggregate()
-      .match({ user: _id })
-      .group({
-        _id: null,
-        total: { $sum: '$volumesRead' },
-      })
-      .then((docs) => docs[0])
-      .then((doc) => doc?.total),
+    volumesRead: await VolumeEntry.countDocuments({
+      user: _id,
+    }),
 
-    chaptersRead: await MangaEntry.aggregate()
-      .match({ user: _id })
-      .group({
-        _id: null,
-        total: { $sum: '$chaptersRead' },
-      })
-      .then((docs) => docs[0])
-      .then((doc) => doc?.total),
+    chaptersRead: await ChapterEntry.countDocuments({
+      user: _id,
+    }),
 
     followedAnimeCount: await AnimeEntry.countDocuments({
       user: _id,

@@ -52,13 +52,11 @@ export interface IManga {
 
   volumeCount: number;
   chapterCount: number;
-
   averageRating: number | null;
-  ratingRank: number | null;
-  popularity: number;
   userCount: number;
   favoritesCount: number;
   reviewCount: number;
+  popularity: number;
 
   genres: Types.ObjectId[] | TGenre[];
   themes: Types.ObjectId[] | TTheme[];
@@ -193,20 +191,9 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
     default: 0,
   },
 
-
   averageRating: {
     type: Number,
     default: null,
-  },
-
-  ratingRank: {
-    type: Number,
-    default: null,
-  },
-
-  popularity: {
-    type: Number,
-    default: 0,
   },
 
   userCount: {
@@ -220,6 +207,11 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
   },
 
   reviewCount: {
+    type: Number,
+    default: 0,
+  },
+
+  popularity: {
     type: Number,
     default: 0,
   },

@@ -78,7 +78,21 @@ export type MangaInstanceMethods = MultiLanguageInstanceMethods & SearchInstance
 
 export type MangaQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper;
 
-export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga> & ChangeTrackingModel<IManga>;
+export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga> & ChangeTrackingModel<IManga> & {
+  updateVolumeCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateChapterCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateAverageRating: (_id: Types.ObjectId) => Promise<void>;
+
+  updateUserCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateFavoritesCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateReviewCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updatePopularity: (_id: Types.ObjectId) => Promise<void>;
+};
 
 export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, MangaQueryHelper, {}, MangaModel>({
   title: {
@@ -279,60 +293,65 @@ MangaSchema.virtual('changes', {
 MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<TManga>('save', async function () {
-  if (this.isModified('poster.fr-FR')) {
-    this.poster.set('fr-FR', await uploadFile(
-      `manga/${this._id}/images/cover.jpg`,
-      this.poster.get('fr-FR') ?? null,
-    ));
-  }
-
-  if (this.isModified('banner.fr-FR')) {
-    this.banner.set('fr-FR', await uploadFile(
-      `manga/${this._id}/images/banner.jpg`,
-      this.banner.get('fr-FR') ?? null,
-    ));
-  }
-});
-
-MangaSchema.pre('findOne', async function () {
-  const _id = this.getFilter()._id;
-  if (!_id) return;
-
-  await Manga.findOneAndUpdate(this.getFilter(), {
+MangaSchema.statics.updateVolumeCount = async function (_id) {
+  await Manga.findByIdAndUpdate(_id, {
     volumeCount: await Volume.countDocuments({
       manga: _id,
     }),
+  });
+};
 
-    chapterCount: await Chapter.countDocuments({
+MangaSchema.statics.updateChapterCount = async function (_id) {
+  await Manga.findByIdAndUpdate(_id, {
+    chapterCount: ! await Chapter.countDocuments({
       manga: _id,
     }),
+  });
+};
 
+MangaSchema.statics.updateAverageRating = async function (_id) {
+  await Manga.findByIdAndUpdate(_id, {
     averageRating: await MangaEntry.aggregate()
-      .match({ manga: new Types.ObjectId(_id) })
+      .match({ manga: _id })
       .group({
         _id: null,
         averageRating: { $avg: '$rating' },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.averageRating ?? null),
+  });
+};
 
+MangaSchema.statics.updateUserCount = async function (_id) {
+  await Manga.findByIdAndUpdate(_id, {
     userCount: await MangaEntry.countDocuments({
       manga: _id,
       isAdd: true,
     }),
+  });
+};
 
+MangaSchema.statics.updateFavoritesCount = async function (_id) {
+  await Manga.findByIdAndUpdate(_id, {
     favoritesCount: await MangaEntry.countDocuments({
       manga: _id,
       isFavorites: true,
     }),
+  });
+};
 
+MangaSchema.statics.updateReviewCount = async function (_id) {
+  await Manga.findByIdAndUpdate(_id, {
     reviewCount: await Review.countDocuments({
       manga: _id,
     }),
+  });
+};
 
+MangaSchema.statics.updatePopularity = async function (_id) {
+  await Manga.findByIdAndUpdate(_id, {
     popularity: await Manga.aggregate()
-      .match({ _id: new Types.ObjectId(_id) })
+      .match({ _id: _id })
       .lookup({
         from: 'mangaentries',
         localField: '_id',
@@ -361,6 +380,23 @@ MangaSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.popularity ?? 0),
   });
+};
+
+
+MangaSchema.pre<TManga>('save', async function () {
+  if (this.isModified('poster.fr-FR')) {
+    this.poster.set('fr-FR', await uploadFile(
+      `manga/${this._id}/images/cover.jpg`,
+      this.poster.get('fr-FR') ?? null,
+    ));
+  }
+
+  if (this.isModified('banner.fr-FR')) {
+    this.banner.set('fr-FR', await uploadFile(
+      `manga/${this._id}/images/banner.jpg`,
+      this.banner.get('fr-FR') ?? null,
+    ));
+  }
 });
 
 MangaSchema.pre<TManga>('deleteOne', async function () {

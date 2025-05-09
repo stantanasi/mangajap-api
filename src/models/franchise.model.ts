@@ -42,7 +42,7 @@ export type FranchiseQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
 export type FranchiseModel = Model<IFranchise, FranchiseQueryHelper, FranchiseInstanceMethods> & MultiLanguageModel<IFranchise> & JsonApiModel<IFranchise> & ChangeTrackingModel<IFranchise>
 
-export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseInstanceMethods, FranchiseQueryHelper>({
+export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseInstanceMethods, FranchiseQueryHelper, {}, FranchiseModel>({
   role: {
     type: String,
     required: true,

@@ -37,7 +37,7 @@ export type StaffQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & C
 
 export type StaffModel = Model<IStaff, StaffQueryHelper, StaffInstanceMethods> & MultiLanguageModel<IStaff> & JsonApiModel<IStaff> & ChangeTrackingModel<IStaff>
 
-export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, StaffQueryHelper>({
+export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, StaffQueryHelper, {}, StaffModel>({
   role: {
     type: String,
     required: true,

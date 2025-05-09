@@ -36,7 +36,7 @@ export type VolumeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & 
 
 export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & MultiLanguageModel<IVolume> & JsonApiModel<IVolume> & ChangeTrackingModel<IVolume>
 
-export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper>({
+export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper, {}, VolumeModel>({
   number: {
     type: Number,
     required: true,

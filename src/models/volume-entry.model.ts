@@ -24,7 +24,7 @@ export type VolumeEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelp
 
 export type VolumeEntryModel = Model<IVolumeEntry, VolumeEntryQueryHelper, VolumeEntryInstanceMethods> & MultiLanguageModel<IVolumeEntry> & JsonApiModel<IVolumeEntry>
 
-export const VolumeEntrySchema = new Schema<IVolumeEntry, VolumeEntryModel, VolumeEntryInstanceMethods, VolumeEntryQueryHelper>({
+export const VolumeEntrySchema = new Schema<IVolumeEntry, VolumeEntryModel, VolumeEntryInstanceMethods, VolumeEntryQueryHelper, {}, VolumeEntryModel>({
   readDate: {
     type: Date,
     default: new Date(),

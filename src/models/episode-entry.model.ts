@@ -24,7 +24,7 @@ export type EpisodeEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHel
 
 export type EpisodeEntryModel = Model<IEpisodeEntry, EpisodeEntryQueryHelper, EpisodeEntryInstanceMethods> & MultiLanguageModel<IEpisodeEntry> & JsonApiModel<IEpisodeEntry>
 
-export const EpisodeEntrySchema = new Schema<IEpisodeEntry, EpisodeEntryModel, EpisodeEntryInstanceMethods, EpisodeEntryQueryHelper>({
+export const EpisodeEntrySchema = new Schema<IEpisodeEntry, EpisodeEntryModel, EpisodeEntryInstanceMethods, EpisodeEntryQueryHelper, {}, EpisodeEntryModel>({
   watchedDate: {
     type: Date,
     default: new Date(),

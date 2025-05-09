@@ -77,7 +77,7 @@ export type AnimeQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & Js
 
 export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & MultiLanguageModel<IAnime> & SearchModel<IAnime> & JsonApiModel<IAnime> & ChangeTrackingModel<IAnime>
 
-export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, AnimeQueryHelper>({
+export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, AnimeQueryHelper, {}, AnimeModel>({
   title: {
     type: Map,
     of: String,

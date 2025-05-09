@@ -28,7 +28,7 @@ export type PeopleQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & J
 
 export type PeopleModel = Model<IPeople, PeopleQueryHelper, PeopleInstanceMethods> & MultiLanguageModel<IPeople> & SearchModel<IPeople> & JsonApiModel<IPeople> & ChangeTrackingModel<IPeople>
 
-export const PeopleSchema = new Schema<IPeople, PeopleModel, PeopleInstanceMethods, PeopleQueryHelper>({
+export const PeopleSchema = new Schema<IPeople, PeopleModel, PeopleInstanceMethods, PeopleQueryHelper, {}, PeopleModel>({
   name: {
     type: Map,
     of: String,

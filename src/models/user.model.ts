@@ -55,7 +55,7 @@ export type UserQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & Jso
 
 export type UserModel = Model<IUser, UserQueryHelper, UserInstanceMethods> & MultiLanguageModel<IUser> & SearchModel<IUser> & JsonApiModel<IUser>
 
-export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, UserQueryHelper>({
+export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, UserQueryHelper, {}, UserModel>({
   _id: {
     type: String,
     required: true,

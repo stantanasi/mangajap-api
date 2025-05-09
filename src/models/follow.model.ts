@@ -19,7 +19,7 @@ export type FollowQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
 export type FollowModel = Model<IFollow, FollowQueryHelper, FollowInstanceMethods> & MultiLanguageModel<IFollow> & JsonApiModel<IFollow>
 
-export const FollowSchema = new Schema<IFollow, FollowModel, FollowInstanceMethods, FollowQueryHelper>({
+export const FollowSchema = new Schema<IFollow, FollowModel, FollowInstanceMethods, FollowQueryHelper, {}, FollowModel>({
   follower: {
     type: String,
     ref: 'User',

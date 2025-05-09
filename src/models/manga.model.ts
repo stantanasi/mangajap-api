@@ -80,7 +80,7 @@ export type MangaQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & Js
 
 export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga> & ChangeTrackingModel<IManga>;
 
-export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, MangaQueryHelper>({
+export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, MangaQueryHelper, {}, MangaModel>({
   title: {
     type: Map,
     of: String,

@@ -37,7 +37,7 @@ export type MangaEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelpe
 
 export type MangaEntryModel = Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> & MultiLanguageModel<IMangaEntry> & JsonApiModel<IMangaEntry>
 
-export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEntryInstanceMethods, MangaEntryQueryHelper>({
+export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEntryInstanceMethods, MangaEntryQueryHelper, {}, MangaEntryModel>({
   isAdd: {
     type: Boolean,
     default: false,

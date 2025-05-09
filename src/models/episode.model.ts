@@ -39,7 +39,7 @@ export type EpisodeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper &
 
 export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & MultiLanguageModel<IEpisode> & JsonApiModel<IEpisode> & ChangeTrackingModel<IEpisode>
 
-export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceMethods, EpisodeQueryHelper>({
+export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceMethods, EpisodeQueryHelper, {}, EpisodeModel>({
   number: {
     type: Number,
     required: true,

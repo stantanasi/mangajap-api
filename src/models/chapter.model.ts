@@ -32,7 +32,7 @@ export type ChapterQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper &
 
 export type ChapterModel = Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> & MultiLanguageModel<IChapter> & JsonApiModel<IChapter> & ChangeTrackingModel<IChapter>
 
-export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceMethods, ChapterQueryHelper>({
+export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceMethods, ChapterQueryHelper, {}, ChapterModel>({
   number: {
     type: Number,
     required: true,

@@ -25,7 +25,7 @@ export type ThemeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & C
 
 export type ThemeModel = Model<ITheme, ThemeQueryHelper, ThemeInstanceMethods> & MultiLanguageModel<ITheme> & JsonApiModel<ITheme> & ChangeTrackingModel<ITheme>
 
-export const ThemeSchema = new Schema<ITheme, ThemeModel, ThemeInstanceMethods, ThemeQueryHelper>({
+export const ThemeSchema = new Schema<ITheme, ThemeModel, ThemeInstanceMethods, ThemeQueryHelper, {}, ThemeModel>({
   name: {
     type: Map,
     of: String,

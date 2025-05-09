@@ -36,7 +36,7 @@ export type AnimeEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelpe
 
 export type AnimeEntryModel = Model<IAnimeEntry, AnimeEntryQueryHelper, AnimeEntryInstanceMethods> & MultiLanguageModel<IAnimeEntry> & JsonApiModel<IAnimeEntry>
 
-export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>({
+export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEntryInstanceMethods, AnimeEntryQueryHelper, {}, AnimeEntryModel>({
   isAdd: {
     type: Boolean,
     default: true,

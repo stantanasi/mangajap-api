@@ -32,7 +32,7 @@ export type SeasonQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & 
 
 export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & MultiLanguageModel<ISeason> & JsonApiModel<ISeason> & ChangeTrackingModel<ISeason>
 
-export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper>({
+export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper, {}, SeasonModel>({
   number: {
     type: Number,
     required: true,

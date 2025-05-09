@@ -25,7 +25,7 @@ export type GenreQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & C
 
 export type GenreModel = Model<IGenre, GenreQueryHelper, GenreInstanceMethods> & MultiLanguageModel<IGenre> & JsonApiModel<IGenre> & ChangeTrackingModel<IGenre>
 
-export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, GenreQueryHelper>({
+export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, GenreQueryHelper, {}, GenreModel>({
   name: {
     type: Map,
     of: String,

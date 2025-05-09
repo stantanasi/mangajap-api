@@ -24,7 +24,7 @@ export type ChapterEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHel
 
 export type ChapterEntryModel = Model<IChapterEntry, ChapterEntryQueryHelper, ChapterEntryInstanceMethods> & MultiLanguageModel<IChapterEntry> & JsonApiModel<IChapterEntry>
 
-export const ChapterEntrySchema = new Schema<IChapterEntry, ChapterEntryModel, ChapterEntryInstanceMethods, ChapterEntryQueryHelper>({
+export const ChapterEntrySchema = new Schema<IChapterEntry, ChapterEntryModel, ChapterEntryInstanceMethods, ChapterEntryQueryHelper, {}, ChapterEntryModel>({
   readDate: {
     type: Date,
     default: new Date(),

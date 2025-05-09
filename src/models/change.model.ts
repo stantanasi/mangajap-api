@@ -37,7 +37,7 @@ export type ChangeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
 export type ChangeModel = Model<IChange, ChangeQueryHelper, ChangeInstanceMethods> & MultiLanguageModel<IChange> & JsonApiModel<IChange>
 
-export const ChangeSchema = new Schema<IChange, ChangeModel, ChangeInstanceMethods, ChangeQueryHelper>({
+export const ChangeSchema = new Schema<IChange, ChangeModel, ChangeInstanceMethods, ChangeQueryHelper, {}, ChangeModel>({
   action: {
     type: String,
     required: true,

@@ -24,7 +24,7 @@ export type ReviewQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
 export type ReviewModel = Model<IReview, ReviewQueryHelper, ReviewInstanceMethods> & MultiLanguageModel<IReview> & JsonApiModel<IReview>
 
-export const ReviewSchema = new Schema<IReview, ReviewModel, ReviewInstanceMethods, ReviewQueryHelper>({
+export const ReviewSchema = new Schema<IReview, ReviewModel, ReviewInstanceMethods, ReviewQueryHelper, {}, ReviewModel>({
   content: {
     type: String,
     required: true,

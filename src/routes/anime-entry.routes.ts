@@ -1,12 +1,12 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import AnimeEntry from "../models/anime-entry.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import AnimeEntry from '../models/anime-entry.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const animeEntryRoutes = express.Router();
 
-animeEntryRoutes.get("/", async (req, res, next) => {
+animeEntryRoutes.get('/', async (req, res, next) => {
   try {
     const response = await AnimeEntry.find()
       .withJsonApi(req.query)
@@ -25,7 +25,7 @@ animeEntryRoutes.get("/", async (req, res, next) => {
   }
 });
 
-animeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
+animeEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const id = await AnimeEntry.fromJsonApi(req.body, {
       assignAttribute: AnimeEntry.fromLanguage(req.query.language),
@@ -46,7 +46,7 @@ animeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-animeEntryRoutes.get("/:id", async (req, res, next) => {
+animeEntryRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await AnimeEntry.findById(req.params.id)
       .withJsonApi(req.query)
@@ -61,7 +61,7 @@ animeEntryRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-animeEntryRoutes.patch("/:id", async (req, res, next) => {
+animeEntryRoutes.patch('/:id', async (req, res, next) => {
   try {
     await AnimeEntry.findById(req.params.id)
       .orFail()
@@ -91,7 +91,7 @@ animeEntryRoutes.patch("/:id", async (req, res, next) => {
   }
 });
 
-animeEntryRoutes.delete("/:id", async (req, res, next) => {
+animeEntryRoutes.delete('/:id', async (req, res, next) => {
   try {
     await AnimeEntry.findById(req.params.id)
       .orFail()
@@ -112,10 +112,10 @@ animeEntryRoutes.delete("/:id", async (req, res, next) => {
 });
 
 
-animeEntryRoutes.get("/:id/anime", async (req, res, next) => {
+animeEntryRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const response = await AnimeEntry.findById(req.params.id)
-      .getRelationship("anime")
+      .getRelationship('anime')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -128,10 +128,10 @@ animeEntryRoutes.get("/:id/anime", async (req, res, next) => {
   }
 });
 
-animeEntryRoutes.get("/:id/user", async (req, res, next) => {
+animeEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const response = await AnimeEntry.findById(req.params.id)
-      .getRelationship("user")
+      .getRelationship('user')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

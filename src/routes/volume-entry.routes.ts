@@ -1,12 +1,12 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import VolumeEntry from "../models/volume-entry.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import VolumeEntry from '../models/volume-entry.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const volumeEntryRoutes = express.Router();
 
-volumeEntryRoutes.get("/", async (req, res, next) => {
+volumeEntryRoutes.get('/', async (req, res, next) => {
   try {
     const response = await VolumeEntry.find()
       .withJsonApi(req.query)
@@ -25,7 +25,7 @@ volumeEntryRoutes.get("/", async (req, res, next) => {
   }
 });
 
-volumeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
+volumeEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const id = await VolumeEntry.fromJsonApi(req.body, {
       assignAttribute: VolumeEntry.fromLanguage(req.query.language),
@@ -46,7 +46,7 @@ volumeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-volumeEntryRoutes.get("/:id", async (req, res, next) => {
+volumeEntryRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await VolumeEntry.findById(req.params.id)
       .withJsonApi(req.query)
@@ -61,7 +61,7 @@ volumeEntryRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-volumeEntryRoutes.patch("/:id", async (req, res, next) => {
+volumeEntryRoutes.patch('/:id', async (req, res, next) => {
   try {
     await VolumeEntry.findById(req.params.id)
       .orFail()
@@ -91,7 +91,7 @@ volumeEntryRoutes.patch("/:id", async (req, res, next) => {
   }
 });
 
-volumeEntryRoutes.delete("/:id", async (req, res, next) => {
+volumeEntryRoutes.delete('/:id', async (req, res, next) => {
   try {
     await VolumeEntry.findById(req.params.id)
       .orFail()
@@ -112,10 +112,10 @@ volumeEntryRoutes.delete("/:id", async (req, res, next) => {
 });
 
 
-volumeEntryRoutes.get("/:id/volume", async (req, res, next) => {
+volumeEntryRoutes.get('/:id/volume', async (req, res, next) => {
   try {
     const response = await VolumeEntry.findById(req.params.id)
-      .getRelationship("volume")
+      .getRelationship('volume')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -128,10 +128,10 @@ volumeEntryRoutes.get("/:id/volume", async (req, res, next) => {
   }
 });
 
-volumeEntryRoutes.get("/:id/user", async (req, res, next) => {
+volumeEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const response = await VolumeEntry.findById(req.params.id)
-      .getRelationship("user")
+      .getRelationship('user')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

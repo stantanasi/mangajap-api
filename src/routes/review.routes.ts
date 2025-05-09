@@ -1,12 +1,12 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import Review from "../models/review.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import Review from '../models/review.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const reviewRoutes = express.Router();
 
-reviewRoutes.get("/", async (req, res, next) => {
+reviewRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Review.find()
       .withJsonApi(req.query)
@@ -25,7 +25,7 @@ reviewRoutes.get("/", async (req, res, next) => {
   }
 });
 
-reviewRoutes.post("/", isLogin(), async (req, res, next) => {
+reviewRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const id = await Review.fromJsonApi(req.body, {
       assignAttribute: Review.fromLanguage(req.query.language),
@@ -46,7 +46,7 @@ reviewRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-reviewRoutes.get("/:id", async (req, res, next) => {
+reviewRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
       .withJsonApi(req.query)
@@ -61,7 +61,7 @@ reviewRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-reviewRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+reviewRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     await Review.findById(req.params.id)
       .orFail()
@@ -91,7 +91,7 @@ reviewRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-reviewRoutes.delete("/:id", isLogin(), async (req, res, next) => {
+reviewRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     await Review.findById(req.params.id)
       .orFail()
@@ -112,10 +112,10 @@ reviewRoutes.delete("/:id", isLogin(), async (req, res, next) => {
 });
 
 
-reviewRoutes.get("/:id/user", async (req, res, next) => {
+reviewRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
-      .getRelationship("user")
+      .getRelationship('user')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -128,10 +128,10 @@ reviewRoutes.get("/:id/user", async (req, res, next) => {
   }
 });
 
-reviewRoutes.get("/:id/manga", async (req, res, next) => {
+reviewRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
-      .getRelationship("manga")
+      .getRelationship('manga')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -144,10 +144,10 @@ reviewRoutes.get("/:id/manga", async (req, res, next) => {
   }
 });
 
-reviewRoutes.get("/:id/anime", async (req, res, next) => {
+reviewRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const response = await Review.findById(req.params.id)
-      .getRelationship("anime")
+      .getRelationship('anime')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

@@ -1,15 +1,15 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TAnime } from "./anime.model";
-import { TUser } from "./user.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TAnime } from './anime.model';
+import { TUser } from './user.model';
 
 enum AnimeEntryStatus {
-  Watching = "watching",
-  Completed = "completed",
-  Planned = "planned",
-  OnHold = "on_hold",
-  Dropped = "dropped",
+  Watching = 'watching',
+  Completed = 'completed',
+  Planned = 'planned',
+  OnHold = 'on_hold',
+  Dropped = 'dropped',
 }
 
 export interface IAnimeEntry {
@@ -76,13 +76,13 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEn
 
   user: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: "Anime",
+    ref: 'Anime',
     required: true,
   },
 }, {
@@ -105,11 +105,11 @@ AnimeEntrySchema.plugin(MongooseMultiLanguage, {
 });
 
 AnimeEntrySchema.plugin(MongooseJsonApi, {
-  type: "anime-entries",
+  type: 'anime-entries',
 });
 
 
 export type TAnimeEntry = HydratedDocument<IAnimeEntry, AnimeEntryInstanceMethods, AnimeEntryQueryHelper>;
 
-const AnimeEntry = model<IAnimeEntry, AnimeEntryModel>("AnimeEntry", AnimeEntrySchema);
+const AnimeEntry = model<IAnimeEntry, AnimeEntryModel>('AnimeEntry', AnimeEntrySchema);
 export default AnimeEntry;

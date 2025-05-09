@@ -1,12 +1,12 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import { deleteFile, uploadFile } from "../firebase-app";
-import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TChange } from "./change.model";
-import Chapter, { TChapter } from "./chapter.model";
-import { TManga } from "./manga.model";
-import { TVolumeEntry } from "./volume-entry.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import { deleteFile, uploadFile } from '../firebase-app';
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TChange } from './change.model';
+import Chapter, { TChapter } from './chapter.model';
+import { TManga } from './manga.model';
+import { TVolumeEntry } from './volume-entry.model';
 
 export interface IVolume {
   _id: Types.ObjectId;
@@ -24,7 +24,7 @@ export interface IVolume {
   manga: Types.ObjectId | TManga;
   chapters?: TChapter[];
   changes?: TChange[];
-  "volume-entry"?: TVolumeEntry | null;
+  'volume-entry'?: TVolumeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -90,7 +90,7 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMetho
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: "Manga",
+    ref: 'Manga',
     required: true,
   },
 }, {
@@ -102,22 +102,22 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMetho
   toObject: { virtuals: true },
 });
 
-VolumeSchema.virtual("chapters", {
-  ref: "Chapter",
-  localField: "_id",
-  foreignField: "volume",
+VolumeSchema.virtual('chapters', {
+  ref: 'Chapter',
+  localField: '_id',
+  foreignField: 'volume',
   options: {
     sort: { number: 1 },
   },
 });
 
-VolumeSchema.virtual("changes", {
-  ref: "Change",
-  localField: "_id",
-  foreignField: "document",
+VolumeSchema.virtual('changes', {
+  ref: 'Change',
+  localField: '_id',
+  foreignField: 'document',
 });
 
-VolumeSchema.virtual("volume-entry");
+VolumeSchema.virtual('volume-entry');
 
 VolumeSchema.index({
   number: 1,
@@ -125,8 +125,8 @@ VolumeSchema.index({
 }, { unique: true });
 
 
-VolumeSchema.pre<TVolume>("save", async function () {
-  if (this.isModified("cover.fr-FR")) {
+VolumeSchema.pre<TVolume>('save', async function () {
+  if (this.isModified('cover.fr-FR')) {
     this.cover.set('fr-FR', await uploadFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
       this.cover.get('fr-FR') ?? null,
@@ -134,7 +134,7 @@ VolumeSchema.pre<TVolume>("save", async function () {
   }
 });
 
-VolumeSchema.pre("findOne", async function () {
+VolumeSchema.pre('findOne', async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -153,7 +153,7 @@ VolumeSchema.pre("findOne", async function () {
   });
 });
 
-VolumeSchema.pre<TVolume>("deleteOne", async function () {
+VolumeSchema.pre<TVolume>('deleteOne', async function () {
   if (this.cover.get('fr-FR')) {
     await deleteFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
@@ -163,11 +163,11 @@ VolumeSchema.pre<TVolume>("deleteOne", async function () {
 
 
 VolumeSchema.plugin(MongooseMultiLanguage, {
-  fields: ["title", "overview", "publishedDate", "cover"],
+  fields: ['title', 'overview', 'publishedDate', 'cover'],
 });
 
 VolumeSchema.plugin(MongooseJsonApi, {
-  type: "volumes",
+  type: 'volumes',
 });
 
 VolumeSchema.plugin(MongooseChangeTracking);
@@ -175,5 +175,5 @@ VolumeSchema.plugin(MongooseChangeTracking);
 
 export type TVolume = HydratedDocument<IVolume, VolumeInstanceMethods, VolumeQueryHelper>;
 
-const Volume = model<IVolume, VolumeModel>("Volume", VolumeSchema);
+const Volume = model<IVolume, VolumeModel>('Volume', VolumeSchema);
 export default Volume;

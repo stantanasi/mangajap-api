@@ -1,15 +1,15 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TManga } from "./manga.model";
-import { TUser } from "./user.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TManga } from './manga.model';
+import { TUser } from './user.model';
 
 enum MangaEntryStatus {
-  Reading = "reading",
-  Completed = "completed",
-  Planned = "planned",
-  OnHold = "on_hold",
-  Dropped = "dropped",
+  Reading = 'reading',
+  Completed = 'completed',
+  Planned = 'planned',
+  OnHold = 'on_hold',
+  Dropped = 'dropped',
 }
 
 export interface IMangaEntry {
@@ -82,13 +82,13 @@ export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEn
 
   user: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: "Manga",
+    ref: 'Manga',
     required: true
   },
 }, {
@@ -111,11 +111,11 @@ MangaEntrySchema.plugin(MongooseMultiLanguage, {
 });
 
 MangaEntrySchema.plugin(MongooseJsonApi, {
-  type: "manga-entries",
+  type: 'manga-entries',
 });
 
 
 export type TMangaEntry = HydratedDocument<IMangaEntry, MangaEntryInstanceMethods, MangaEntryQueryHelper>;
 
-const MangaEntry = model<IMangaEntry, MangaEntryModel>("MangaEntry", MangaEntrySchema);
+const MangaEntry = model<IMangaEntry, MangaEntryModel>('MangaEntry', MangaEntrySchema);
 export default MangaEntry;

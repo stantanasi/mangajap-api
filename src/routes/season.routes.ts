@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Season from "../models/season.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Season from '../models/season.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const seasonRoutes = express.Router();
 
-seasonRoutes.get("/", async (req, res, next) => {
+seasonRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Season.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ seasonRoutes.get("/", async (req, res, next) => {
   }
 });
 
-seasonRoutes.post("/", isLogin(), async (req, res, next) => {
+seasonRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ seasonRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-seasonRoutes.get("/:id", async (req, res, next) => {
+seasonRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Season.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ seasonRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-seasonRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+seasonRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ seasonRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-seasonRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+seasonRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ seasonRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-seasonRoutes.get("/:id/anime", async (req, res, next) => {
+seasonRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const response = await Season.findById(req.params.id)
-      .getRelationship("anime")
+      .getRelationship('anime')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -123,10 +123,10 @@ seasonRoutes.get("/:id/anime", async (req, res, next) => {
   }
 });
 
-seasonRoutes.get("/:id/episodes", async (req, res, next) => {
+seasonRoutes.get('/:id/episodes', async (req, res, next) => {
   try {
     const response = await Season.findById(req.params.id)
-      .getRelationship("episodes")
+      .getRelationship('episodes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -143,10 +143,10 @@ seasonRoutes.get("/:id/episodes", async (req, res, next) => {
   }
 });
 
-seasonRoutes.get("/:id/changes", async (req, res, next) => {
+seasonRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Season.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

@@ -1,33 +1,33 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import { deleteFile, uploadFile } from "../firebase-app";
-import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
-import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
-import { TChange } from "./change.model";
-import Episode, { TEpisode } from "./episode.model";
-import { TFranchise } from "./franchise.model";
-import { TGenre } from "./genre.model";
-import Review, { TReview } from "./review.model";
-import Season, { TSeason } from "./season.model";
-import { TStaff } from "./staff.model";
-import { TTheme } from "./theme.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import { deleteFile, uploadFile } from '../firebase-app';
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
+import AnimeEntry, { TAnimeEntry } from './anime-entry.model';
+import { TChange } from './change.model';
+import Episode, { TEpisode } from './episode.model';
+import { TFranchise } from './franchise.model';
+import { TGenre } from './genre.model';
+import Review, { TReview } from './review.model';
+import Season, { TSeason } from './season.model';
+import { TStaff } from './staff.model';
+import { TTheme } from './theme.model';
 
 enum AnimeStatus {
-  Airing = "airing",
-  Finished = "finished",
-  Unreleased = "unreleased",
-  Upcoming = "upcoming",
+  Airing = 'airing',
+  Finished = 'finished',
+  Unreleased = 'unreleased',
+  Upcoming = 'upcoming',
 }
 
 enum AnimeType {
-  Tv = "tv",
-  Ova = "ova",
-  Ona = "ona",
-  Movie = "movie",
-  Music = "music",
-  Special = "special",
+  Tv = 'tv',
+  Ova = 'ova',
+  Ona = 'ona',
+  Movie = 'movie',
+  Music = 'music',
+  Special = 'special',
 }
 
 export interface IAnime {
@@ -65,7 +65,7 @@ export interface IAnime {
   reviews?: TReview[];
   franchises?: TFranchise[];
   changes?: TChange[];
-  "anime-entry"?: TAnimeEntry | null;
+  'anime-entry'?: TAnimeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -154,7 +154,7 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
 
   youtubeVideoId: {
     type: String,
-    default: "",
+    default: '',
   },
 
   poster: {
@@ -225,13 +225,13 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
 
   genres: [{
     type: Schema.Types.ObjectId,
-    ref: "Genre",
+    ref: 'Genre',
     default: [],
   }],
 
   themes: [{
     type: Schema.Types.ObjectId,
-    ref: "Theme",
+    ref: 'Theme',
     default: [],
   }],
 }, {
@@ -243,63 +243,63 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
   toObject: { virtuals: true },
 });
 
-AnimeSchema.virtual("seasons", {
-  ref: "Season",
-  localField: "_id",
-  foreignField: "anime",
+AnimeSchema.virtual('seasons', {
+  ref: 'Season',
+  localField: '_id',
+  foreignField: 'anime',
   options: {
     sort: { number: 1 },
   },
 });
 
-AnimeSchema.virtual("episodes", {
-  ref: "Episode",
-  localField: "_id",
-  foreignField: "anime",
+AnimeSchema.virtual('episodes', {
+  ref: 'Episode',
+  localField: '_id',
+  foreignField: 'anime',
   options: {
     sort: { number: 1 },
   },
 });
 
-AnimeSchema.virtual("staff", {
-  ref: "Staff",
-  localField: "_id",
-  foreignField: "anime",
+AnimeSchema.virtual('staff', {
+  ref: 'Staff',
+  localField: '_id',
+  foreignField: 'anime',
 });
 
-AnimeSchema.virtual("reviews", {
-  ref: "Review",
-  localField: "_id",
-  foreignField: "anime",
+AnimeSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'anime',
   options: {
     sort: { updatedAt: -1 },
   },
 });
 
-AnimeSchema.virtual("franchises", {
-  ref: "Franchise",
-  localField: "_id",
-  foreignField: "source",
+AnimeSchema.virtual('franchises', {
+  ref: 'Franchise',
+  localField: '_id',
+  foreignField: 'source',
 });
 
-AnimeSchema.virtual("changes", {
-  ref: "Change",
-  localField: "_id",
-  foreignField: "document",
+AnimeSchema.virtual('changes', {
+  ref: 'Change',
+  localField: '_id',
+  foreignField: 'document',
 });
 
-AnimeSchema.virtual("anime-entry");
+AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<TAnime>("save", async function () {
-  if (this.isModified("poster.fr-FR")) {
+AnimeSchema.pre<TAnime>('save', async function () {
+  if (this.isModified('poster.fr-FR')) {
     this.poster.set('fr-FR', await uploadFile(
       `anime/${this._id}/images/cover.jpg`,
       this.poster.get('fr-FR') ?? null,
     ));
   }
 
-  if (this.isModified("banner.fr-FR")) {
+  if (this.isModified('banner.fr-FR')) {
     this.banner.set('fr-FR', await uploadFile(
       `anime/${this._id}/images/banner.jpg`,
       this.banner.get('fr-FR') ?? null,
@@ -307,7 +307,7 @@ AnimeSchema.pre<TAnime>("save", async function () {
   }
 });
 
-AnimeSchema.pre("findOne", async function () {
+AnimeSchema.pre('findOne', async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -324,7 +324,7 @@ AnimeSchema.pre("findOne", async function () {
       .match({ anime: new Types.ObjectId(_id) })
       .group({
         _id: null,
-        averageRating: { $avg: "$rating" },
+        averageRating: { $avg: '$rating' },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.averageRating ?? null),
@@ -346,10 +346,10 @@ AnimeSchema.pre("findOne", async function () {
     popularity: await Anime.aggregate()
       .match({ _id: new Types.ObjectId(_id) })
       .lookup({
-        from: "animeentries",
-        localField: "_id",
-        foreignField: "anime",
-        as: "entriesCount",
+        from: 'animeentries',
+        localField: '_id',
+        foreignField: 'anime',
+        as: 'entriesCount',
         pipeline: [
           {
             $match: {
@@ -360,13 +360,13 @@ AnimeSchema.pre("findOne", async function () {
           },
         ],
       })
-      .addFields({ entriesCount: { $size: "$entriesCount" } })
+      .addFields({ entriesCount: { $size: '$entriesCount' } })
       .addFields({
         popularity: {
           $add: [
-            "$userCount", "$favoritesCount",
-            { $multiply: ["$userCount", { $ifNull: ["$averageRating", 0] }] },
-            { $multiply: [2, "$entriesCount", { $ifNull: ["$averageRating", 0] }, { $add: ["$userCount", "$favoritesCount"] }] },
+            '$userCount', '$favoritesCount',
+            { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
+            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] },
           ],
         },
       })
@@ -375,7 +375,7 @@ AnimeSchema.pre("findOne", async function () {
   });
 });
 
-AnimeSchema.pre<TAnime>("deleteOne", async function () {
+AnimeSchema.pre<TAnime>('deleteOne', async function () {
   if (this.poster.get('fr-FR')) {
     await deleteFile(
       `anime/${this._id}/images/cover.jpg`,
@@ -391,15 +391,15 @@ AnimeSchema.pre<TAnime>("deleteOne", async function () {
 
 
 AnimeSchema.plugin(MongooseMultiLanguage, {
-  fields: ["title", "overview", "startDate", "endDate", "poster", "banner"],
+  fields: ['title', 'overview', 'startDate', 'endDate', 'poster', 'banner'],
 });
 
 AnimeSchema.plugin(MongooseSearch, {
-  fields: ["title"],
+  fields: ['title'],
 });
 
 AnimeSchema.plugin(MongooseJsonApi, {
-  type: "anime",
+  type: 'anime',
   filter: {
     query: (query: string) => {
       return {
@@ -414,5 +414,5 @@ AnimeSchema.plugin(MongooseChangeTracking);
 
 export type TAnime = HydratedDocument<IAnime, AnimeInstanceMethods, AnimeQueryHelper>;
 
-const Anime = model<IAnime, AnimeModel>("Anime", AnimeSchema);
+const Anime = model<IAnime, AnimeModel>('Anime', AnimeSchema);
 export default Anime;

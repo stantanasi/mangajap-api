@@ -1,16 +1,16 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import { deleteFile, uploadFile } from "../firebase-app";
-import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TAnime } from "./anime.model";
-import { TChange } from "./change.model";
-import { TEpisodeEntry } from "./episode-entry.model";
-import { TSeason } from "./season.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import { deleteFile, uploadFile } from '../firebase-app';
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TAnime } from './anime.model';
+import { TChange } from './change.model';
+import { TEpisodeEntry } from './episode-entry.model';
+import { TSeason } from './season.model';
 
 enum EpisodeType {
-  None = "",
-  Oav = "oav",
+  None = '',
+  Oav = 'oav',
 }
 
 export interface IEpisode {
@@ -27,7 +27,7 @@ export interface IEpisode {
   anime: Types.ObjectId | TAnime;
   season: Types.ObjectId | TSeason;
   changes?: TChange[];
-  "episode-entry"?: TEpisodeEntry | null;
+  'episode-entry'?: TEpisodeEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -88,13 +88,13 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceM
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: "Anime",
+    ref: 'Anime',
     required: true,
   },
 
   season: {
     type: Schema.Types.ObjectId,
-    ref: "Season",
+    ref: 'Season',
     required: true,
   },
 }, {
@@ -106,13 +106,13 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceM
   toObject: { virtuals: true },
 });
 
-EpisodeSchema.virtual("changes", {
-  ref: "Change",
-  localField: "_id",
-  foreignField: "document",
+EpisodeSchema.virtual('changes', {
+  ref: 'Change',
+  localField: '_id',
+  foreignField: 'document',
 });
 
-EpisodeSchema.virtual("episode-entry");
+EpisodeSchema.virtual('episode-entry');
 
 EpisodeSchema.index({
   number: 1,
@@ -120,8 +120,8 @@ EpisodeSchema.index({
 }, { unique: true });
 
 
-EpisodeSchema.pre<TEpisode>("save", async function () {
-  if (this.isModified("poster.fr-FR")) {
+EpisodeSchema.pre<TEpisode>('save', async function () {
+  if (this.isModified('poster.fr-FR')) {
     this.poster.set('fr-FR', await uploadFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
       this.poster.get('fr-FR') ?? null,
@@ -129,7 +129,7 @@ EpisodeSchema.pre<TEpisode>("save", async function () {
   }
 });
 
-EpisodeSchema.pre<TEpisode>("deleteOne", async function () {
+EpisodeSchema.pre<TEpisode>('deleteOne', async function () {
   if (this.poster.get('fr-FR')) {
     await deleteFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
@@ -139,11 +139,11 @@ EpisodeSchema.pre<TEpisode>("deleteOne", async function () {
 
 
 EpisodeSchema.plugin(MongooseMultiLanguage, {
-  fields: ["title", "overview", "airDate", "poster"],
+  fields: ['title', 'overview', 'airDate', 'poster'],
 });
 
 EpisodeSchema.plugin(MongooseJsonApi, {
-  type: "episodes",
+  type: 'episodes',
 });
 
 EpisodeSchema.plugin(MongooseChangeTracking);
@@ -151,5 +151,5 @@ EpisodeSchema.plugin(MongooseChangeTracking);
 
 export type TEpisode = HydratedDocument<IEpisode, EpisodeInstanceMethods, EpisodeQueryHelper>;
 
-const Episode = model<IEpisode, EpisodeModel>("Episode", EpisodeSchema);
+const Episode = model<IEpisode, EpisodeModel>('Episode', EpisodeSchema);
 export default Episode;

@@ -1,12 +1,12 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import MangaEntry from "../models/manga-entry.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import MangaEntry from '../models/manga-entry.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const mangaEntryRoutes = express.Router();
 
-mangaEntryRoutes.get("/", async (req, res, next) => {
+mangaEntryRoutes.get('/', async (req, res, next) => {
   try {
     const response = await MangaEntry.find()
       .withJsonApi(req.query)
@@ -25,7 +25,7 @@ mangaEntryRoutes.get("/", async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.post("/", isLogin(), async (req, res, next) => {
+mangaEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const id = await MangaEntry.fromJsonApi(req.body, {
       assignAttribute: MangaEntry.fromLanguage(req.query.language),
@@ -46,7 +46,7 @@ mangaEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.get("/:id", async (req, res, next) => {
+mangaEntryRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await MangaEntry.findById(req.params.id)
       .withJsonApi(req.query)
@@ -61,7 +61,7 @@ mangaEntryRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+mangaEntryRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     await MangaEntry.findById(req.params.id)
       .orFail()
@@ -91,7 +91,7 @@ mangaEntryRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.delete("/:id", isLogin(), async (req, res, next) => {
+mangaEntryRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     await MangaEntry.findById(req.params.id)
       .orFail()
@@ -112,10 +112,10 @@ mangaEntryRoutes.delete("/:id", isLogin(), async (req, res, next) => {
 });
 
 
-mangaEntryRoutes.get("/:id/manga", async (req, res, next) => {
+mangaEntryRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const response = await MangaEntry.findById(req.params.id)
-      .getRelationship("manga")
+      .getRelationship('manga')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -128,10 +128,10 @@ mangaEntryRoutes.get("/:id/manga", async (req, res, next) => {
   }
 });
 
-mangaEntryRoutes.get("/:id/user", async (req, res, next) => {
+mangaEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const response = await MangaEntry.findById(req.params.id)
-      .getRelationship("user")
+      .getRelationship('user')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

@@ -1,11 +1,11 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import { deleteFile, uploadFile } from "../firebase-app";
-import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TAnime } from "./anime.model";
-import { TChange } from "./change.model";
-import Episode, { TEpisode } from "./episode.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import { deleteFile, uploadFile } from '../firebase-app';
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TAnime } from './anime.model';
+import { TChange } from './change.model';
+import Episode, { TEpisode } from './episode.model';
 
 export interface ISeason {
   _id: Types.ObjectId;
@@ -76,7 +76,7 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMetho
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: "Anime",
+    ref: 'Anime',
     required: true,
   },
 }, {
@@ -88,19 +88,19 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMetho
   toObject: { virtuals: true },
 });
 
-SeasonSchema.virtual("episodes", {
-  ref: "Episode",
-  localField: "_id",
-  foreignField: "season",
+SeasonSchema.virtual('episodes', {
+  ref: 'Episode',
+  localField: '_id',
+  foreignField: 'season',
   options: {
     sort: { number: 1 },
   },
 });
 
-SeasonSchema.virtual("changes", {
-  ref: "Change",
-  localField: "_id",
-  foreignField: "document",
+SeasonSchema.virtual('changes', {
+  ref: 'Change',
+  localField: '_id',
+  foreignField: 'document',
 });
 
 SeasonSchema.index({
@@ -109,8 +109,8 @@ SeasonSchema.index({
 }, { unique: true });
 
 
-SeasonSchema.pre<TSeason>("save", async function () {
-  if (this.isModified("poster.fr-FR")) {
+SeasonSchema.pre<TSeason>('save', async function () {
+  if (this.isModified('poster.fr-FR')) {
     this.poster.set('fr-FR', await uploadFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
       this.poster.get('fr-FR') ?? null,
@@ -118,7 +118,7 @@ SeasonSchema.pre<TSeason>("save", async function () {
   }
 });
 
-SeasonSchema.pre("findOne", async function () {
+SeasonSchema.pre('findOne', async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -133,7 +133,7 @@ SeasonSchema.pre("findOne", async function () {
   });
 });
 
-SeasonSchema.pre<TSeason>("deleteOne", async function () {
+SeasonSchema.pre<TSeason>('deleteOne', async function () {
   if (this.poster.get('fr-FR')) {
     await deleteFile(
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
@@ -143,11 +143,11 @@ SeasonSchema.pre<TSeason>("deleteOne", async function () {
 
 
 SeasonSchema.plugin(MongooseMultiLanguage, {
-  fields: ["title", "overview", "airDate", "poster"],
+  fields: ['title', 'overview', 'airDate', 'poster'],
 });
 
 SeasonSchema.plugin(MongooseJsonApi, {
-  type: "seasons",
+  type: 'seasons',
 });
 
 SeasonSchema.plugin(MongooseChangeTracking);
@@ -155,5 +155,5 @@ SeasonSchema.plugin(MongooseChangeTracking);
 
 export type TSeason = HydratedDocument<ISeason, SeasonInstanceMethods, SeasonQueryHelper>;
 
-const Season = model<ISeason, SeasonModel>("Season", SeasonSchema);
+const Season = model<ISeason, SeasonModel>('Season', SeasonSchema);
 export default Season;

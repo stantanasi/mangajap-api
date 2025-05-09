@@ -1,5 +1,5 @@
-import { Document, QueryOptions, SaveOptions, Schema } from "mongoose";
-import Change, { IChange } from "../../models/change.model";
+import { Document, QueryOptions, SaveOptions, Schema } from 'mongoose';
+import Change, { IChange } from '../../models/change.model';
 
 type ChangeSaveOptions = SaveOptions & {
   user: string;
@@ -49,10 +49,10 @@ export default function MongooseChangeTracking<DocType extends { _id: any }, M e
   };
 
 
-  schema.pre("save", async function (_next, options) {
+  schema.pre('save', async function (_next, options) {
     if (this.isNew) {
       await new Change({
-        action: "create",
+        action: 'create',
         changes: {
           after: this.toJSON(),
         },
@@ -72,7 +72,7 @@ export default function MongooseChangeTracking<DocType extends { _id: any }, M e
       if (!before || Object.keys(before).length === 0) return
 
       await new Change({
-        action: "update",
+        action: 'update',
         changes: {
           before: before,
           after: after,
@@ -85,9 +85,9 @@ export default function MongooseChangeTracking<DocType extends { _id: any }, M e
     }
   });
 
-  schema.pre("deleteOne", { document: true, query: false }, async function (_next, options) {
+  schema.pre('deleteOne', { document: true, query: false }, async function (_next, options) {
     await new Change({
-      action: "delete",
+      action: 'delete',
       changes: {
         before: this.toJSON(),
       },

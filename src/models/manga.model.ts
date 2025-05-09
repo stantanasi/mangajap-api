@@ -1,39 +1,39 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import { deleteFile, uploadFile } from "../firebase-app";
-import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
-import { TChange } from "./change.model";
-import Chapter, { TChapter } from "./chapter.model";
-import { TFranchise } from "./franchise.model";
-import { TGenre } from "./genre.model";
-import MangaEntry, { TMangaEntry } from "./manga-entry.model";
-import Review, { TReview } from "./review.model";
-import { TStaff } from "./staff.model";
-import { TTheme } from "./theme.model";
-import Volume, { TVolume } from "./volume.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import { deleteFile, uploadFile } from '../firebase-app';
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
+import { TChange } from './change.model';
+import Chapter, { TChapter } from './chapter.model';
+import { TFranchise } from './franchise.model';
+import { TGenre } from './genre.model';
+import MangaEntry, { TMangaEntry } from './manga-entry.model';
+import Review, { TReview } from './review.model';
+import { TStaff } from './staff.model';
+import { TTheme } from './theme.model';
+import Volume, { TVolume } from './volume.model';
 
 enum MangaType {
-  Bd = "bd",
-  Comics = "comics",
-  Josei = "josei",
-  Kodomo = "kodomo",
-  Seijin = "seijin",
-  Seinen = "seinen",
-  Shojo = "shojo",
-  Shonen = "shonen",
-  Doujin = "doujin",
-  Novel = "novel",
-  Oneshot = "oneshot",
-  Webtoon = "webtoon",
+  Bd = 'bd',
+  Comics = 'comics',
+  Josei = 'josei',
+  Kodomo = 'kodomo',
+  Seijin = 'seijin',
+  Seinen = 'seinen',
+  Shojo = 'shojo',
+  Shonen = 'shonen',
+  Doujin = 'doujin',
+  Novel = 'novel',
+  Oneshot = 'oneshot',
+  Webtoon = 'webtoon',
 }
 
 enum MangaStatus {
-  Publishing = "publishing",
-  Finished = "finished",
-  Unreleased = "unreleased",
-  Upcoming = "upcoming",
+  Publishing = 'publishing',
+  Finished = 'finished',
+  Unreleased = 'unreleased',
+  Upcoming = 'upcoming',
 }
 
 export interface IManga {
@@ -68,7 +68,7 @@ export interface IManga {
   reviews?: TReview[];
   franchises?: TFranchise[];
   changes?: TChange[];
-  "manga-entry"?: TMangaEntry | null;
+  'manga-entry'?: TMangaEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -213,13 +213,13 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
 
   genres: [{
     type: Schema.Types.ObjectId,
-    ref: "Genre",
+    ref: 'Genre',
     default: [],
   }],
 
   themes: [{
     type: Schema.Types.ObjectId,
-    ref: "Theme",
+    ref: 'Theme',
     default: [],
   }],
 }, {
@@ -231,63 +231,63 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
   toObject: { virtuals: true },
 });
 
-MangaSchema.virtual("volumes", {
-  ref: "Volume",
-  localField: "_id",
-  foreignField: "manga",
+MangaSchema.virtual('volumes', {
+  ref: 'Volume',
+  localField: '_id',
+  foreignField: 'manga',
   options: {
     sort: { number: 1 },
   },
 });
 
-MangaSchema.virtual("chapters", {
-  ref: "Chapter",
-  localField: "_id",
-  foreignField: "manga",
+MangaSchema.virtual('chapters', {
+  ref: 'Chapter',
+  localField: '_id',
+  foreignField: 'manga',
   options: {
     sort: { number: 1 },
   },
 });
 
-MangaSchema.virtual("staff", {
-  ref: "Staff",
-  localField: "_id",
-  foreignField: "manga",
+MangaSchema.virtual('staff', {
+  ref: 'Staff',
+  localField: '_id',
+  foreignField: 'manga',
 });
 
-MangaSchema.virtual("reviews", {
-  ref: "Review",
-  localField: "_id",
-  foreignField: "manga",
+MangaSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'manga',
   options: {
     sort: { updatedAt: -1 },
   },
 });
 
-MangaSchema.virtual("franchises", {
-  ref: "Franchise",
-  localField: "_id",
-  foreignField: "source",
+MangaSchema.virtual('franchises', {
+  ref: 'Franchise',
+  localField: '_id',
+  foreignField: 'source',
 });
 
-MangaSchema.virtual("changes", {
-  ref: "Change",
-  localField: "_id",
-  foreignField: "document",
+MangaSchema.virtual('changes', {
+  ref: 'Change',
+  localField: '_id',
+  foreignField: 'document',
 });
 
-MangaSchema.virtual("manga-entry");
+MangaSchema.virtual('manga-entry');
 
 
-MangaSchema.pre<TManga>("save", async function () {
-  if (this.isModified("poster.fr-FR")) {
+MangaSchema.pre<TManga>('save', async function () {
+  if (this.isModified('poster.fr-FR')) {
     this.poster.set('fr-FR', await uploadFile(
       `manga/${this._id}/images/cover.jpg`,
       this.poster.get('fr-FR') ?? null,
     ));
   }
 
-  if (this.isModified("banner.fr-FR")) {
+  if (this.isModified('banner.fr-FR')) {
     this.banner.set('fr-FR', await uploadFile(
       `manga/${this._id}/images/banner.jpg`,
       this.banner.get('fr-FR') ?? null,
@@ -295,7 +295,7 @@ MangaSchema.pre<TManga>("save", async function () {
   }
 });
 
-MangaSchema.pre("findOne", async function () {
+MangaSchema.pre('findOne', async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -312,7 +312,7 @@ MangaSchema.pre("findOne", async function () {
       .match({ manga: new Types.ObjectId(_id) })
       .group({
         _id: null,
-        averageRating: { $avg: "$rating" },
+        averageRating: { $avg: '$rating' },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.averageRating ?? null),
@@ -334,10 +334,10 @@ MangaSchema.pre("findOne", async function () {
     popularity: await Manga.aggregate()
       .match({ _id: new Types.ObjectId(_id) })
       .lookup({
-        from: "mangaentries",
-        localField: "_id",
-        foreignField: "manga",
-        as: "entriesCount",
+        from: 'mangaentries',
+        localField: '_id',
+        foreignField: 'manga',
+        as: 'entriesCount',
         pipeline: [
           {
             $match: {
@@ -348,13 +348,13 @@ MangaSchema.pre("findOne", async function () {
           },
         ],
       })
-      .addFields({ entriesCount: { $size: "$entriesCount" } })
+      .addFields({ entriesCount: { $size: '$entriesCount' } })
       .addFields({
         popularity: {
           $add: [
-            "$userCount", "$favoritesCount",
-            { $multiply: ["$userCount", { $ifNull: ["$averageRating", 0] }] },
-            { $multiply: [2, "$entriesCount", { $ifNull: ["$averageRating", 0] }, { $add: ["$userCount", "$favoritesCount"] }] },
+            '$userCount', '$favoritesCount',
+            { $multiply: ['$userCount', { $ifNull: ['$averageRating', 0] }] },
+            { $multiply: [2, '$entriesCount', { $ifNull: ['$averageRating', 0] }, { $add: ['$userCount', '$favoritesCount'] }] },
           ],
         },
       })
@@ -363,7 +363,7 @@ MangaSchema.pre("findOne", async function () {
   });
 });
 
-MangaSchema.pre<TManga>("deleteOne", async function () {
+MangaSchema.pre<TManga>('deleteOne', async function () {
   if (this.poster.get('fr-FR')) {
     await deleteFile(
       `manga/${this._id}/images/cover.jpg`,
@@ -379,15 +379,15 @@ MangaSchema.pre<TManga>("deleteOne", async function () {
 
 
 MangaSchema.plugin(MongooseMultiLanguage, {
-  fields: ["title", "overview", "startDate", "endDate", "poster", "banner"],
+  fields: ['title', 'overview', 'startDate', 'endDate', 'poster', 'banner'],
 });
 
 MangaSchema.plugin(MongooseSearch, {
-  fields: ["title"],
+  fields: ['title'],
 });
 
 MangaSchema.plugin(MongooseJsonApi, {
-  type: "manga",
+  type: 'manga',
   filter: {
     query: (query: string) => {
       return {
@@ -402,5 +402,5 @@ MangaSchema.plugin(MongooseChangeTracking);
 
 export type TManga = HydratedDocument<IManga, MangaInstanceMethods, MangaQueryHelper>;
 
-const Manga = model<IManga, MangaModel>("Manga", MangaSchema);
+const Manga = model<IManga, MangaModel>('Manga', MangaSchema);
 export default Manga;

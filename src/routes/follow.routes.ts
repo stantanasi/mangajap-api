@@ -1,12 +1,12 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import Follow from "../models/follow.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import Follow from '../models/follow.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const followRoutes = express.Router();
 
-followRoutes.get("/", async (req, res, next) => {
+followRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Follow.find()
       .withJsonApi(req.query)
@@ -25,7 +25,7 @@ followRoutes.get("/", async (req, res, next) => {
   }
 });
 
-followRoutes.post("/", isLogin(), async (req, res, next) => {
+followRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const id = await Follow.fromJsonApi(req.body, {
       assignAttribute: Follow.fromLanguage(req.query.language),
@@ -46,7 +46,7 @@ followRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-followRoutes.get("/:id", async (req, res, next) => {
+followRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Follow.findById(req.params.id)
       .withJsonApi(req.query)
@@ -61,7 +61,7 @@ followRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-followRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+followRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     await Follow.findById(req.params.id)
       .orFail()
@@ -91,7 +91,7 @@ followRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-followRoutes.delete("/:id", isLogin(), async (req, res, next) => {
+followRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     await Follow.findById(req.params.id)
       .orFail()
@@ -112,10 +112,10 @@ followRoutes.delete("/:id", isLogin(), async (req, res, next) => {
 });
 
 
-followRoutes.get("/:id/follower", async (req, res, next) => {
+followRoutes.get('/:id/follower', async (req, res, next) => {
   try {
     const response = await Follow.findById(req.params.id)
-      .getRelationship("follower")
+      .getRelationship('follower')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -128,10 +128,10 @@ followRoutes.get("/:id/follower", async (req, res, next) => {
   }
 });
 
-followRoutes.get("/:id/followed", async (req, res, next) => {
+followRoutes.get('/:id/followed', async (req, res, next) => {
   try {
     const response = await Follow.findById(req.params.id)
-      .getRelationship("followed")
+      .getRelationship('followed')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

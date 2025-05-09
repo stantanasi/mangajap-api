@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Anime from "../models/anime.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Anime from '../models/anime.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const animeRoutes = express.Router();
 
-animeRoutes.get("/", async (req, res, next) => {
+animeRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Anime.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ animeRoutes.get("/", async (req, res, next) => {
   }
 });
 
-animeRoutes.post("/", isLogin(), async (req, res, next) => {
+animeRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ animeRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id", async (req, res, next) => {
+animeRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ animeRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-animeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+animeRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ animeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-animeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+animeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ animeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-animeRoutes.get("/:id/seasons", async (req, res, next) => {
+animeRoutes.get('/:id/seasons', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("seasons")
+      .getRelationship('seasons')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -127,10 +127,10 @@ animeRoutes.get("/:id/seasons", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/episodes", async (req, res, next) => {
+animeRoutes.get('/:id/episodes', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("episodes")
+      .getRelationship('episodes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -147,10 +147,10 @@ animeRoutes.get("/:id/episodes", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/genres", async (req, res, next) => {
+animeRoutes.get('/:id/genres', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("genres")
+      .getRelationship('genres')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -167,10 +167,10 @@ animeRoutes.get("/:id/genres", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/themes", async (req, res, next) => {
+animeRoutes.get('/:id/themes', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("themes")
+      .getRelationship('themes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -187,10 +187,10 @@ animeRoutes.get("/:id/themes", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/staff", async (req, res, next) => {
+animeRoutes.get('/:id/staff', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("staff")
+      .getRelationship('staff')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -207,10 +207,10 @@ animeRoutes.get("/:id/staff", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/reviews", async (req, res, next) => {
+animeRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("reviews")
+      .getRelationship('reviews')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -227,10 +227,10 @@ animeRoutes.get("/:id/reviews", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/franchises", async (req, res, next) => {
+animeRoutes.get('/:id/franchises', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("franchises")
+      .getRelationship('franchises')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -247,10 +247,10 @@ animeRoutes.get("/:id/franchises", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/changes", async (req, res, next) => {
+animeRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -267,10 +267,10 @@ animeRoutes.get("/:id/changes", async (req, res, next) => {
   }
 });
 
-animeRoutes.get("/:id/anime-entry", async (req, res, next) => {
+animeRoutes.get('/:id/anime-entry', async (req, res, next) => {
   try {
     const response = await Anime.findById(req.params.id)
-      .getRelationship("anime-entry")
+      .getRelationship('anime-entry')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

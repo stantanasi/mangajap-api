@@ -1,5 +1,5 @@
-import { AxiosInstance } from "axios";
-import { TvSeriesDetails } from "../types/tv-series.type";
+import { AxiosInstance } from 'axios';
+import { TvSeriesDetails } from '../types/tv-series.type';
 
 export default class TvSeries {
 

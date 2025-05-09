@@ -1,8 +1,8 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TUser } from "./user.model";
-import { TVolume } from "./volume.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TUser } from './user.model';
+import { TVolume } from './volume.model';
 
 export interface IVolumeEntry {
   _id: Types.ObjectId;
@@ -43,13 +43,13 @@ export const VolumeEntrySchema = new Schema<IVolumeEntry, VolumeEntryModel, Volu
 
   user: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
   volume: {
     type: Schema.Types.ObjectId,
-    ref: "Volume",
+    ref: 'Volume',
     required: true,
   },
 }, {
@@ -72,11 +72,11 @@ VolumeEntrySchema.plugin(MongooseMultiLanguage, {
 });
 
 VolumeEntrySchema.plugin(MongooseJsonApi, {
-  type: "volume-entries",
+  type: 'volume-entries',
 });
 
 
 export type TVolumeEntry = HydratedDocument<IVolumeEntry, VolumeEntryInstanceMethods, VolumeEntryQueryHelper>;
 
-const VolumeEntry = model<IVolumeEntry, VolumeEntryModel>("VolumeEntry", VolumeEntrySchema);
+const VolumeEntry = model<IVolumeEntry, VolumeEntryModel>('VolumeEntry', VolumeEntrySchema);
 export default VolumeEntry;

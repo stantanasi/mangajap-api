@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Volume from "../models/volume.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Volume from '../models/volume.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const volumeRoutes = express.Router();
 
-volumeRoutes.get("/", async (req, res, next) => {
+volumeRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Volume.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ volumeRoutes.get("/", async (req, res, next) => {
   }
 });
 
-volumeRoutes.post("/", isLogin(), async (req, res, next) => {
+volumeRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ volumeRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-volumeRoutes.get("/:id", async (req, res, next) => {
+volumeRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ volumeRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-volumeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+volumeRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ volumeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-volumeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+volumeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ volumeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-volumeRoutes.get("/:id/manga", async (req, res, next) => {
+volumeRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
-      .getRelationship("manga")
+      .getRelationship('manga')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -123,30 +123,10 @@ volumeRoutes.get("/:id/manga", async (req, res, next) => {
   }
 });
 
-volumeRoutes.get("/:id/chapters", async (req, res, next) => {
+volumeRoutes.get('/:id/chapters', async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
-      .getRelationship("chapters")
-      .withJsonApi(req.query)
-      .withLanguage(req.query.language)
-      .toJsonApi({
-        baseUrl: `${process.env.API_URL}`,
-      })
-      .paginate({
-        url: `${process.env.API_URL}${req.originalUrl}`,
-        query: req.query,
-      });
-
-    res.json(response);
-  } catch (err) {
-    next(err);
-  }
-});
-
-volumeRoutes.get("/:id/changes", async (req, res, next) => {
-  try {
-    const response = await Volume.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('chapters')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -163,10 +143,30 @@ volumeRoutes.get("/:id/changes", async (req, res, next) => {
   }
 });
 
-volumeRoutes.get("/:id/volume-entry", async (req, res, next) => {
+volumeRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Volume.findById(req.params.id)
-      .getRelationship("volume-entry")
+      .getRelationship('changes')
+      .withJsonApi(req.query)
+      .withLanguage(req.query.language)
+      .toJsonApi({
+        baseUrl: `${process.env.API_URL}`,
+      })
+      .paginate({
+        url: `${process.env.API_URL}${req.originalUrl}`,
+        query: req.query,
+      });
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+volumeRoutes.get('/:id/volume-entry', async (req, res, next) => {
+  try {
+    const response = await Volume.findById(req.params.id)
+      .getRelationship('volume-entry')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

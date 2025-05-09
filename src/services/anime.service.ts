@@ -1,7 +1,7 @@
-import Anime from "../models/anime.model";
-import Episode from "../models/episode.model";
-import Season from "../models/season.model";
-import TMDb from "../utils/tmdb-client/tmdb";
+import Anime from '../models/anime.model';
+import Episode from '../models/episode.model';
+import Season from '../models/season.model';
+import TMDb from '../utils/tmdb-client/tmdb';
 
 abstract class TMDbService {
 
@@ -45,7 +45,7 @@ abstract class TMDbService {
       if (anime.isModified()) {
         const directModifiedPaths = anime.directModifiedPaths();
         await anime.save();
-        console.log(anime.title.get('fr-FR'), "|", "UPDATE", directModifiedPaths);
+        console.log(anime.title.get('fr-FR'), '|', 'UPDATE', directModifiedPaths);
       }
 
 
@@ -72,7 +72,7 @@ abstract class TMDbService {
 
           await season.save();
           anime.seasons!.push(season);
-          console.log(anime.title.get('fr-FR'), "|", `S${season.number}`, "|", "CREATE");
+          console.log(anime.title.get('fr-FR'), '|', `S${season.number}`, '|', 'CREATE');
         } else {
           if (!season.get('title.fr-FR')) season.set('title.fr-FR', season_tmdb.name);
           if (!season.get('overview.fr-FR')) season.set('overview.fr-FR', season_tmdb.overview);
@@ -81,7 +81,7 @@ abstract class TMDbService {
           if (season.isModified()) {
             const directModifiedPaths = season.directModifiedPaths();
             await season.save();
-            console.log(anime.title.get('fr-FR'), "|", `S${season.number}`, "|", "UPDATE", "|", directModifiedPaths);
+            console.log(anime.title.get('fr-FR'), '|', `S${season.number}`, '|', 'UPDATE', '|', directModifiedPaths);
           }
         }
 
@@ -111,7 +111,7 @@ abstract class TMDbService {
 
             await episode.save();
             season.episodes!.push(episode);
-            console.log(anime.title.get('fr-FR'), "|", `S${season.number} E${episode.number}`, "|", "CREATE");
+            console.log(anime.title.get('fr-FR'), '|', `S${season.number} E${episode.number}`, '|', 'CREATE');
           } else {
             if (episode.number != episode_tmdb.episode_number) episode.set('number', episode_tmdb.episode_number);
             if (!episode.get('title.fr-FR')) episode.set('title.fr-FR', episode_tmdb.name);
@@ -122,7 +122,7 @@ abstract class TMDbService {
             if (episode.isModified()) {
               const directModifiedPaths = episode.directModifiedPaths();
               await episode.save();
-              console.log(anime.title.get('fr-FR'), "|", `S${season.number} E${episode.number}`, "|", "UPDATE", "|", directModifiedPaths);
+              console.log(anime.title.get('fr-FR'), '|', `S${season.number} E${episode.number}`, '|', 'UPDATE', '|', directModifiedPaths);
             }
           }
         }

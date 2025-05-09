@@ -1,56 +1,56 @@
 import {
-  HydratedDocument,
-  QueryWithHelpers,
-  Schema,
-  SchemaType,
-  VirtualType
-} from "mongoose";
+    HydratedDocument,
+    QueryWithHelpers,
+    Schema,
+    SchemaType,
+    VirtualType
+} from 'mongoose';
 
-const DEFAULT_LANGUAGE = "fr-FR";
+const DEFAULT_LANGUAGE = 'fr-FR';
 
 const LANGUAGES: Record<string, string> = {
-  fr: "fr-FR",
-  en: "en-US",
-  es: "es-ES",
-  de: "de-DE",
-  it: "it-IT",
-  ja: "ja-JP",
-  zh: "zh-CN",
-  pt: "pt-BR",
-  nl: "nl-NL",
-  ru: "ru-RU",
-  ar: "ar-SA",
-  ko: "ko-KR",
-  sv: "sv-SE",
-  no: "no-NO",
-  da: "da-DK",
-  fi: "fi-FI",
-  pl: "pl-PL",
-  tr: "tr-TR",
-  cs: "cs-CZ",
-  ro: "ro-RO",
-  hu: "hu-HU",
-  el: "el-GR",
-  th: "th-TH",
-  vi: "vi-VN",
-  id: "id-ID",
-  ms: "ms-MY",
-  hi: "hi-IN",
-  bn: "bn-BD",
-  ta: "ta-IN",
-  ml: "ml-IN",
-  kn: "kn-IN",
-  mr: "mr-IN",
-  gu: "gu-IN",
-  te: "te-IN",
-  or: "or-IN",
-  pa: "pa-IN",
-  ur: "ur-PK",
-  he: "he-IL",
-  sw: "sw-KE",
-  am: "am-ET",
-  ne: "ne-NP",
-  si: "si-LK"
+  fr: 'fr-FR',
+  en: 'en-US',
+  es: 'es-ES',
+  de: 'de-DE',
+  it: 'it-IT',
+  ja: 'ja-JP',
+  zh: 'zh-CN',
+  pt: 'pt-BR',
+  nl: 'nl-NL',
+  ru: 'ru-RU',
+  ar: 'ar-SA',
+  ko: 'ko-KR',
+  sv: 'sv-SE',
+  no: 'no-NO',
+  da: 'da-DK',
+  fi: 'fi-FI',
+  pl: 'pl-PL',
+  tr: 'tr-TR',
+  cs: 'cs-CZ',
+  ro: 'ro-RO',
+  hu: 'hu-HU',
+  el: 'el-GR',
+  th: 'th-TH',
+  vi: 'vi-VN',
+  id: 'id-ID',
+  ms: 'ms-MY',
+  hi: 'hi-IN',
+  bn: 'bn-BD',
+  ta: 'ta-IN',
+  ml: 'ml-IN',
+  kn: 'kn-IN',
+  mr: 'mr-IN',
+  gu: 'gu-IN',
+  te: 'te-IN',
+  or: 'or-IN',
+  pa: 'pa-IN',
+  ur: 'ur-PK',
+  he: 'he-IL',
+  sw: 'sw-KE',
+  am: 'am-ET',
+  ne: 'ne-NP',
+  si: 'si-LK'
 };
 
 const getLanguage = (language: string): string => {
@@ -112,7 +112,7 @@ export default function MongooseMultiLanguage<DocType extends { _id: any }, M ex
       const languages = this._languages;
       if (!languages) return value;
 
-      if (typeof value === "object") {
+      if (typeof value === 'object') {
         const translations = value instanceof Map
           ? languages.map((language) => value.get(language))
           : languages.map((language) => value[language]);

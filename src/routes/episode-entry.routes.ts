@@ -1,12 +1,12 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import EpisodeEntry from "../models/episode-entry.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import EpisodeEntry from '../models/episode-entry.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const episodeEntryRoutes = express.Router();
 
-episodeEntryRoutes.get("/", async (req, res, next) => {
+episodeEntryRoutes.get('/', async (req, res, next) => {
   try {
     const response = await EpisodeEntry.find()
       .withJsonApi(req.query)
@@ -25,7 +25,7 @@ episodeEntryRoutes.get("/", async (req, res, next) => {
   }
 });
 
-episodeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
+episodeEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const id = await EpisodeEntry.fromJsonApi(req.body, {
       assignAttribute: EpisodeEntry.fromLanguage(req.query.language),
@@ -46,7 +46,7 @@ episodeEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-episodeEntryRoutes.get("/:id", async (req, res, next) => {
+episodeEntryRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await EpisodeEntry.findById(req.params.id)
       .withJsonApi(req.query)
@@ -61,7 +61,7 @@ episodeEntryRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-episodeEntryRoutes.patch("/:id", async (req, res, next) => {
+episodeEntryRoutes.patch('/:id', async (req, res, next) => {
   try {
     await EpisodeEntry.findById(req.params.id)
       .orFail()
@@ -91,7 +91,7 @@ episodeEntryRoutes.patch("/:id", async (req, res, next) => {
   }
 });
 
-episodeEntryRoutes.delete("/:id", async (req, res, next) => {
+episodeEntryRoutes.delete('/:id', async (req, res, next) => {
   try {
     await EpisodeEntry.findById(req.params.id)
       .orFail()
@@ -112,10 +112,10 @@ episodeEntryRoutes.delete("/:id", async (req, res, next) => {
 });
 
 
-episodeEntryRoutes.get("/:id/episode", async (req, res, next) => {
+episodeEntryRoutes.get('/:id/episode', async (req, res, next) => {
   try {
     const response = await EpisodeEntry.findById(req.params.id)
-      .getRelationship("episode")
+      .getRelationship('episode')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -128,10 +128,10 @@ episodeEntryRoutes.get("/:id/episode", async (req, res, next) => {
   }
 });
 
-episodeEntryRoutes.get("/:id/user", async (req, res, next) => {
+episodeEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const response = await EpisodeEntry.findById(req.params.id)
-      .getRelationship("user")
+      .getRelationship('user')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

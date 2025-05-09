@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Episode from "../models/episode.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Episode from '../models/episode.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const episodeRoutes = express.Router();
 
-episodeRoutes.get("/", async (req, res, next) => {
+episodeRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Episode.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ episodeRoutes.get("/", async (req, res, next) => {
   }
 });
 
-episodeRoutes.post("/", isLogin(), async (req, res, next) => {
+episodeRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ episodeRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-episodeRoutes.get("/:id", async (req, res, next) => {
+episodeRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ episodeRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-episodeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+episodeRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ episodeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-episodeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+episodeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ episodeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-episodeRoutes.get("/:id/anime", async (req, res, next) => {
+episodeRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
-      .getRelationship("anime")
+      .getRelationship('anime')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -123,10 +123,10 @@ episodeRoutes.get("/:id/anime", async (req, res, next) => {
   }
 });
 
-episodeRoutes.get("/:id/season", async (req, res, next) => {
+episodeRoutes.get('/:id/season', async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
-      .getRelationship("season")
+      .getRelationship('season')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -139,10 +139,10 @@ episodeRoutes.get("/:id/season", async (req, res, next) => {
   }
 });
 
-episodeRoutes.get("/:id/changes", async (req, res, next) => {
+episodeRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -159,10 +159,10 @@ episodeRoutes.get("/:id/changes", async (req, res, next) => {
   }
 });
 
-episodeRoutes.get("/:id/episode-entry", async (req, res, next) => {
+episodeRoutes.get('/:id/episode-entry', async (req, res, next) => {
   try {
     const response = await Episode.findById(req.params.id)
-      .getRelationship("episode-entry")
+      .getRelationship('episode-entry')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

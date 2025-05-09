@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Theme from "../models/theme.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Theme from '../models/theme.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const themeRoutes = express.Router();
 
-themeRoutes.get("/", async (req, res, next) => {
+themeRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Theme.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ themeRoutes.get("/", async (req, res, next) => {
   }
 });
 
-themeRoutes.post("/", isLogin(), async (req, res, next) => {
+themeRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ themeRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-themeRoutes.get("/:id", async (req, res, next) => {
+themeRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ themeRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-themeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+themeRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ themeRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-themeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+themeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ themeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-themeRoutes.get("/:id/mangas", async (req, res, next) => {
+themeRoutes.get('/:id/mangas', async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
-      .getRelationship("mangas")
+      .getRelationship('mangas')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -127,10 +127,10 @@ themeRoutes.get("/:id/mangas", async (req, res, next) => {
   }
 });
 
-themeRoutes.get("/:id/animes", async (req, res, next) => {
+themeRoutes.get('/:id/animes', async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
-      .getRelationship("animes")
+      .getRelationship('animes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -147,10 +147,10 @@ themeRoutes.get("/:id/animes", async (req, res, next) => {
   }
 });
 
-themeRoutes.get("/:id/changes", async (req, res, next) => {
+themeRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Theme.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

@@ -1,9 +1,9 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TAnime } from "./anime.model";
-import { TManga } from "./manga.model";
-import { TUser } from "./user.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TAnime } from './anime.model';
+import { TManga } from './manga.model';
+import { TUser } from './user.model';
 
 export interface IReview {
   _id: Types.ObjectId;
@@ -33,19 +33,19 @@ export const ReviewSchema = new Schema<IReview, ReviewModel, ReviewInstanceMetho
 
   user: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
   anime: {
     type: Schema.Types.ObjectId,
-    ref: "Anime",
+    ref: 'Anime',
     default: undefined,
   },
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: "Manga",
+    ref: 'Manga',
     default: undefined,
   },
 }, {
@@ -63,11 +63,11 @@ ReviewSchema.plugin(MongooseMultiLanguage, {
 });
 
 ReviewSchema.plugin(MongooseJsonApi, {
-  type: "reviews",
+  type: 'reviews',
 });
 
 
 export type TReview = HydratedDocument<IReview, ReviewInstanceMethods, ReviewQueryHelper>;
 
-const Review = model<IReview, ReviewModel>("Review", ReviewSchema);
+const Review = model<IReview, ReviewModel>('Review', ReviewSchema);
 export default Review;

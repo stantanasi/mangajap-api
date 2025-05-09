@@ -1,12 +1,12 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import { deleteFile, uploadFile } from "../firebase-app";
-import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TChange } from "./change.model";
-import { TChapterEntry } from "./chapter-entry.model";
-import { TManga } from "./manga.model";
-import { TVolume } from "./volume.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import { deleteFile, uploadFile } from '../firebase-app';
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TChange } from './change.model';
+import { TChapterEntry } from './chapter-entry.model';
+import { TManga } from './manga.model';
+import { TVolume } from './volume.model';
 
 export interface IChapter {
   _id: Types.ObjectId;
@@ -20,7 +20,7 @@ export interface IChapter {
   manga: Types.ObjectId | TManga;
   volume: Types.ObjectId | TVolume | null;
   changes?: TChange[];
-  "chapter-entry"?: TChapterEntry | null;
+  'chapter-entry'?: TChapterEntry | null;
 
   createdAt: Date;
   updatedAt: Date;
@@ -70,13 +70,13 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceM
 
   manga: {
     type: Schema.Types.ObjectId,
-    ref: "Manga",
+    ref: 'Manga',
     required: true,
   },
 
   volume: {
     type: Schema.Types.ObjectId,
-    ref: "Volume",
+    ref: 'Volume',
     default: null,
   },
 }, {
@@ -88,13 +88,13 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceM
   toObject: { virtuals: true },
 });
 
-ChapterSchema.virtual("changes", {
-  ref: "Change",
-  localField: "_id",
-  foreignField: "document",
+ChapterSchema.virtual('changes', {
+  ref: 'Change',
+  localField: '_id',
+  foreignField: 'document',
 });
 
-ChapterSchema.virtual("chapter-entry");
+ChapterSchema.virtual('chapter-entry');
 
 ChapterSchema.index({
   number: 1,
@@ -102,17 +102,17 @@ ChapterSchema.index({
 }, { unique: true });
 
 
-ChapterSchema.pre<TChapter>("save", async function () {
-  if (this.isModified("cover.fr-FR")) {
+ChapterSchema.pre<TChapter>('save', async function () {
+  if (this.isModified('cover.fr-FR')) {
     this.cover.set('fr-FR', await uploadFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
-      this.cover.get("fr-FR") ?? null,
+      this.cover.get('fr-FR') ?? null,
     ));
   }
 });
 
-ChapterSchema.pre<TChapter>("deleteOne", async function () {
-  if (this.cover.get("fr-FR")) {
+ChapterSchema.pre<TChapter>('deleteOne', async function () {
+  if (this.cover.get('fr-FR')) {
     await deleteFile(
       `manga/${this.manga}/volumes/${this._id}/images/cover.jpg`,
     );
@@ -121,11 +121,11 @@ ChapterSchema.pre<TChapter>("deleteOne", async function () {
 
 
 ChapterSchema.plugin(MongooseMultiLanguage, {
-  fields: ["title", "overview", "publishedDate", "cover"],
+  fields: ['title', 'overview', 'publishedDate', 'cover'],
 });
 
 ChapterSchema.plugin(MongooseJsonApi, {
-  type: "chapters",
+  type: 'chapters',
 });
 
 ChapterSchema.plugin(MongooseChangeTracking);
@@ -133,5 +133,5 @@ ChapterSchema.plugin(MongooseChangeTracking);
 
 export type TChapter = HydratedDocument<IChapter, ChapterInstanceMethods, ChapterQueryHelper>;
 
-const Chapter = model<IChapter, ChapterModel>("Chapter", ChapterSchema);
+const Chapter = model<IChapter, ChapterModel>('Chapter', ChapterSchema);
 export default Chapter;

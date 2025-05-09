@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Franchise from "../models/franchise.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Franchise from '../models/franchise.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const franchiseRoutes = express.Router();
 
-franchiseRoutes.get("/", async (req, res, next) => {
+franchiseRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Franchise.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ franchiseRoutes.get("/", async (req, res, next) => {
   }
 });
 
-franchiseRoutes.post("/", isLogin(), async (req, res, next) => {
+franchiseRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ franchiseRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-franchiseRoutes.get("/:id", async (req, res, next) => {
+franchiseRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ franchiseRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-franchiseRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+franchiseRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ franchiseRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-franchiseRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+franchiseRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ franchiseRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-franchiseRoutes.get("/:id/source", async (req, res, next) => {
+franchiseRoutes.get('/:id/source', async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
-      .getRelationship("source")
+      .getRelationship('source')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -123,10 +123,10 @@ franchiseRoutes.get("/:id/source", async (req, res, next) => {
   }
 });
 
-franchiseRoutes.get("/:id/destination", async (req, res, next) => {
+franchiseRoutes.get('/:id/destination', async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
-      .getRelationship("destination")
+      .getRelationship('destination')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -139,10 +139,10 @@ franchiseRoutes.get("/:id/destination", async (req, res, next) => {
   }
 });
 
-franchiseRoutes.get("/:id/changes", async (req, res, next) => {
+franchiseRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Franchise.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

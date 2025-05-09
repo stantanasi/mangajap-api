@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Manga from "../models/manga.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Manga from '../models/manga.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const mangaRoutes = express.Router();
 
-mangaRoutes.get("/", async (req, res, next) => {
+mangaRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Manga.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ mangaRoutes.get("/", async (req, res, next) => {
   }
 });
 
-mangaRoutes.post("/", isLogin(), async (req, res, next) => {
+mangaRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ mangaRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id", async (req, res, next) => {
+mangaRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ mangaRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-mangaRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+mangaRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ mangaRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-mangaRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+mangaRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ mangaRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-mangaRoutes.get("/:id/volumes", async (req, res, next) => {
+mangaRoutes.get('/:id/volumes', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("volumes")
+      .getRelationship('volumes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -127,10 +127,10 @@ mangaRoutes.get("/:id/volumes", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/chapters", async (req, res, next) => {
+mangaRoutes.get('/:id/chapters', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("chapters")
+      .getRelationship('chapters')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -147,10 +147,10 @@ mangaRoutes.get("/:id/chapters", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/genres", async (req, res, next) => {
+mangaRoutes.get('/:id/genres', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("genres")
+      .getRelationship('genres')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -167,10 +167,10 @@ mangaRoutes.get("/:id/genres", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/themes", async (req, res, next) => {
+mangaRoutes.get('/:id/themes', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("themes")
+      .getRelationship('themes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -187,10 +187,10 @@ mangaRoutes.get("/:id/themes", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/staff", async (req, res, next) => {
+mangaRoutes.get('/:id/staff', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("staff")
+      .getRelationship('staff')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -207,10 +207,10 @@ mangaRoutes.get("/:id/staff", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/reviews", async (req, res, next) => {
+mangaRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("reviews")
+      .getRelationship('reviews')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -227,10 +227,10 @@ mangaRoutes.get("/:id/reviews", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/franchises", async (req, res, next) => {
+mangaRoutes.get('/:id/franchises', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("franchises")
+      .getRelationship('franchises')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -247,10 +247,10 @@ mangaRoutes.get("/:id/franchises", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/changes", async (req, res, next) => {
+mangaRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -267,10 +267,10 @@ mangaRoutes.get("/:id/changes", async (req, res, next) => {
   }
 });
 
-mangaRoutes.get("/:id/manga-entry", async (req, res, next) => {
+mangaRoutes.get('/:id/manga-entry', async (req, res, next) => {
   try {
     const response = await Manga.findById(req.params.id)
-      .getRelationship("manga-entry")
+      .getRelationship('manga-entry')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

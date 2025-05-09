@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Genre from "../models/genre.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Genre from '../models/genre.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const genreRoutes = express.Router();
 
-genreRoutes.get("/", async (req, res, next) => {
+genreRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Genre.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ genreRoutes.get("/", async (req, res, next) => {
   }
 });
 
-genreRoutes.post("/", isLogin(), async (req, res, next) => {
+genreRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ genreRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-genreRoutes.get("/:id", async (req, res, next) => {
+genreRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ genreRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-genreRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+genreRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ genreRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-genreRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+genreRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ genreRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-genreRoutes.get("/:id/mangas", async (req, res, next) => {
+genreRoutes.get('/:id/mangas', async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
-      .getRelationship("mangas")
+      .getRelationship('mangas')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -127,10 +127,10 @@ genreRoutes.get("/:id/mangas", async (req, res, next) => {
   }
 });
 
-genreRoutes.get("/:id/animes", async (req, res, next) => {
+genreRoutes.get('/:id/animes', async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
-      .getRelationship("animes")
+      .getRelationship('animes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -147,10 +147,10 @@ genreRoutes.get("/:id/animes", async (req, res, next) => {
   }
 });
 
-genreRoutes.get("/:id/changes", async (req, res, next) => {
+genreRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Genre.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

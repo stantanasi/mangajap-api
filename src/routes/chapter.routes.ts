@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Chapter from "../models/chapter.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Chapter from '../models/chapter.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const chapterRoutes = express.Router();
 
-chapterRoutes.get("/", async (req, res, next) => {
+chapterRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Chapter.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ chapterRoutes.get("/", async (req, res, next) => {
   }
 });
 
-chapterRoutes.post("/", isLogin(), async (req, res, next) => {
+chapterRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ chapterRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-chapterRoutes.get("/:id", async (req, res, next) => {
+chapterRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ chapterRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-chapterRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+chapterRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ chapterRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-chapterRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+chapterRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ chapterRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-chapterRoutes.get("/:id/manga", async (req, res, next) => {
+chapterRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
-      .getRelationship("manga")
+      .getRelationship('manga')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -123,10 +123,10 @@ chapterRoutes.get("/:id/manga", async (req, res, next) => {
   }
 });
 
-chapterRoutes.get("/:id/volume", async (req, res, next) => {
+chapterRoutes.get('/:id/volume', async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
-      .getRelationship("volume")
+      .getRelationship('volume')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -139,10 +139,10 @@ chapterRoutes.get("/:id/volume", async (req, res, next) => {
   }
 });
 
-chapterRoutes.get("/:id/changes", async (req, res, next) => {
+chapterRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -159,10 +159,10 @@ chapterRoutes.get("/:id/changes", async (req, res, next) => {
   }
 });
 
-chapterRoutes.get("/:id/chapter-entry", async (req, res, next) => {
+chapterRoutes.get('/:id/chapter-entry', async (req, res, next) => {
   try {
     const response = await Chapter.findById(req.params.id)
-      .getRelationship("chapter-entry")
+      .getRelationship('chapter-entry')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

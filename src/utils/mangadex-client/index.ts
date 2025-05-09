@@ -1,5 +1,5 @@
-import axios from "axios";
-import MangaEndpoint from "./endpoints/manga.endpoint";
+import axios from 'axios';
+import MangaEndpoint from './endpoints/manga.endpoint';
 
 export default class MangaDex {
 

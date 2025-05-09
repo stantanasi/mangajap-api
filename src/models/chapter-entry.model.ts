@@ -1,8 +1,8 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TChapter } from "./chapter.model";
-import { TUser } from "./user.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TChapter } from './chapter.model';
+import { TUser } from './user.model';
 
 export interface IChapterEntry {
   _id: Types.ObjectId;
@@ -43,13 +43,13 @@ export const ChapterEntrySchema = new Schema<IChapterEntry, ChapterEntryModel, C
 
   user: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
   chapter: {
     type: Schema.Types.ObjectId,
-    ref: "Chapter",
+    ref: 'Chapter',
     required: true,
   },
 }, {
@@ -72,11 +72,11 @@ ChapterEntrySchema.plugin(MongooseMultiLanguage, {
 });
 
 ChapterEntrySchema.plugin(MongooseJsonApi, {
-  type: "chapter-entries",
+  type: 'chapter-entries',
 });
 
 
 export type TChapterEntry = HydratedDocument<IChapterEntry, ChapterEntryInstanceMethods, ChapterEntryQueryHelper>;
 
-const ChapterEntry = model<IChapterEntry, ChapterEntryModel>("ChapterEntry", ChapterEntrySchema);
+const ChapterEntry = model<IChapterEntry, ChapterEntryModel>('ChapterEntry', ChapterEntrySchema);
 export default ChapterEntry;

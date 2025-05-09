@@ -1,22 +1,22 @@
-import { JsonApiQueryParams } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import People from "../models/people.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiQueryParams } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import People from '../models/people.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const peopleRoutes = express.Router();
 
-peopleRoutes.get("/", async (req, res, next) => {
+peopleRoutes.get('/', async (req, res, next) => {
   try {
     const query: JsonApiQueryParams = Object.assign({}, req.query);
-    if (query.sort?.split(",").includes("random")) {
+    if (query.sort?.split(',').includes('random')) {
       query.filter = query.filter || {};
       query.filter._id = (await People.aggregate()
         .sample(+(query.page?.limit ?? 10)))
         .map((people) => people._id)
-        .join(",");
+        .join(',');
 
-      query.sort = query.sort?.split(",").filter((sort) => sort !== "random").join(",");
+      query.sort = query.sort?.split(',').filter((sort) => sort !== 'random').join(',');
     }
 
     const response = await People.find()
@@ -36,7 +36,7 @@ peopleRoutes.get("/", async (req, res, next) => {
   }
 });
 
-peopleRoutes.post("/", isLogin(), async (req, res, next) => {
+peopleRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -59,7 +59,7 @@ peopleRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-peopleRoutes.get("/:id", async (req, res, next) => {
+peopleRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
       .withJsonApi(req.query)
@@ -74,7 +74,7 @@ peopleRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-peopleRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+peopleRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -101,7 +101,7 @@ peopleRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-peopleRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+peopleRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -119,10 +119,10 @@ peopleRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-peopleRoutes.get("/:id/staff", async (req, res, next) => {
+peopleRoutes.get('/:id/staff', async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
-      .getRelationship("staff")
+      .getRelationship('staff')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -139,10 +139,10 @@ peopleRoutes.get("/:id/staff", async (req, res, next) => {
   }
 });
 
-peopleRoutes.get("/:id/manga-staff", async (req, res, next) => {
+peopleRoutes.get('/:id/manga-staff', async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
-      .getRelationship("manga-staff")
+      .getRelationship('manga-staff')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -159,10 +159,10 @@ peopleRoutes.get("/:id/manga-staff", async (req, res, next) => {
   }
 });
 
-peopleRoutes.get("/:id/anime-staff", async (req, res, next) => {
+peopleRoutes.get('/:id/anime-staff', async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
-      .getRelationship("anime-staff")
+      .getRelationship('anime-staff')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -179,10 +179,10 @@ peopleRoutes.get("/:id/anime-staff", async (req, res, next) => {
   }
 });
 
-peopleRoutes.get("/:id/changes", async (req, res, next) => {
+peopleRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await People.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

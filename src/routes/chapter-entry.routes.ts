@@ -1,12 +1,12 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import ChapterEntry from "../models/chapter-entry.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import ChapterEntry from '../models/chapter-entry.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const chapterEntryRoutes = express.Router();
 
-chapterEntryRoutes.get("/", async (req, res, next) => {
+chapterEntryRoutes.get('/', async (req, res, next) => {
   try {
     const response = await ChapterEntry.find()
       .withJsonApi(req.query)
@@ -25,7 +25,7 @@ chapterEntryRoutes.get("/", async (req, res, next) => {
   }
 });
 
-chapterEntryRoutes.post("/", isLogin(), async (req, res, next) => {
+chapterEntryRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const id = await ChapterEntry.fromJsonApi(req.body, {
       assignAttribute: ChapterEntry.fromLanguage(req.query.language),
@@ -46,7 +46,7 @@ chapterEntryRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-chapterEntryRoutes.get("/:id", async (req, res, next) => {
+chapterEntryRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await ChapterEntry.findById(req.params.id)
       .withJsonApi(req.query)
@@ -61,7 +61,7 @@ chapterEntryRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-chapterEntryRoutes.patch("/:id", async (req, res, next) => {
+chapterEntryRoutes.patch('/:id', async (req, res, next) => {
   try {
     await ChapterEntry.findById(req.params.id)
       .orFail()
@@ -91,7 +91,7 @@ chapterEntryRoutes.patch("/:id", async (req, res, next) => {
   }
 });
 
-chapterEntryRoutes.delete("/:id", async (req, res, next) => {
+chapterEntryRoutes.delete('/:id', async (req, res, next) => {
   try {
     await ChapterEntry.findById(req.params.id)
       .orFail()
@@ -112,10 +112,10 @@ chapterEntryRoutes.delete("/:id", async (req, res, next) => {
 });
 
 
-chapterEntryRoutes.get("/:id/chapter", async (req, res, next) => {
+chapterEntryRoutes.get('/:id/chapter', async (req, res, next) => {
   try {
     const response = await ChapterEntry.findById(req.params.id)
-      .getRelationship("chapter")
+      .getRelationship('chapter')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -128,10 +128,10 @@ chapterEntryRoutes.get("/:id/chapter", async (req, res, next) => {
   }
 });
 
-chapterEntryRoutes.get("/:id/user", async (req, res, next) => {
+chapterEntryRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const response = await ChapterEntry.findById(req.params.id)
-      .getRelationship("user")
+      .getRelationship('user')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

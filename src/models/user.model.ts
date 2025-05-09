@@ -1,17 +1,17 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema } from "mongoose";
-import { deleteFile, uploadFile } from "../firebase-app";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from "../utils/mongoose-search/mongoose-search";
-import AnimeEntry, { TAnimeEntry } from "./anime-entry.model";
-import Follow, { TFollow } from "./follow.model";
-import MangaEntry, { TMangaEntry } from "./manga-entry.model";
-import { TReview } from "./review.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema } from 'mongoose';
+import { deleteFile, uploadFile } from '../firebase-app';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import MongooseSearch, { SearchInstanceMethods, SearchModel, SearchQueryHelper } from '../utils/mongoose-search/mongoose-search';
+import AnimeEntry, { TAnimeEntry } from './anime-entry.model';
+import Follow, { TFollow } from './follow.model';
+import MangaEntry, { TMangaEntry } from './manga-entry.model';
+import { TReview } from './review.model';
 
 enum UserGender {
-  Men = "men",
-  Women = "women",
-  Other = "other",
+  Men = 'men',
+  Women = 'women',
+  Other = 'other',
 }
 
 export interface IUser {
@@ -36,10 +36,10 @@ export interface IUser {
 
   followers?: TFollow[];
   following?: TFollow[];
-  "anime-library"?: TAnimeEntry[];
-  "manga-library"?: TMangaEntry[];
-  "anime-favorites"?: TAnimeEntry[];
-  "manga-favorites"?: TMangaEntry[];
+  'anime-library'?: TAnimeEntry[];
+  'manga-library'?: TMangaEntry[];
+  'anime-favorites'?: TAnimeEntry[];
+  'manga-favorites'?: TMangaEntry[];
   reviews?: TReview[];
 
   createdAt: Date;
@@ -66,12 +66,12 @@ export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, User
 
   name: {
     type: String,
-    default: "",
+    default: '',
   },
 
   bio: {
     type: String,
-    default: "",
+    default: '',
   },
 
   gender: {
@@ -90,7 +90,7 @@ export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, User
 
   country: {
     type: String,
-    default: "",
+    default: '',
   },
 
   avatar: {
@@ -147,22 +147,22 @@ export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, User
   toObject: { virtuals: true },
 });
 
-UserSchema.virtual("followers", {
-  ref: "Follow",
-  localField: "_id",
-  foreignField: "followed",
+UserSchema.virtual('followers', {
+  ref: 'Follow',
+  localField: '_id',
+  foreignField: 'followed',
 });
 
-UserSchema.virtual("following", {
-  ref: "Follow",
-  localField: "_id",
-  foreignField: "follower",
+UserSchema.virtual('following', {
+  ref: 'Follow',
+  localField: '_id',
+  foreignField: 'follower',
 });
 
-UserSchema.virtual("anime-library", {
-  ref: "AnimeEntry",
-  localField: "_id",
-  foreignField: "user",
+UserSchema.virtual('anime-library', {
+  ref: 'AnimeEntry',
+  localField: '_id',
+  foreignField: 'user',
   match: {
     isAdd: true,
   },
@@ -172,10 +172,10 @@ UserSchema.virtual("anime-library", {
   limit: 20,
 });
 
-UserSchema.virtual("manga-library", {
-  ref: "MangaEntry",
-  localField: "_id",
-  foreignField: "user",
+UserSchema.virtual('manga-library', {
+  ref: 'MangaEntry',
+  localField: '_id',
+  foreignField: 'user',
   match: {
     isAdd: true,
   },
@@ -185,24 +185,10 @@ UserSchema.virtual("manga-library", {
   limit: 20,
 });
 
-UserSchema.virtual("anime-favorites", {
-  ref: "AnimeEntry",
-  localField: "_id",
-  foreignField: "user",
-  match: {
-    isAdd: true,
-    isFavorites: true,
-  },
-  options: {
-    sort: { updatedAt: -1 },
-  },
-  limit: 20,
-});
-
-UserSchema.virtual("manga-favorites", {
-  ref: "MangaEntry",
-  localField: "_id",
-  foreignField: "user",
+UserSchema.virtual('anime-favorites', {
+  ref: 'AnimeEntry',
+  localField: '_id',
+  foreignField: 'user',
   match: {
     isAdd: true,
     isFavorites: true,
@@ -213,21 +199,35 @@ UserSchema.virtual("manga-favorites", {
   limit: 20,
 });
 
-UserSchema.virtual("reviews", {
-  ref: "Review",
-  localField: "_id",
-  foreignField: "user",
+UserSchema.virtual('manga-favorites', {
+  ref: 'MangaEntry',
+  localField: '_id',
+  foreignField: 'user',
+  match: {
+    isAdd: true,
+    isFavorites: true,
+  },
+  options: {
+    sort: { updatedAt: -1 },
+  },
+  limit: 20,
 });
 
-UserSchema.virtual("requests", {
-  ref: "Request",
-  localField: "_id",
-  foreignField: "user",
+UserSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+UserSchema.virtual('requests', {
+  ref: 'Request',
+  localField: '_id',
+  foreignField: 'user',
 });
 
 
-UserSchema.pre<TUser>("save", async function () {
-  if (this.isModified("avatar")) {
+UserSchema.pre<TUser>('save', async function () {
+  if (this.isModified('avatar')) {
     this.avatar = await uploadFile(
       `users/${this._id}/images/profile.jpg`,
       this.avatar,
@@ -235,7 +235,7 @@ UserSchema.pre<TUser>("save", async function () {
   }
 });
 
-UserSchema.pre("findOne", async function () {
+UserSchema.pre('findOne', async function () {
   const _id = this.getFilter()._id;
   if (!_id) return;
 
@@ -257,7 +257,7 @@ UserSchema.pre("findOne", async function () {
       .match({ user: _id })
       .group({
         _id: null,
-        total: { $sum: "$volumesRead" },
+        total: { $sum: '$volumesRead' },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.total),
@@ -266,7 +266,7 @@ UserSchema.pre("findOne", async function () {
       .match({ user: _id })
       .group({
         _id: null,
-        total: { $sum: "$chaptersRead" },
+        total: { $sum: '$chaptersRead' },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.total),
@@ -280,7 +280,7 @@ UserSchema.pre("findOne", async function () {
       .match({ user: _id })
       .group({
         _id: null,
-        total: { $sum: "$episodesWatch" }
+        total: { $sum: '$episodesWatch' }
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.total),
@@ -288,22 +288,22 @@ UserSchema.pre("findOne", async function () {
     timeSpentOnAnime: await AnimeEntry.aggregate()
       .match({ user: _id })
       .lookup({
-        from: "animes",
-        localField: "anime",
-        foreignField: "_id",
-        as: "anime",
+        from: 'animes',
+        localField: 'anime',
+        foreignField: '_id',
+        as: 'anime',
       })
-      .unwind("anime")
+      .unwind('anime')
       .group({
         _id: null,
-        timeSpentOnAnime: { $sum: { $multiply: ["$episodesWatch", "$anime.episodeLength"] } },
+        timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.timeSpentOnAnime),
   });
 });
 
-UserSchema.pre<TUser>("deleteOne", async function () {
+UserSchema.pre<TUser>('deleteOne', async function () {
   if (this.avatar) {
     await deleteFile(
       `users/${this._id}/images/profile.jpg`,
@@ -317,11 +317,11 @@ UserSchema.plugin(MongooseMultiLanguage, {
 });
 
 UserSchema.plugin(MongooseSearch, {
-  fields: ["pseudo"],
+  fields: ['pseudo'],
 });
 
 UserSchema.plugin(MongooseJsonApi, {
-  type: "users",
+  type: 'users',
   filter: {
     query: (query: string) => {
       return {
@@ -334,5 +334,5 @@ UserSchema.plugin(MongooseJsonApi, {
 
 export type TUser = HydratedDocument<IUser, UserInstanceMethods, UserQueryHelper>;
 
-const User = model<IUser, UserModel>("User", UserSchema);
+const User = model<IUser, UserModel>('User', UserSchema);
 export default User;

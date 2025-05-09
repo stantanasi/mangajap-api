@@ -1,10 +1,10 @@
-import express from "express";
-import Change from "../models/change.model";
-import { isAdmin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import Change from '../models/change.model';
+import { isAdmin } from '../utils/middlewares/middlewares';
 
 const changeRoutes = express.Router();
 
-changeRoutes.get("/", async (req, res, next) => {
+changeRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Change.find()
       .withJsonApi(req.query)
@@ -23,7 +23,7 @@ changeRoutes.get("/", async (req, res, next) => {
   }
 });
 
-changeRoutes.post("/", isAdmin(), async (req, res, next) => {
+changeRoutes.post('/', isAdmin(), async (req, res, next) => {
   try {
     const id = await Change.fromJsonApi(req.body, {
       assignAttribute: Change.fromLanguage(req.query.language),
@@ -44,7 +44,7 @@ changeRoutes.post("/", isAdmin(), async (req, res, next) => {
   }
 });
 
-changeRoutes.get("/:id", async (req, res, next) => {
+changeRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Change.findById(req.params.id)
       .withJsonApi(req.query)
@@ -59,7 +59,7 @@ changeRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-changeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
+changeRoutes.patch('/:id', isAdmin(), async (req, res, next) => {
   try {
     await Change.findById(req.params.id)
       .orFail()
@@ -84,7 +84,7 @@ changeRoutes.patch("/:id", isAdmin(), async (req, res, next) => {
   }
 });
 
-changeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+changeRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     await Change.findById(req.params.id)
       .orFail()
@@ -100,10 +100,10 @@ changeRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-changeRoutes.get("/:id/document", async (req, res, next) => {
+changeRoutes.get('/:id/document', async (req, res, next) => {
   try {
     const response = await Change.findById(req.params.id)
-      .getRelationship("document")
+      .getRelationship('document')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -120,10 +120,10 @@ changeRoutes.get("/:id/document", async (req, res, next) => {
   }
 });
 
-changeRoutes.get("/:id/user", async (req, res, next) => {
+changeRoutes.get('/:id/user', async (req, res, next) => {
   try {
     const response = await Change.findById(req.params.id)
-      .getRelationship("user")
+      .getRelationship('user')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

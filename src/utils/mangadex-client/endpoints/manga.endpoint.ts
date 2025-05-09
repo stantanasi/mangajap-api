@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import { AxiosInstance } from 'axios';
 
 type Response<T> = {
   result: string;
@@ -65,7 +65,7 @@ export type Manga = {
 }
 
 export interface MangaVolumes {
-  result: "ok" | "error";
+  result: 'ok' | 'error';
   volumes: {
     [volume: string]: {
       volume: string;

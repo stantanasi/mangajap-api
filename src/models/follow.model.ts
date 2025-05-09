@@ -1,7 +1,7 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TUser } from "./user.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TUser } from './user.model';
 
 export interface IFollow {
   _id: Types.ObjectId;
@@ -22,13 +22,13 @@ export type FollowModel = Model<IFollow, FollowQueryHelper, FollowInstanceMethod
 export const FollowSchema = new Schema<IFollow, FollowModel, FollowInstanceMethods, FollowQueryHelper>({
   follower: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
   followed: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 }, {
@@ -51,11 +51,11 @@ FollowSchema.plugin(MongooseMultiLanguage, {
 });
 
 FollowSchema.plugin(MongooseJsonApi, {
-  type: "follows",
+  type: 'follows',
 });
 
 
 export type TFollow = HydratedDocument<IFollow, FollowInstanceMethods, FollowQueryHelper>;
 
-const Follow = model<IFollow, FollowModel>("Follow", FollowSchema);
+const Follow = model<IFollow, FollowModel>('Follow', FollowSchema);
 export default Follow;

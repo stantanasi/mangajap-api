@@ -1,23 +1,23 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TAnime } from "./anime.model";
-import { TChapter } from "./chapter.model";
-import { TEpisode } from "./episode.model";
-import { TFranchise } from "./franchise.model";
-import { TGenre } from "./genre.model";
-import { TManga } from "./manga.model";
-import { TPeople } from "./people.model";
-import { TSeason } from "./season.model";
-import { TStaff } from "./staff.model";
-import { TTheme } from "./theme.model";
-import { TUser } from "./user.model";
-import { TVolume } from "./volume.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TAnime } from './anime.model';
+import { TChapter } from './chapter.model';
+import { TEpisode } from './episode.model';
+import { TFranchise } from './franchise.model';
+import { TGenre } from './genre.model';
+import { TManga } from './manga.model';
+import { TPeople } from './people.model';
+import { TSeason } from './season.model';
+import { TStaff } from './staff.model';
+import { TTheme } from './theme.model';
+import { TUser } from './user.model';
+import { TVolume } from './volume.model';
 
 export interface IChange {
   _id: Types.ObjectId;
 
-  action: "create" | "update" | "delete";
+  action: 'create' | 'update' | 'delete';
   changes: {
     before?: Record<string, any>;
     after?: Record<string, any>;
@@ -41,7 +41,7 @@ export const ChangeSchema = new Schema<IChange, ChangeModel, ChangeInstanceMetho
   action: {
     type: String,
     required: true,
-    enum: ["create", "update", "delete"],
+    enum: ['create', 'update', 'delete'],
   },
 
   changes: {
@@ -52,19 +52,19 @@ export const ChangeSchema = new Schema<IChange, ChangeModel, ChangeInstanceMetho
 
   document: {
     type: Schema.Types.ObjectId,
-    refPath: "documentModel",
+    refPath: 'documentModel',
     required: true,
   },
 
   documentModel: {
     type: String,
     required: true,
-    enum: ["Anime", "Chapter", "Episode", "Franchise", "Genre", "Manga", "People", "Season", "Staff", "Theme", "Volume"],
+    enum: ['Anime', 'Chapter', 'Episode', 'Franchise', 'Genre', 'Manga', 'People', 'Season', 'Staff', 'Theme', 'Volume'],
   },
 
   user: {
     type: String,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 }, {
@@ -82,11 +82,11 @@ ChangeSchema.plugin(MongooseMultiLanguage, {
 });
 
 ChangeSchema.plugin(MongooseJsonApi, {
-  type: "changes",
+  type: 'changes',
 });
 
 
 export type TChange = HydratedDocument<IChange, ChangeInstanceMethods, ChangeQueryHelper>;
 
-const Change = model<IChange, ChangeModel>("Change", ChangeSchema);
+const Change = model<IChange, ChangeModel>('Change', ChangeSchema);
 export default Change;

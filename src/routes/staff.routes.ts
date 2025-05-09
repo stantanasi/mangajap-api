@@ -1,11 +1,11 @@
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
-import Staff from "../models/staff.model";
-import { isAdmin, isLogin } from "../utils/middlewares/middlewares";
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import Staff from '../models/staff.model';
+import { isAdmin, isLogin } from '../utils/middlewares/middlewares';
 
 const staffRoutes = express.Router();
 
-staffRoutes.get("/", async (req, res, next) => {
+staffRoutes.get('/', async (req, res, next) => {
   try {
     const response = await Staff.find()
       .withJsonApi(req.query)
@@ -24,7 +24,7 @@ staffRoutes.get("/", async (req, res, next) => {
   }
 });
 
-staffRoutes.post("/", isLogin(), async (req, res, next) => {
+staffRoutes.post('/', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -47,7 +47,7 @@ staffRoutes.post("/", isLogin(), async (req, res, next) => {
   }
 });
 
-staffRoutes.get("/:id", async (req, res, next) => {
+staffRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
       .withJsonApi(req.query)
@@ -62,7 +62,7 @@ staffRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-staffRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+staffRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -89,7 +89,7 @@ staffRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-staffRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
+staffRoutes.delete('/:id', isAdmin(), async (req, res, next) => {
   try {
     const token: DecodedIdToken = res.locals.token;
 
@@ -107,10 +107,10 @@ staffRoutes.delete("/:id", isAdmin(), async (req, res, next) => {
 });
 
 
-staffRoutes.get("/:id/people", async (req, res, next) => {
+staffRoutes.get('/:id/people', async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
-      .getRelationship("people")
+      .getRelationship('people')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -123,10 +123,10 @@ staffRoutes.get("/:id/people", async (req, res, next) => {
   }
 });
 
-staffRoutes.get("/:id/anime", async (req, res, next) => {
+staffRoutes.get('/:id/anime', async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
-      .getRelationship("anime")
+      .getRelationship('anime')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -139,10 +139,10 @@ staffRoutes.get("/:id/anime", async (req, res, next) => {
   }
 });
 
-staffRoutes.get("/:id/manga", async (req, res, next) => {
+staffRoutes.get('/:id/manga', async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
-      .getRelationship("manga")
+      .getRelationship('manga')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -155,10 +155,10 @@ staffRoutes.get("/:id/manga", async (req, res, next) => {
   }
 });
 
-staffRoutes.get("/:id/changes", async (req, res, next) => {
+staffRoutes.get('/:id/changes', async (req, res, next) => {
   try {
     const response = await Staff.findById(req.params.id)
-      .getRelationship("changes")
+      .getRelationship('changes')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

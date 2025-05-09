@@ -1,8 +1,8 @@
-import Chapter, { TChapter } from "../models/chapter.model";
-import Manga from "../models/manga.model";
-import Volume, { TVolume } from "../models/volume.model";
-import MangaDex from "../utils/mangadex-client";
-import { delay } from "../utils/utils";
+import Chapter, { TChapter } from '../models/chapter.model';
+import Manga from '../models/manga.model';
+import Volume, { TVolume } from '../models/volume.model';
+import MangaDex from '../utils/mangadex-client';
+import { delay } from '../utils/utils';
 
 abstract class MangaDexService {
 
@@ -34,7 +34,7 @@ abstract class MangaDexService {
       if (manga.isModified()) {
         const directModifiedPaths = manga.directModifiedPaths();
         await manga.save();
-        console.log(manga.title.get('fr-FR'), "|", "UPDATE", directModifiedPaths);
+        console.log(manga.title.get('fr-FR'), '|', 'UPDATE', directModifiedPaths);
       }
 
 
@@ -56,7 +56,7 @@ abstract class MangaDexService {
 
           await volume.save();
           manga.volumes.push(volume);
-          console.log(manga.title.get('fr-FR'), "|", `V${volume.number}`, "|", "CREATE");
+          console.log(manga.title.get('fr-FR'), '|', `V${volume.number}`, '|', 'CREATE');
         } else if (volume) {
         }
 
@@ -77,14 +77,14 @@ abstract class MangaDexService {
 
             await chapter.save();
             manga.chapters.push(chapter);
-            console.log(manga.title.get('fr-FR'), "|", `C${chapter.number}`, "|", "CREATE");
+            console.log(manga.title.get('fr-FR'), '|', `C${chapter.number}`, '|', 'CREATE');
           } else if (chapter) {
             if (!chapter.get('volume') && volume) chapter.set('volume', volume);
 
             if (chapter.isModified()) {
               const directModifiedPaths = chapter.directModifiedPaths();
               await chapter.save();
-              console.log(manga.title.get('fr-FR'), "|", `C${chapter.number}`, "|", "UPDATE", "|", directModifiedPaths);
+              console.log(manga.title.get('fr-FR'), '|', `C${chapter.number}`, '|', 'UPDATE', '|', directModifiedPaths);
             }
           }
         }

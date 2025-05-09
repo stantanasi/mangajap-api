@@ -1,10 +1,10 @@
-import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from "@stantanasi/mongoose-jsonapi";
-import { HydratedDocument, model, Model, Schema, Types } from "mongoose";
-import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from "../utils/mongoose-change-tracking/mongoose-change-tracking";
-import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from "../utils/mongoose-multi-language/mongoose-multi-language";
-import { TAnime } from "./anime.model";
-import { TChange } from "./change.model";
-import { TManga } from "./manga.model";
+import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
+import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
+import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
+import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
+import { TAnime } from './anime.model';
+import { TChange } from './change.model';
+import { TManga } from './manga.model';
 
 export interface IGenre {
   _id: Types.ObjectId;
@@ -46,31 +46,31 @@ export const GenreSchema = new Schema<IGenre, GenreModel, GenreInstanceMethods, 
   toObject: { virtuals: true },
 });
 
-GenreSchema.virtual("animes", {
-  ref: "Anime",
-  localField: "_id",
-  foreignField: "genres",
+GenreSchema.virtual('animes', {
+  ref: 'Anime',
+  localField: '_id',
+  foreignField: 'genres',
 });
 
-GenreSchema.virtual("mangas", {
-  ref: "Manga",
-  localField: "_id",
-  foreignField: "genres",
+GenreSchema.virtual('mangas', {
+  ref: 'Manga',
+  localField: '_id',
+  foreignField: 'genres',
 });
 
-GenreSchema.virtual("changes", {
-  ref: "Change",
-  localField: "_id",
-  foreignField: "document",
+GenreSchema.virtual('changes', {
+  ref: 'Change',
+  localField: '_id',
+  foreignField: 'document',
 });
 
 
 GenreSchema.plugin(MongooseMultiLanguage, {
-  fields: ["name"],
+  fields: ['name'],
 });
 
 GenreSchema.plugin(MongooseJsonApi, {
-  type: "genres",
+  type: 'genres',
 });
 
 GenreSchema.plugin(MongooseChangeTracking);
@@ -78,5 +78,5 @@ GenreSchema.plugin(MongooseChangeTracking);
 
 export type TGenre = HydratedDocument<IGenre, GenreInstanceMethods, GenreQueryHelper>;
 
-const Genre = model<IGenre, GenreModel>("Genre", GenreSchema);
+const Genre = model<IGenre, GenreModel>('Genre', GenreSchema);
 export default Genre;

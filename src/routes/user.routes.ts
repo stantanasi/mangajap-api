@@ -1,13 +1,13 @@
-import { JsonApiError } from "@stantanasi/mongoose-jsonapi";
-import express from "express";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import { auth } from "../firebase-app";
-import User from "../models/user.model";
-import { isLogin } from "../utils/middlewares/middlewares";
+import { JsonApiError } from '@stantanasi/mongoose-jsonapi';
+import express from 'express';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import { auth } from '../firebase-app';
+import User from '../models/user.model';
+import { isLogin } from '../utils/middlewares/middlewares';
 
 const userRoutes = express.Router();
 
-userRoutes.get("/", async (req, res, next) => {
+userRoutes.get('/', async (req, res, next) => {
   try {
     const response = await User.find()
       .withJsonApi(req.query)
@@ -26,15 +26,15 @@ userRoutes.get("/", async (req, res, next) => {
   }
 });
 
-userRoutes.post("/", async (req, res, next) => {
+userRoutes.post('/', async (req, res, next) => {
   try {
     const user = User.fromJsonApi(req.body, {
       assignAttribute: User.fromLanguage(req.query.language),
     });
 
     const attributes = req.body?.data?.attributes ?? {};
-    for (const attribute of ["email", "password"]) {
-      if (typeof attributes[attribute] === "undefined" || !attributes[attribute]) {
+    for (const attribute of ['email', 'password']) {
+      if (typeof attributes[attribute] === 'undefined' || !attributes[attribute]) {
         throw new JsonApiError.MissingAttribute(attribute);
       }
     }
@@ -63,7 +63,7 @@ userRoutes.post("/", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id", async (req, res, next) => {
+userRoutes.get('/:id', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
       .withJsonApi(req.query)
@@ -78,7 +78,7 @@ userRoutes.get("/:id", async (req, res, next) => {
   }
 });
 
-userRoutes.patch("/:id", isLogin(), async (req, res, next) => {
+userRoutes.patch('/:id', isLogin(), async (req, res, next) => {
   try {
     await User.findById(req.params.id)
       .orFail()
@@ -108,7 +108,7 @@ userRoutes.patch("/:id", isLogin(), async (req, res, next) => {
   }
 });
 
-userRoutes.delete("/:id", isLogin(), async (req, res, next) => {
+userRoutes.delete('/:id', isLogin(), async (req, res, next) => {
   try {
     await User.findById(req.params.id)
       .orFail()
@@ -131,10 +131,10 @@ userRoutes.delete("/:id", isLogin(), async (req, res, next) => {
 });
 
 
-userRoutes.get("/:id/followers", async (req, res, next) => {
+userRoutes.get('/:id/followers', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
-      .getRelationship("followers")
+      .getRelationship('followers')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -151,10 +151,10 @@ userRoutes.get("/:id/followers", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id/following", async (req, res, next) => {
+userRoutes.get('/:id/following', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
-      .getRelationship("following")
+      .getRelationship('following')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -171,10 +171,10 @@ userRoutes.get("/:id/following", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id/anime-library", async (req, res, next) => {
+userRoutes.get('/:id/anime-library', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
-      .getRelationship("anime-library")
+      .getRelationship('anime-library')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -191,10 +191,10 @@ userRoutes.get("/:id/anime-library", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id/manga-library", async (req, res, next) => {
+userRoutes.get('/:id/manga-library', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
-      .getRelationship("manga-library")
+      .getRelationship('manga-library')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -211,10 +211,10 @@ userRoutes.get("/:id/manga-library", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id/anime-favorites", async (req, res, next) => {
+userRoutes.get('/:id/anime-favorites', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
-      .getRelationship("anime-favorites")
+      .getRelationship('anime-favorites')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -231,10 +231,10 @@ userRoutes.get("/:id/anime-favorites", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id/manga-favorites", async (req, res, next) => {
+userRoutes.get('/:id/manga-favorites', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
-      .getRelationship("manga-favorites")
+      .getRelationship('manga-favorites')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({
@@ -251,10 +251,10 @@ userRoutes.get("/:id/manga-favorites", async (req, res, next) => {
   }
 });
 
-userRoutes.get("/:id/reviews", async (req, res, next) => {
+userRoutes.get('/:id/reviews', async (req, res, next) => {
   try {
     const response = await User.findById(req.params.id)
-      .getRelationship("reviews")
+      .getRelationship('reviews')
       .withJsonApi(req.query)
       .withLanguage(req.query.language)
       .toJsonApi({

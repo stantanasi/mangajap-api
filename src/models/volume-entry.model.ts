@@ -1,7 +1,7 @@
 import MongooseJsonApi, { JsonApiInstanceMethods, JsonApiModel, JsonApiQueryHelper } from '@stantanasi/mongoose-jsonapi';
 import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TUser } from './user.model';
+import User, { TUser } from './user.model';
 import { TVolume } from './volume.model';
 
 export interface IVolumeEntry {
@@ -65,6 +65,15 @@ VolumeEntrySchema.index({
   user: 1,
   volume: 1,
 }, { unique: true });
+
+
+VolumeEntrySchema.post('save', async function () {
+  await User.updateVolumesRead(typeof this.user === 'string' ? this.user : this.user._id);
+});
+
+VolumeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
+  await User.updateVolumesRead(typeof this.user === 'string' ? this.user : this.user._id);
+});
 
 
 VolumeEntrySchema.plugin(MongooseMultiLanguage, {

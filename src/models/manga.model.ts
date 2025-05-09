@@ -289,7 +289,7 @@ MangaSchema.statics.updateVolumeCount = async function (_id) {
 
 MangaSchema.statics.updateChapterCount = async function (_id) {
   await Manga.findByIdAndUpdate(_id, {
-    chapterCount: ! await Chapter.countDocuments({
+    chapterCount: await Chapter.countDocuments({
       manga: _id,
     }),
   });

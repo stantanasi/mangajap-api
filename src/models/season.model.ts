@@ -3,7 +3,7 @@ import { HydratedDocument, model, Model, Schema, Types } from 'mongoose';
 import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
-import { TAnime } from './anime.model';
+import Anime, { TAnime } from './anime.model';
 import { TChange } from './change.model';
 import Episode, { TEpisode } from './episode.model';
 
@@ -139,6 +139,14 @@ SeasonSchema.pre<TSeason>('deleteOne', async function () {
       `anime/${this.anime}/seasons/${this._id}/images/poster.jpg`,
     );
   }
+});
+
+SeasonSchema.post('save', async function () {
+  await Anime.updateSeasonCount(this.anime._id);
+});
+
+SeasonSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await Anime.updateSeasonCount(this.anime._id);
 });
 
 

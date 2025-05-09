@@ -75,7 +75,21 @@ export type AnimeInstanceMethods = MultiLanguageInstanceMethods & SearchInstance
 
 export type AnimeQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & MultiLanguageModel<IAnime> & SearchModel<IAnime> & JsonApiModel<IAnime> & ChangeTrackingModel<IAnime>
+export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & MultiLanguageModel<IAnime> & SearchModel<IAnime> & JsonApiModel<IAnime> & ChangeTrackingModel<IAnime> & {
+  updateSeasonCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateEpisodeCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateAverageRating: (_id: Types.ObjectId) => Promise<void>;
+
+  updateUserCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateFavoritesCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateReviewCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updatePopularity: (_id: Types.ObjectId) => Promise<void>;
+}
 
 export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, AnimeQueryHelper, {}, AnimeModel>({
   title: {
@@ -291,60 +305,65 @@ AnimeSchema.virtual('changes', {
 AnimeSchema.virtual('anime-entry');
 
 
-AnimeSchema.pre<TAnime>('save', async function () {
-  if (this.isModified('poster.fr-FR')) {
-    this.poster.set('fr-FR', await uploadFile(
-      `anime/${this._id}/images/cover.jpg`,
-      this.poster.get('fr-FR') ?? null,
-    ));
-  }
-
-  if (this.isModified('banner.fr-FR')) {
-    this.banner.set('fr-FR', await uploadFile(
-      `anime/${this._id}/images/banner.jpg`,
-      this.banner.get('fr-FR') ?? null,
-    ));
-  }
-});
-
-AnimeSchema.pre('findOne', async function () {
-  const _id = this.getFilter()._id;
-  if (!_id) return;
-
-  await Anime.findOneAndUpdate(this.getFilter(), {
+AnimeSchema.statics.updateSeasonCount = async function (_id) {
+  await Anime.findByIdAndUpdate(_id, {
     seasonCount: await Season.countDocuments({
       anime: _id,
     }),
+  });
+};
 
+AnimeSchema.statics.updateEpisodeCount = async function (_id) {
+  await Anime.findByIdAndUpdate(_id, {
     episodeCount: await Episode.countDocuments({
       anime: _id,
     }),
+  });
+};
 
+AnimeSchema.statics.updateAverageRating = async function (_id) {
+  await Anime.findByIdAndUpdate(_id, {
     averageRating: await AnimeEntry.aggregate()
-      .match({ anime: new Types.ObjectId(_id) })
+      .match({ anime: _id })
       .group({
         _id: null,
         averageRating: { $avg: '$rating' },
       })
       .then((docs) => docs[0])
       .then((doc) => doc?.averageRating ?? null),
+  });
+};
 
+AnimeSchema.statics.updateUserCount = async function (_id) {
+  await Anime.findByIdAndUpdate(_id, {
     userCount: await AnimeEntry.countDocuments({
       anime: _id,
       isAdd: true,
     }),
+  });
+};
 
+AnimeSchema.statics.updateFavoritesCount = async function (_id) {
+  await Anime.findByIdAndUpdate(_id, {
     favoritesCount: await AnimeEntry.countDocuments({
       anime: _id,
       isFavorites: true,
     }),
+  });
+};
 
+AnimeSchema.statics.updateReviewCount = async function (_id) {
+  await Anime.findByIdAndUpdate(_id, {
     reviewCount: await Review.countDocuments({
       anime: _id,
     }),
+  });
+};
 
+AnimeSchema.statics.updatePopularity = async function (_id) {
+  await Anime.findByIdAndUpdate(_id, {
     popularity: await Anime.aggregate()
-      .match({ _id: new Types.ObjectId(_id) })
+      .match({ _id: _id })
       .lookup({
         from: 'animeentries',
         localField: '_id',
@@ -373,6 +392,24 @@ AnimeSchema.pre('findOne', async function () {
       .then((docs) => docs[0])
       .then((doc) => doc?.popularity ?? 0),
   });
+};
+
+
+AnimeSchema.pre<TAnime>('save', async function () {
+  // IMPLEMENT other languages
+  if (this.isModified('poster.fr-FR')) {
+    this.poster.set('fr-FR', await uploadFile(
+      `anime/${this._id}/images/cover.jpg`,
+      this.poster.get('fr-FR') ?? null,
+    ));
+  }
+
+  if (this.isModified('banner.fr-FR')) {
+    this.banner.set('fr-FR', await uploadFile(
+      `anime/${this._id}/images/banner.jpg`,
+      this.banner.get('fr-FR') ?? null,
+    ));
+  }
 });
 
 AnimeSchema.pre<TAnime>('deleteOne', async function () {

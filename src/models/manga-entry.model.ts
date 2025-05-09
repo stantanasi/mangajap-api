@@ -18,9 +18,10 @@ export interface IMangaEntry {
   isAdd: boolean;
   isFavorites: boolean;
   status: MangaEntryStatus;
+  rating: number | null;
+
   volumesRead: number;
   chaptersRead: number;
-  rating: number | null;
   startedAt: Date | null;
   finishedAt: Date | null;
 
@@ -35,7 +36,11 @@ export type MangaEntryInstanceMethods = MultiLanguageInstanceMethods & JsonApiIn
 
 export type MangaEntryQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper
 
-export type MangaEntryModel = Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> & MultiLanguageModel<IMangaEntry> & JsonApiModel<IMangaEntry>
+export type MangaEntryModel = Model<IMangaEntry, MangaEntryQueryHelper, MangaEntryInstanceMethods> & MultiLanguageModel<IMangaEntry> & JsonApiModel<IMangaEntry> & {
+  updateVolumesRead: (_id: Types.ObjectId) => Promise<void>;
+
+  updateChaptersRead: (_id: Types.ObjectId) => Promise<void>;
+}
 
 export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEntryInstanceMethods, MangaEntryQueryHelper, {}, MangaEntryModel>({
   isAdd: {
@@ -54,6 +59,12 @@ export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEn
     enum: Object.values(MangaEntryStatus),
   },
 
+  rating: {
+    type: Number,
+    default: null,
+  },
+
+
   volumesRead: {
     type: Number,
     default: 0,
@@ -62,11 +73,6 @@ export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEn
   chaptersRead: {
     type: Number,
     default: 0,
-  },
-
-  rating: {
-    type: Number,
-    default: null,
   },
 
   startedAt: {
@@ -104,6 +110,139 @@ MangaEntrySchema.index({
   user: 1,
   manga: 1,
 }, { unique: true });
+
+
+MangaEntrySchema.statics.updateVolumesRead = async function (_id) {
+  await MangaEntry.findByIdAndUpdate(_id, {
+    volumesRead: await MangaEntry.aggregate()
+      .match({ _id: _id })
+      .lookup({
+        from: 'mangas',
+        localField: 'manga',
+        foreignField: '_id',
+        as: 'manga',
+        let: { user: '$user' },
+        pipeline: [
+          {
+            $lookup: {
+              from: 'volumes',
+              localField: '_id',
+              foreignField: 'manga',
+              as: 'volumes',
+              let: { user: '$$user' },
+              pipeline: [
+                {
+                  $lookup: {
+                    from: 'volumeentries',
+                    localField: '_id',
+                    foreignField: 'volume',
+                    as: 'volume-entry',
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $eq: ['$user', '$$user']
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      })
+      .addFields({
+        volumesRead: {
+          $sum: {
+            $map: {
+              input: '$manga',
+              as: 'manga',
+              in: {
+                $sum: {
+                  $map: {
+                    input: '$$manga.volumes',
+                    as: 'volume',
+                    in: {
+                      $size: '$$volume.volume-entry'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+      .then((result) => result[0].volumesRead),
+  });
+};
+
+MangaEntrySchema.statics.updateChaptersRead = async function (_id) {
+  await MangaEntry.findByIdAndUpdate(_id, {
+    chaptersRead: await MangaEntry.aggregate()
+      .match({ _id: _id })
+      .lookup({
+        from: 'mangas',
+        localField: 'manga',
+        foreignField: '_id',
+        as: 'manga',
+        let: { user: '$user' },
+        pipeline: [
+          {
+            $lookup: {
+              from: 'chapters',
+              localField: '_id',
+              foreignField: 'manga',
+              as: 'chapters',
+              let: { user: '$$user' },
+              pipeline: [
+                {
+                  $lookup: {
+                    from: 'chapterentries',
+                    localField: '_id',
+                    foreignField: 'chapter',
+                    as: 'chapter-entry',
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $eq: ['$user', '$$user']
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      })
+      .addFields({
+        chaptersRead: {
+          $sum: {
+            $map: {
+              input: '$manga',
+              as: 'manga',
+              in: {
+                $sum: {
+                  $map: {
+                    input: '$$manga.chapters',
+                    as: 'chapter',
+                    in: {
+                      $size: '$$chapter.chapter-entry'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+      .then((result) => result[0].chaptersRead),
+  });
+};
 
 
 MangaEntrySchema.post('save', async function () {

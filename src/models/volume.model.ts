@@ -34,7 +34,13 @@ export type VolumeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstan
 
 export type VolumeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & MultiLanguageModel<IVolume> & JsonApiModel<IVolume> & ChangeTrackingModel<IVolume>
+export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethods> & MultiLanguageModel<IVolume> & JsonApiModel<IVolume> & ChangeTrackingModel<IVolume> & {
+  updateChapterCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateStartChapter: (_id: Types.ObjectId) => Promise<void>;
+
+  updateEndChapter: (_id: Types.ObjectId) => Promise<void>;
+}
 
 export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper, {}, VolumeModel>({
   number: {
@@ -125,6 +131,31 @@ VolumeSchema.index({
 }, { unique: true });
 
 
+VolumeSchema.statics.updateChapterCount = async function (_id) {
+  await Volume.findByIdAndUpdate(_id, {
+    chapterCount: await Chapter.countDocuments({
+      volume: _id,
+    }),
+  });
+};
+
+VolumeSchema.statics.updateStartChapter = async function (_id) {
+  await Volume.findByIdAndUpdate(_id, {
+    startChapter: await Chapter.findOne({
+      volume: _id,
+    }).sort({ number: 1 }).then((doc) => doc?.number ?? null),
+  });
+};
+
+VolumeSchema.statics.updateEndChapter = async function (_id) {
+  await Volume.findByIdAndUpdate(_id, {
+    endChapter: await Chapter.findOne({
+      volume: _id,
+    }).sort({ number: -1 }).then((doc) => doc?.number ?? null),
+  });
+};
+
+
 VolumeSchema.pre<TVolume>('save', async function () {
   if (this.isModified('cover.fr-FR')) {
     this.cover.set('fr-FR', await uploadFile(
@@ -132,25 +163,6 @@ VolumeSchema.pre<TVolume>('save', async function () {
       this.cover.get('fr-FR') ?? null,
     ));
   }
-});
-
-VolumeSchema.pre('findOne', async function () {
-  const _id = this.getFilter()._id;
-  if (!_id) return;
-
-  await Volume.findOneAndUpdate(this.getFilter(), {
-    chapterCount: await Chapter.countDocuments({
-      volume: _id,
-    }),
-
-    startChapter: await Chapter.findOne({
-      volume: _id,
-    }).sort({ number: 1 }).then((doc) => doc?.number ?? null),
-
-    endChapter: await Chapter.findOne({
-      volume: _id,
-    }).sort({ number: -1 }).then((doc) => doc?.number ?? null),
-  });
 });
 
 VolumeSchema.pre<TVolume>('deleteOne', async function () {

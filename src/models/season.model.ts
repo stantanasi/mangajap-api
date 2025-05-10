@@ -17,6 +17,7 @@ export interface ISeason {
 
   airDate: Map<string, Date | null>;
   episodeCount: number;
+  rating: number | null;
 
   anime: Types.ObjectId | TAnime;
   episodes?: TEpisode[];
@@ -34,6 +35,8 @@ export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethod
   updateAirDate: (_id: Types.ObjectId) => Promise<void>;
 
   updateEpisodeCount: (_id: Types.ObjectId) => Promise<void>;
+
+  updateRating: (_id: Types.ObjectId) => Promise<void>;
 }
 
 export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMethods, SeasonQueryHelper, {}, SeasonModel>({
@@ -75,6 +78,11 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMetho
   episodeCount: {
     type: Number,
     default: 0,
+  },
+
+  rating: {
+    type: Number,
+    default: null,
   },
 
 
@@ -126,6 +134,25 @@ SeasonSchema.statics.updateEpisodeCount = async function (_id) {
     episodeCount: await Episode.countDocuments({
       season: _id,
     }),
+  });
+};
+
+SeasonSchema.statics.updateRating = async function (_id) {
+  await Season.findByIdAndUpdate(_id, {
+    rating: await Episode.aggregate()
+      .match({ season: _id })
+      .lookup({
+        from: 'episodeentries',
+        localField: '_id',
+        foreignField: 'episode',
+        as: 'entries',
+      })
+      .unwind('$entries')
+      .group({
+        _id: null,
+        rating: { $avg: '$entries.rating' },
+      })
+      .then((result) => result[0].rating ?? null),
   });
 };
 

@@ -5,7 +5,7 @@ import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingMo
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import Anime, { TAnime } from './anime.model';
 import { TChange } from './change.model';
-import { TEpisodeEntry } from './episode-entry.model';
+import EpisodeEntry, { TEpisodeEntry } from './episode-entry.model';
 import Season, { TSeason } from './season.model';
 
 enum EpisodeType {
@@ -24,6 +24,8 @@ export interface IEpisode {
   episodeType: EpisodeType;
   poster: Map<string, string | null>;
 
+  rating: number | null;
+
   anime: Types.ObjectId | TAnime;
   season: Types.ObjectId | TSeason;
   changes?: TChange[];
@@ -37,7 +39,9 @@ export type EpisodeInstanceMethods = MultiLanguageInstanceMethods & JsonApiInsta
 
 export type EpisodeQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & MultiLanguageModel<IEpisode> & JsonApiModel<IEpisode> & ChangeTrackingModel<IEpisode>
+export type EpisodeModel = Model<IEpisode, EpisodeQueryHelper, EpisodeInstanceMethods> & MultiLanguageModel<IEpisode> & JsonApiModel<IEpisode> & ChangeTrackingModel<IEpisode> & {
+  updateRating: (_id: Types.ObjectId) => Promise<void>;
+}
 
 export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceMethods, EpisodeQueryHelper, {}, EpisodeModel>({
   number: {
@@ -86,6 +90,12 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceM
   },
 
 
+  rating: {
+    type: Number,
+    default: null,
+  },
+
+
   anime: {
     type: Schema.Types.ObjectId,
     ref: 'Anime',
@@ -118,6 +128,19 @@ EpisodeSchema.index({
   number: 1,
   season: 1,
 }, { unique: true });
+
+
+EpisodeSchema.statics.updateRating = async function (_id) {
+  await Episode.findByIdAndUpdate(_id, {
+    rating: await EpisodeEntry.aggregate()
+      .match({ episode: _id })
+      .group({
+        _id: null,
+        rating: { $avg: '$rating' },
+      })
+      .then((result) => result[0].rating ?? null),
+  });
+};
 
 
 EpisodeSchema.pre<TEpisode>('save', async function () {

@@ -4,7 +4,7 @@ import { deleteFile, uploadFile } from '../firebase-app';
 import MongooseChangeTracking, { ChangeTrackingInstanceMethods, ChangeTrackingModel, ChangeTrackingQueryHelper } from '../utils/mongoose-change-tracking/mongoose-change-tracking';
 import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel, MultiLanguageQueryHelper } from '../utils/mongoose-multi-language/mongoose-multi-language';
 import { TChange } from './change.model';
-import { TChapterEntry } from './chapter-entry.model';
+import ChapterEntry, { TChapterEntry } from './chapter-entry.model';
 import Manga, { TManga } from './manga.model';
 import Volume, { TVolume } from './volume.model';
 
@@ -16,6 +16,8 @@ export interface IChapter {
   overview: Map<string, string>;
   publishedDate: Map<string, Date | null>;
   cover: Map<string, string | null>;
+
+  rating: number | null;
 
   manga: Types.ObjectId | TManga;
   volume: Types.ObjectId | TVolume | null;
@@ -30,7 +32,9 @@ export type ChapterInstanceMethods = MultiLanguageInstanceMethods & JsonApiInsta
 
 export type ChapterQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
-export type ChapterModel = Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> & MultiLanguageModel<IChapter> & JsonApiModel<IChapter> & ChangeTrackingModel<IChapter>
+export type ChapterModel = Model<IChapter, ChapterQueryHelper, ChapterInstanceMethods> & MultiLanguageModel<IChapter> & JsonApiModel<IChapter> & ChangeTrackingModel<IChapter> & {
+  updateRating: (_id: Types.ObjectId) => Promise<void>;
+}
 
 export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceMethods, ChapterQueryHelper, {}, ChapterModel>({
   number: {
@@ -68,6 +72,12 @@ export const ChapterSchema = new Schema<IChapter, ChapterModel, ChapterInstanceM
   },
 
 
+  rating: {
+    type: Number,
+    default: null,
+  },
+
+
   manga: {
     type: Schema.Types.ObjectId,
     ref: 'Manga',
@@ -100,6 +110,19 @@ ChapterSchema.index({
   number: 1,
   manga: 1,
 }, { unique: true });
+
+
+ChapterSchema.statics.updateRating = async function (_id) {
+  await Chapter.findByIdAndUpdate(_id, {
+    rating: await ChapterEntry.aggregate()
+      .match({ chapter: _id })
+      .group({
+        _id: null,
+        rating: { $avg: '$rating' },
+      })
+      .then((result) => result[0].rating ?? null),
+  });
+};
 
 
 ChapterSchema.pre<TChapter>('save', async function () {

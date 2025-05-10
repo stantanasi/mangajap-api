@@ -71,6 +71,8 @@ ChapterEntrySchema.index({
 ChapterEntrySchema.post('save', async function () {
   await User.updateChaptersRead(typeof this.user === 'string' ? this.user : this.user._id);
 
+  await Chapter.updateRating(this.chapter._id);
+
   const chapter = await Chapter.findById(this.chapter._id).select('manga').lean();
   if (!chapter) return
 
@@ -85,6 +87,8 @@ ChapterEntrySchema.post('save', async function () {
 
 ChapterEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
   await User.updateChaptersRead(typeof this.user === 'string' ? this.user : this.user._id);
+
+  await Chapter.updateRating(this.chapter._id);
 
   const chapter = await Chapter.findById(this.chapter._id).select('manga').lean();
   if (!chapter) return

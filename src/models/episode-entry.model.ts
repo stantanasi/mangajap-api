@@ -71,6 +71,8 @@ EpisodeEntrySchema.index({
 EpisodeEntrySchema.post('save', async function () {
   await User.updateEpisodesWatch(typeof this.user === 'string' ? this.user : this.user._id);
 
+  await Episode.updateRating(this.episode._id);
+
   const episode = await Episode.findById(this.episode._id).select('anime').lean();
   if (!episode) return
 
@@ -85,6 +87,8 @@ EpisodeEntrySchema.post('save', async function () {
 
 EpisodeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
   await User.updateEpisodesWatch(typeof this.user === 'string' ? this.user : this.user._id);
+
+  await Episode.updateRating(this.episode._id);
 
   const episode = await Episode.findById(this.episode._id).select('anime').lean();
   if (!episode) return

@@ -6,6 +6,7 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import Anime, { TAnime } from './anime.model';
 import { TChange } from './change.model';
 import Episode, { TEpisode } from './episode.model';
+import EpisodeEntry from './episode-entry.model';
 
 export interface ISeason {
   _id: Types.ObjectId;

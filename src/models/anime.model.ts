@@ -17,8 +17,6 @@ import { TTheme } from './theme.model';
 enum AnimeStatus {
   Airing = 'airing',
   Finished = 'finished',
-  Unreleased = 'unreleased',
-  Upcoming = 'upcoming',
 }
 
 enum AnimeType {

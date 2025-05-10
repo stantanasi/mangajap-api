@@ -32,8 +32,6 @@ enum MangaType {
 enum MangaStatus {
   Publishing = 'publishing',
   Finished = 'finished',
-  Unreleased = 'unreleased',
-  Upcoming = 'upcoming',
 }
 
 export interface IManga {

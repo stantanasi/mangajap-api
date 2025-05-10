@@ -7,20 +7,10 @@ import { TChange } from './change.model';
 import { TManga } from './manga.model';
 import { TPeople } from './people.model';
 
-enum StaffRole {
-  Author = 'author',
-  Illustrator = 'illustrator',
-  StoryAndArt = 'story_and_art',
-  Licensor = 'licensor',
-  Producer = 'producer',
-  Studio = 'studio',
-  OriginalCreator = 'original_creator',
-}
-
 export interface IStaff {
   _id: Types.ObjectId;
 
-  role: StaffRole;
+  role: 'author' | 'illustrator' | 'story_and_art' | 'licensor' | 'producer' | 'studio' | 'original_creator';
 
   people: Types.ObjectId | TPeople;
   anime?: Types.ObjectId | TAnime;
@@ -41,7 +31,7 @@ export const StaffSchema = new Schema<IStaff, StaffModel, StaffInstanceMethods, 
   role: {
     type: String,
     required: true,
-    enum: Object.values(StaffRole),
+    enum: ['author', 'illustrator', 'story_and_art', 'licensor', 'producer', 'studio', 'original_creator'],
   },
 
 

@@ -6,25 +6,10 @@ import Anime, { TAnime } from './anime.model';
 import { TChange } from './change.model';
 import Manga, { TManga } from './manga.model';
 
-enum FranchiseRole {
-  Adaptation = 'adaptation',
-  AlternativeSetting = 'alternative_setting',
-  AlternativeVersion = 'alternative_version',
-  Character = 'character',
-  FullStory = 'full_story',
-  Other = 'other',
-  ParentStory = 'parent_story',
-  Prequel = 'prequel',
-  Sequel = 'sequel',
-  SideStory = 'side_story',
-  Spinoff = 'spinoff',
-  Summary = 'summary',
-}
-
 export interface IFranchise {
   _id: Types.ObjectId;
 
-  role: FranchiseRole;
+  role: 'adaptation' | 'alternative_setting' | 'alternative_version' | 'character' | 'full_story' | 'other' | 'parent_story' | 'prequel' | 'sequel' | 'side_story' | 'spinoff' | 'summary';
   sourceModel: 'Anime' | 'Manga';
   destinationModel: 'Anime' | 'Manga';
 
@@ -46,7 +31,7 @@ export const FranchiseSchema = new Schema<IFranchise, FranchiseModel, FranchiseI
   role: {
     type: String,
     required: true,
-    enum: Object.values(FranchiseRole),
+    enum: ['adaptation', 'alternative_setting', 'alternative_version', 'character', 'full_story', 'other', 'parent_story', 'prequel', 'sequel', 'side_story', 'spinoff', 'summary'],
   },
 
   sourceModel: {

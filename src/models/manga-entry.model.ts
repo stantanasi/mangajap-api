@@ -4,20 +4,12 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import Manga, { TManga } from './manga.model';
 import User, { TUser } from './user.model';
 
-enum MangaEntryStatus {
-  Reading = 'reading',
-  Completed = 'completed',
-  Planned = 'planned',
-  OnHold = 'on_hold',
-  Dropped = 'dropped',
-}
-
 export interface IMangaEntry {
   _id: Types.ObjectId;
 
   isAdd: boolean;
   isFavorites: boolean;
-  status: MangaEntryStatus;
+  status: 'reading' | 'completed' | 'planned' | 'on_hold' | 'dropped';
   rating: number | null;
 
   volumesRead: number;
@@ -55,8 +47,8 @@ export const MangaEntrySchema = new Schema<IMangaEntry, MangaEntryModel, MangaEn
 
   status: {
     type: String,
-    default: MangaEntryStatus.Reading,
-    enum: Object.values(MangaEntryStatus),
+    default: 'reading',
+    enum: ['reading', 'completed', 'planned', 'on_hold', 'dropped'],
   },
 
   rating: {

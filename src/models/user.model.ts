@@ -11,19 +11,13 @@ import MangaEntry, { TMangaEntry } from './manga-entry.model';
 import { TReview } from './review.model';
 import VolumeEntry from './volume-entry.model';
 
-enum UserGender {
-  Men = 'men',
-  Women = 'women',
-  Other = 'other',
-}
-
 export interface IUser {
   _id: string;
 
   pseudo: string;
   name: string;
   bio: string;
-  gender: UserGender | null;
+  gender: 'men' | 'women' | 'other' | null;
   birthday: Date | null;
   country: string;
   avatar: string | null;
@@ -96,7 +90,7 @@ export const UserSchema = new Schema<IUser, UserModel, UserInstanceMethods, User
   gender: {
     type: String,
     default: null,
-    enum: [...Object.values(UserGender), null],
+    enum: ['men', 'women', 'other', null],
   },
 
   birthday: {

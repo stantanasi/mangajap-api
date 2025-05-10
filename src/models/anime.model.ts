@@ -14,20 +14,6 @@ import Season, { TSeason } from './season.model';
 import { TStaff } from './staff.model';
 import { TTheme } from './theme.model';
 
-enum AnimeStatus {
-  Airing = 'airing',
-  Finished = 'finished',
-}
-
-enum AnimeType {
-  Tv = 'tv',
-  Ova = 'ova',
-  Ona = 'ona',
-  Movie = 'movie',
-  Music = 'music',
-  Special = 'special',
-}
-
 export interface IAnime {
   _id: Types.ObjectId;
 
@@ -36,8 +22,8 @@ export interface IAnime {
   startDate: Map<string, Date | null>;
   endDate: Map<string, Date | null>;
   origin: string[];
-  animeType: AnimeType;
-  status: AnimeStatus;
+  animeType: 'tv' | 'ova' | 'ona' | 'movie' | 'music' | 'special';
+  status: 'airing' | 'finished';
   inProduction: boolean;
   youtubeVideoId: string;
   episodeLength: number;
@@ -142,13 +128,13 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
   animeType: {
     type: String,
     required: true,
-    enum: Object.values(AnimeType),
+    enum: ['tv', 'ova', 'ona', 'movie', 'music', 'special'],
   },
 
   status: {
     type: String,
     required: true,
-    enum: Object.values(AnimeStatus),
+    enum: ['airing', 'finished'],
   },
 
   inProduction: {

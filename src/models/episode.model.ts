@@ -8,11 +8,6 @@ import { TChange } from './change.model';
 import EpisodeEntry, { TEpisodeEntry } from './episode-entry.model';
 import Season, { TSeason } from './season.model';
 
-enum EpisodeType {
-  None = '',
-  Oav = 'oav',
-}
-
 export interface IEpisode {
   _id: Types.ObjectId;
 
@@ -21,7 +16,7 @@ export interface IEpisode {
   overview: Map<string, string>;
   airDate: Map<string, Date | null>;
   runtime: number;
-  episodeType: EpisodeType;
+  episodeType: '' | 'oav';
   poster: Map<string, string | null>;
 
   rating: number | null;
@@ -79,8 +74,8 @@ export const EpisodeSchema = new Schema<IEpisode, EpisodeModel, EpisodeInstanceM
 
   episodeType: {
     type: String,
-    enum: Object.values(EpisodeType),
-    default: EpisodeType.None,
+    default: '',
+    enum: ['', 'oav'],
   },
 
   poster: {

@@ -4,20 +4,12 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import Anime, { TAnime } from './anime.model';
 import User, { TUser } from './user.model';
 
-enum AnimeEntryStatus {
-  Watching = 'watching',
-  Completed = 'completed',
-  Planned = 'planned',
-  OnHold = 'on_hold',
-  Dropped = 'dropped',
-}
-
 export interface IAnimeEntry {
   _id: Types.ObjectId;
 
   isAdd: boolean;
   isFavorites: boolean;
-  status: AnimeEntryStatus;
+  status: 'watching' | 'completed' | 'planned' | 'on_hold' | 'dropped';
   rating: number | null;
 
   episodesWatch: number;
@@ -52,8 +44,8 @@ export const AnimeEntrySchema = new Schema<IAnimeEntry, AnimeEntryModel, AnimeEn
 
   status: {
     type: String,
-    default: AnimeEntryStatus.Watching,
-    enum: Object.values(AnimeEntryStatus),
+    default: 'watching',
+    enum: ['watching', 'completed', 'planned', 'on_hold', 'dropped'],
   },
 
   rating: {

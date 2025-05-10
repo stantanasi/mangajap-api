@@ -14,26 +14,6 @@ import { TStaff } from './staff.model';
 import { TTheme } from './theme.model';
 import Volume, { TVolume } from './volume.model';
 
-enum MangaType {
-  Bd = 'bd',
-  Comics = 'comics',
-  Josei = 'josei',
-  Kodomo = 'kodomo',
-  Seijin = 'seijin',
-  Seinen = 'seinen',
-  Shojo = 'shojo',
-  Shonen = 'shonen',
-  Doujin = 'doujin',
-  Novel = 'novel',
-  Oneshot = 'oneshot',
-  Webtoon = 'webtoon',
-}
-
-enum MangaStatus {
-  Publishing = 'publishing',
-  Finished = 'finished',
-}
-
 export interface IManga {
   _id: Types.ObjectId;
 
@@ -42,8 +22,8 @@ export interface IManga {
   startDate: Map<string, Date | null>;
   endDate: Map<string, Date | null>;
   origin: string[];
-  mangaType: MangaType;
-  status: MangaStatus;
+  mangaType: 'bd' | 'comics' | 'josei' | 'kodomo' | 'seijin' | 'seinen' | 'shojo' | 'shonen' | 'doujin' | 'novel' | 'oneshot' | 'webtoon';
+  status: 'publishing' | 'finished';
   poster: Map<string, string | null>;
   banner: Map<string, string | null>;
   links: Map<string, string>;
@@ -145,13 +125,13 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
   mangaType: {
     type: String,
     required: true,
-    enum: Object.values(MangaType),
+    enum: ['bd', 'comics', 'josei', 'kodomo', 'seijin', 'seinen', 'shojo', 'shonen', 'doujin', 'novel', 'oneshot', 'webtoon'],
   },
 
   status: {
     type: String,
     required: true,
-    enum: Object.values(MangaStatus),
+    enum: ['publishing', 'finished'],
   },
 
   poster: {

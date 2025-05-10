@@ -4,6 +4,7 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import AnimeEntry from './anime-entry.model';
 import Episode, { TEpisode } from './episode.model';
 import User, { TUser } from './user.model';
+import Season from './season.model';
 
 export interface IEpisodeEntry {
   _id: Types.ObjectId;
@@ -73,8 +74,10 @@ EpisodeEntrySchema.post('save', async function () {
 
   await Episode.updateRating(this.episode._id);
 
-  const episode = await Episode.findById(this.episode._id).select('anime').lean();
+  const episode = await Episode.findById(this.episode._id).select(['anime', 'season']).lean();
   if (!episode) return
+
+  await Season.updateRating(episode.season._id);
 
   const animeEntry = await AnimeEntry.findOne({
     user: this.user,
@@ -90,8 +93,10 @@ EpisodeEntrySchema.post('deleteOne', { document: true, query: false }, async fun
 
   await Episode.updateRating(this.episode._id);
 
-  const episode = await Episode.findById(this.episode._id).select('anime').lean();
+  const episode = await Episode.findById(this.episode._id).select(['anime', 'season']).lean();
   if (!episode) return
+
+  await Season.updateRating(episode.season._id);
 
   const animeEntry = await AnimeEntry.findOne({
     user: this.user,

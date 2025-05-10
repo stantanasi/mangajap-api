@@ -71,6 +71,8 @@ VolumeEntrySchema.index({
 VolumeEntrySchema.post('save', async function () {
   await User.updateVolumesRead(typeof this.user === 'string' ? this.user : this.user._id);
 
+  await Volume.updateRating(this.volume._id);
+
   const volume = await Volume.findById(this.volume._id).select('manga').lean();
   if (!volume) return
 
@@ -85,6 +87,8 @@ VolumeEntrySchema.post('save', async function () {
 
 VolumeEntrySchema.post('deleteOne', { document: true, query: false }, async function () {
   await User.updateVolumesRead(typeof this.user === 'string' ? this.user : this.user._id);
+
+  await Volume.updateRating(this.volume._id);
 
   const volume = await Volume.findById(this.volume._id).select('manga').lean();
   if (!volume) return

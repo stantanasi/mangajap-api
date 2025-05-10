@@ -6,7 +6,7 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import { TChange } from './change.model';
 import Chapter, { TChapter } from './chapter.model';
 import Manga, { TManga } from './manga.model';
-import { TVolumeEntry } from './volume-entry.model';
+import VolumeEntry, { TVolumeEntry } from './volume-entry.model';
 
 export interface IVolume {
   _id: Types.ObjectId;
@@ -20,6 +20,7 @@ export interface IVolume {
   chapterCount: number;
   startChapter: number | null;
   endChapter: number | null;
+  rating: number | null;
 
   manga: Types.ObjectId | TManga;
   chapters?: TChapter[];
@@ -40,6 +41,8 @@ export type VolumeModel = Model<IVolume, VolumeQueryHelper, VolumeInstanceMethod
   updateStartChapter: (_id: Types.ObjectId) => Promise<void>;
 
   updateEndChapter: (_id: Types.ObjectId) => Promise<void>;
+
+  updateRating: (_id: Types.ObjectId) => Promise<void>;
 }
 
 export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMethods, VolumeQueryHelper, {}, VolumeModel>({
@@ -89,6 +92,11 @@ export const VolumeSchema = new Schema<IVolume, VolumeModel, VolumeInstanceMetho
   },
 
   endChapter: {
+    type: Number,
+    default: null,
+  },
+
+  rating: {
     type: Number,
     default: null,
   },
@@ -152,6 +160,18 @@ VolumeSchema.statics.updateEndChapter = async function (_id) {
     endChapter: await Chapter.findOne({
       volume: _id,
     }).sort({ number: -1 }).then((doc) => doc?.number ?? null),
+  });
+};
+
+VolumeSchema.statics.updateRating = async function (_id) {
+  await Volume.findByIdAndUpdate(_id, {
+    rating: await VolumeEntry.aggregate()
+      .match({ volume: _id })
+      .group({
+        _id: null,
+        rating: { $avg: '$rating' },
+      })
+      .then((result) => result[0].rating ?? null),
   });
 };
 

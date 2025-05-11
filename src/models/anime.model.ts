@@ -19,8 +19,6 @@ export interface IAnime {
 
   title: Map<string, string>;
   overview: Map<string, string>;
-  startDate: Map<string, Date | null>;
-  endDate: Map<string, Date | null>;
   origin: string[];
   animeType: 'tv' | 'ova' | 'ona' | 'movie' | 'music' | 'special';
   status: 'airing' | 'finished';
@@ -31,6 +29,8 @@ export interface IAnime {
   banner: Map<string, string | null>;
   links: Map<string, string>;
 
+  startDate: Map<string, Date | null>;
+  endDate: Map<string, Date | null>;
   seasonCount: number;
   episodeCount: number;
   averageRating: number | null;
@@ -58,6 +58,10 @@ export type AnimeInstanceMethods = MultiLanguageInstanceMethods & SearchInstance
 export type AnimeQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
 export type AnimeModel = Model<IAnime, AnimeQueryHelper, AnimeInstanceMethods> & MultiLanguageModel<IAnime> & SearchModel<IAnime> & JsonApiModel<IAnime> & ChangeTrackingModel<IAnime> & {
+  updateStartDate: (_id: Types.ObjectId) => Promise<void>;
+
+  updateEndDate: (_id: Types.ObjectId) => Promise<void>;
+
   updateSeasonCount: (_id: Types.ObjectId) => Promise<void>;
 
   updateEpisodeCount: (_id: Types.ObjectId) => Promise<void>;
@@ -95,28 +99,6 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
         return value.size > 0 && Array.from(value.values()).every((v) => !!v);
       },
       message: 'Invalid overview',
-    },
-  },
-
-  startDate: {
-    type: Map,
-    of: Date,
-    default: {},
-    transform: function (this, val: IAnime['startDate']) {
-      return Object.fromEntries(
-        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
-      );
-    },
-  },
-
-  endDate: {
-    type: Map,
-    of: Date,
-    default: {},
-    transform: function (this, val: IAnime['endDate']) {
-      return Object.fromEntries(
-        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
-      );
     },
   },
 
@@ -170,6 +152,28 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
     default: {},
   },
 
+
+  startDate: {
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IAnime['startDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
+    },
+  },
+
+  endDate: {
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IAnime['endDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
+    },
+  },
 
   seasonCount: {
     type: Number,
@@ -274,6 +278,30 @@ AnimeSchema.virtual('changes', {
 
 AnimeSchema.virtual('anime-entry');
 
+
+AnimeSchema.statics.updateStartDate = async function (_id) {
+  const firstEpisode = await Season.findOne({ anime: _id }).sort({ number: 1 })
+    .then((firstSeason) => {
+      if (!firstSeason) return null;
+      return Episode.findOne({ season: firstSeason._id }).sort({ number: 1 });
+    });
+
+  await Anime.findByIdAndUpdate(_id, {
+    startDate: firstEpisode?.airDate ?? {},
+  });
+};
+
+AnimeSchema.statics.updateEndDate = async function (_id) {
+  const lastEpisode = await Season.findOne({ anime: _id }).sort({ number: -1 })
+    .then((lastSeason) => {
+      if (!lastSeason) return null;
+      return Episode.findOne({ season: lastSeason._id }).sort({ number: -1 });
+    });
+
+  await Anime.findByIdAndUpdate(_id, {
+    endDate: lastEpisode?.airDate ?? {},
+  });
+};
 
 AnimeSchema.statics.updateSeasonCount = async function (_id) {
   await Anime.findByIdAndUpdate(_id, {

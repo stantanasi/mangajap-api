@@ -160,7 +160,8 @@ EpisodeSchema.post('save', async function () {
   await Anime.updateEndDate(this.anime._id);
   await Anime.updateEpisodeCount(this.anime._id);
 
-  await Season.updateAirDate(this.season._id);
+  await Season.updateStartDate(this.season._id);
+  await Season.updateEndDate(this.season._id);
   await Season.updateEpisodeCount(this.season._id);
 });
 
@@ -169,7 +170,8 @@ EpisodeSchema.post('deleteOne', { document: true, query: false }, async function
   await Anime.updateEndDate(this.anime._id);
   await Anime.updateEpisodeCount(this.anime._id);
 
-  await Season.updateAirDate(this.season._id);
+  await Season.updateStartDate(this.season._id);
+  await Season.updateEndDate(this.season._id);
   await Season.updateEpisodeCount(this.season._id);
 });
 

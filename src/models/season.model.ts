@@ -6,7 +6,6 @@ import MongooseMultiLanguage, { MultiLanguageInstanceMethods, MultiLanguageModel
 import Anime, { TAnime } from './anime.model';
 import { TChange } from './change.model';
 import Episode, { TEpisode } from './episode.model';
-import EpisodeEntry from './episode-entry.model';
 
 export interface ISeason {
   _id: Types.ObjectId;
@@ -16,7 +15,8 @@ export interface ISeason {
   overview: Map<string, string>;
   poster: Map<string, string | null>;
 
-  airDate: Map<string, Date | null>;
+  startDate: Map<string, Date | null>;
+  endDate: Map<string, Date | null>;
   episodeCount: number;
   rating: number | null;
 
@@ -33,7 +33,9 @@ export type SeasonInstanceMethods = MultiLanguageInstanceMethods & JsonApiInstan
 export type SeasonQueryHelper = MultiLanguageQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper
 
 export type SeasonModel = Model<ISeason, SeasonQueryHelper, SeasonInstanceMethods> & MultiLanguageModel<ISeason> & JsonApiModel<ISeason> & ChangeTrackingModel<ISeason> & {
-  updateAirDate: (_id: Types.ObjectId) => Promise<void>;
+  updateStartDate: (_id: Types.ObjectId) => Promise<void>;
+
+  updateEndDate: (_id: Types.ObjectId) => Promise<void>;
 
   updateEpisodeCount: (_id: Types.ObjectId) => Promise<void>;
 
@@ -65,11 +67,22 @@ export const SeasonSchema = new Schema<ISeason, SeasonModel, SeasonInstanceMetho
   },
 
 
-  airDate: {
+  startDate: {
     type: Map,
     of: Date,
     default: {},
-    transform: function (this, val: ISeason['airDate']) {
+    transform: function (this, val: ISeason['startDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
+    },
+  },
+
+  endDate: {
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: ISeason['endDate']) {
       return Object.fromEntries(
         Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
       );
@@ -122,11 +135,19 @@ SeasonSchema.index({
 }, { unique: true });
 
 
-SeasonSchema.statics.updateAirDate = async function (_id) {
+SeasonSchema.statics.updateStartDate = async function (_id) {
+  const firstEpisode = await Episode.findOne({ season: _id }).sort({ number: 1 });
+
   await Season.findByIdAndUpdate(_id, {
-    airDate: await Episode.findOne({
-      season: _id,
-    }).sort({ number: 1 }).then((doc) => doc?.airDate ?? {}),
+    startDate: firstEpisode?.airDate ?? {},
+  });
+};
+
+SeasonSchema.statics.updateEndDate = async function (_id) {
+  const lastEpisode = await Episode.findOne({ season: _id }).sort({ number: -1 });
+
+  await Season.findByIdAndUpdate(_id, {
+    endDate: lastEpisode?.airDate ?? {},
   });
 };
 
@@ -185,7 +206,7 @@ SeasonSchema.post('deleteOne', { document: true, query: false }, async function 
 
 
 SeasonSchema.plugin(MongooseMultiLanguage, {
-  fields: ['title', 'overview', 'airDate', 'poster'],
+  fields: ['title', 'overview', 'startDate', 'endDate', 'poster'],
 });
 
 SeasonSchema.plugin(MongooseJsonApi, {

@@ -24,7 +24,6 @@ export interface IAnime {
   status: 'airing' | 'finished';
   inProduction: boolean;
   youtubeVideoId: string;
-  episodeLength: number;
   poster: Map<string, string | null>;
   banner: Map<string, string | null>;
   links: Map<string, string>;
@@ -127,11 +126,6 @@ export const AnimeSchema = new Schema<IAnime, AnimeModel, AnimeInstanceMethods, 
   youtubeVideoId: {
     type: String,
     default: '',
-  },
-
-  episodeLength: {
-    type: Number,
-    default: 0,
   },
 
   poster: {

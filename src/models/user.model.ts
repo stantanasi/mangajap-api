@@ -299,21 +299,34 @@ UserSchema.statics.updateEpisodesWatch = async function (_id) {
 
 UserSchema.statics.updateTimeSpentOnAnime = async function (_id) {
   await User.findByIdAndUpdate(_id, {
-    timeSpentOnAnime: await AnimeEntry.aggregate()
+    timeSpentOnAnime: await EpisodeEntry.aggregate()
       .match({ user: _id })
       .lookup({
-        from: 'animes',
-        localField: 'anime',
+        from: 'episodes',
+        localField: 'episode',
         foreignField: '_id',
-        as: 'anime',
+        as: 'episode',
       })
-      .unwind('anime')
+      .unwind('episode')
       .group({
         _id: null,
-        timeSpentOnAnime: { $sum: { $multiply: ['$episodesWatch', '$anime.episodeLength'] } },
+        timeSpentOnAnime: {
+          $sum: {
+            $cond: [
+              {
+                $or: [
+                  { $eq: ['$episode.runtime', null] },
+                  { $eq: ['$episode.runtime', 0] },
+                  { $not: ['$episode.runtime'] }
+                ]
+              },
+              20,
+              '$episode.runtime'
+            ]
+          }
+        },
       })
-      .then((docs) => docs[0])
-      .then((doc) => doc?.timeSpentOnAnime),
+      .then((result) => result[0].timeSpentOnAnime),
   });
 };
 

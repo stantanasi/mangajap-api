@@ -19,8 +19,6 @@ export interface IManga {
 
   title: Map<string, string>;
   overview: Map<string, string>;
-  startDate: Map<string, Date | null>;
-  endDate: Map<string, Date | null>;
   origin: string[];
   mangaType: 'bd' | 'comics' | 'josei' | 'kodomo' | 'seijin' | 'seinen' | 'shojo' | 'shonen' | 'doujin' | 'novel' | 'oneshot' | 'webtoon';
   status: 'publishing' | 'finished';
@@ -28,6 +26,8 @@ export interface IManga {
   banner: Map<string, string | null>;
   links: Map<string, string>;
 
+  startDate: Map<string, Date | null>;
+  endDate: Map<string, Date | null>;
   volumeCount: number;
   chapterCount: number;
   averageRating: number | null;
@@ -55,6 +55,10 @@ export type MangaInstanceMethods = MultiLanguageInstanceMethods & SearchInstance
 export type MangaQueryHelper = MultiLanguageQueryHelper & SearchQueryHelper & JsonApiQueryHelper & ChangeTrackingQueryHelper;
 
 export type MangaModel = Model<IManga, MangaQueryHelper, MangaInstanceMethods> & MultiLanguageModel<IManga> & SearchModel<IManga> & JsonApiModel<IManga> & ChangeTrackingModel<IManga> & {
+  updateStartDate: (_id: Types.ObjectId) => Promise<void>;
+
+  updateEndDate: (_id: Types.ObjectId) => Promise<void>;
+
   updateVolumeCount: (_id: Types.ObjectId) => Promise<void>;
 
   updateChapterCount: (_id: Types.ObjectId) => Promise<void>;
@@ -95,28 +99,6 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
     },
   },
 
-  startDate: {
-    type: Map,
-    of: Date,
-    default: {},
-    transform: function (this, val: IManga['startDate']) {
-      return Object.fromEntries(
-        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
-      );
-    },
-  },
-
-  endDate: {
-    type: Map,
-    of: Date,
-    default: {},
-    transform: function (this, val: IManga['endDate']) {
-      return Object.fromEntries(
-        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
-      );
-    },
-  },
-
   origin: {
     type: [String],
     default: [],
@@ -152,6 +134,28 @@ export const MangaSchema = new Schema<IManga, MangaModel, MangaInstanceMethods, 
     default: {},
   },
 
+
+  startDate: {
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IManga['startDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
+    },
+  },
+
+  endDate: {
+    type: Map,
+    of: Date,
+    default: {},
+    transform: function (this, val: IManga['endDate']) {
+      return Object.fromEntries(
+        Array.from(val.entries()).map(([key, value]) => [key, value?.toISOString().slice(0, 10) ?? null])
+      );
+    },
+  },
 
   volumeCount: {
     type: Number,
@@ -256,6 +260,64 @@ MangaSchema.virtual('changes', {
 
 MangaSchema.virtual('manga-entry');
 
+
+MangaSchema.statics.updateStartDate = async function (_id) {
+  const [firstVolume, firstChapter] = await Promise.all([
+    Volume.findOne({
+      manga: _id,
+    }).sort({ number: 1 }),
+    Chapter.findOne({
+      manga: _id,
+    }).sort({ number: 1 }),
+  ]);
+
+  await Manga.findByIdAndUpdate(_id, {
+    startDate: [
+      ...firstVolume?.publishedDate.keys() ?? [],
+      ...firstChapter?.publishedDate.keys() ?? [],
+    ]
+      .reduce<IManga['startDate']>((acc, key) => {
+        const date1 = firstVolume?.publishedDate.get(key) ?? null;
+        const date2 = firstChapter?.publishedDate.get(key) ?? null;
+        acc.set(
+          key,
+          date1 && date2
+            ? date1 < date2 ? date1 : date2
+            : date1 ?? date2
+        );
+        return acc;
+      }, new Map()),
+  });
+};
+
+MangaSchema.statics.updateEndDate = async function (_id) {
+  const [lastVolume, lastChapter] = await Promise.all([
+    Volume.findOne({
+      manga: _id,
+    }).sort({ number: -1 }),
+    Chapter.findOne({
+      manga: _id,
+    }).sort({ number: -1 }),
+  ]);
+
+  await Manga.findByIdAndUpdate(_id, {
+    endDate: [
+      ...lastVolume?.publishedDate.keys() ?? [],
+      ...lastChapter?.publishedDate.keys() ?? [],
+    ]
+      .reduce<IManga['startDate']>((acc, key) => {
+        const date1 = lastVolume?.publishedDate.get(key) ?? null;
+        const date2 = lastChapter?.publishedDate.get(key) ?? null;
+        acc.set(
+          key,
+          date1 && date2
+            ? date1 > date2 ? date1 : date2
+            : date1 ?? date2
+        );
+        return acc;
+      }, new Map()),
+  });
+};
 
 MangaSchema.statics.updateVolumeCount = async function (_id) {
   await Manga.findByIdAndUpdate(_id, {

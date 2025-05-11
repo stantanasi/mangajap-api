@@ -194,10 +194,14 @@ VolumeSchema.pre<TVolume>('deleteOne', async function () {
 });
 
 VolumeSchema.post('save', async function () {
+  await Manga.updateStartDate(this.manga._id);
+  await Manga.updateEndDate(this.manga._id);
   await Manga.updateVolumeCount(this.manga._id);
 });
 
 VolumeSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await Manga.updateStartDate(this.manga._id);
+  await Manga.updateEndDate(this.manga._id);
   await Manga.updateVolumeCount(this.manga._id);
 });
 

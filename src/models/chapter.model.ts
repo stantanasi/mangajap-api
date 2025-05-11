@@ -143,6 +143,8 @@ ChapterSchema.pre<TChapter>('deleteOne', async function () {
 });
 
 ChapterSchema.post('save', async function () {
+  await Manga.updateStartDate(this.manga._id);
+  await Manga.updateEndDate(this.manga._id);
   await Manga.updateChapterCount(this.manga._id);
 
   if (this.volume) {
@@ -153,6 +155,8 @@ ChapterSchema.post('save', async function () {
 });
 
 ChapterSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await Manga.updateStartDate(this.manga._id);
+  await Manga.updateEndDate(this.manga._id);
   await Manga.updateChapterCount(this.manga._id);
 
   if (this.volume) {

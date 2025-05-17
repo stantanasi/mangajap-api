@@ -326,7 +326,7 @@ UserSchema.statics.updateTimeSpentOnAnime = async function (_id) {
           }
         },
       })
-      .then((result) => result[0].timeSpentOnAnime),
+      .then((result) => result[0]?.timeSpentOnAnime ?? 0),
   });
 };
 

@@ -133,7 +133,7 @@ EpisodeSchema.statics.updateRating = async function (_id) {
         _id: null,
         rating: { $avg: '$rating' },
       })
-      .then((result) => result[0].rating ?? null),
+      .then((result) => result[0]?.rating ?? null),
   });
 };
 

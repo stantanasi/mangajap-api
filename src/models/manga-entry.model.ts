@@ -166,7 +166,7 @@ MangaEntrySchema.statics.updateVolumesRead = async function (_id) {
           }
         }
       })
-      .then((result) => result[0].volumesRead),
+      .then((result) => result[0]?.volumesRead ?? 0),
   });
 };
 
@@ -232,7 +232,7 @@ MangaEntrySchema.statics.updateChaptersRead = async function (_id) {
           }
         }
       })
-      .then((result) => result[0].chaptersRead),
+      .then((result) => result[0]?.chaptersRead ?? 0),
   });
 };
 

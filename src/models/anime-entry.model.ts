@@ -144,7 +144,7 @@ AnimeEntrySchema.statics.updateEpisodesWatch = async function (_id) {
         _id: null,
         count: { $sum: 1 },
       })
-      .then((result) => result[0].count),
+      .then((result) => result[0]?.count ?? 0),
   });
 };
 

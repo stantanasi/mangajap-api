@@ -110,11 +110,6 @@ export default function MongooseSearch<DocType extends { _id: any }, M extends S
         queryScore: -1,
       }, this.getOptions().sort));
 
-    const limit = this.getOptions().limit;
-    if (limit) {
-      aggregate.limit(limit);
-    }
-
     const ids = await aggregate.then((docs) => docs.map((doc) => doc._id));
 
     cleanFilter(this.getFilter());

@@ -182,7 +182,6 @@ UserSchema.virtual('anime-library', {
   options: {
     sort: { updatedAt: -1 },
   },
-  limit: 20,
 });
 
 UserSchema.virtual('manga-library', {
@@ -195,7 +194,6 @@ UserSchema.virtual('manga-library', {
   options: {
     sort: { updatedAt: -1 },
   },
-  limit: 20,
 });
 
 UserSchema.virtual('anime-favorites', {
@@ -209,7 +207,6 @@ UserSchema.virtual('anime-favorites', {
   options: {
     sort: { updatedAt: -1 },
   },
-  limit: 20,
 });
 
 UserSchema.virtual('manga-favorites', {
@@ -223,7 +220,6 @@ UserSchema.virtual('manga-favorites', {
   options: {
     sort: { updatedAt: -1 },
   },
-  limit: 20,
 });
 
 UserSchema.virtual('reviews', {

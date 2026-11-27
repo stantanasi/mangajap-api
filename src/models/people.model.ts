@@ -12,6 +12,10 @@ export interface IPeople {
 
   name: Map<string, string>;
   portrait: string | null;
+  biography: Map<string, string | null>;
+  birthday: Date | null;
+  deathday: Date | null;
+  height: number | null;
 
   staff?: TStaff[];
   'anime-staff'?: TStaff[];
@@ -43,6 +47,33 @@ export const PeopleSchema = new Schema<IPeople, PeopleModel, PeopleInstanceMetho
 
   portrait: {
     type: String,
+    default: null,
+  },
+
+  biography: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+
+  birthday: {
+    type: Date,
+    default: null,
+    transform: function (this, val: IPeople['birthday']) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
+  },
+
+  deathday: {
+    type: Date,
+    default: null,
+    transform: function (this, val: IPeople['deathday']) {
+      return val?.toISOString().slice(0, 10) ?? null;
+    },
+  },
+
+  height: {
+    type: Number,
     default: null,
   },
 }, {
@@ -104,7 +135,7 @@ PeopleSchema.pre<TPeople>('deleteOne', async function () {
 
 
 PeopleSchema.plugin(MongooseMultiLanguage, {
-  fields: ['name'],
+  fields: ['name', 'biography'],
 });
 
 PeopleSchema.plugin(MongooseSearch, {
